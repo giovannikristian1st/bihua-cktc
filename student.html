@@ -431,7 +431,7 @@
           drawingFadeDuration: 400,
           highlightOnComplete: true,
           highlightColor: '#00C4CC',
-          leniency: 0.65,
+          leniency: 0.85, // Dikurangi sensitivitas errornya (lebih longgar)
           charDataLoader: function(c, onLoad) {
             onLoad((typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[c]) || null);
           }
