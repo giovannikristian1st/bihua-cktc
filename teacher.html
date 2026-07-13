@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brush Master - Dashboard Guru</title>
+  
+  <!-- Load databases -->
+  <script src="meihuadb.js"></script>
+  <script src="vocabdb.js"></script>
+  
+  <style>
+    :root {
+      --primary: #8B3DFF;
+      --primary-dark: #00C4CC;
+      --bg: #F9FAFB;
+      --card: #FFFFFF;
+      --text: #0E1318;
+      --text-muted: #5E6A75;
+      --border: #E5E7EB;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Times New Roman', Times, 'Kaiti', 'KaiTi', STKaiti, serif;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+    
+    .card {
+      background-color: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    select, input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: #FFFFFF;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    select:focus, input:focus { 
+      border-color: var(--primary); 
+      box-shadow: 0 0 0 3px rgba(139, 61, 255, 0.15); 
+    }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .vocab-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    
+    .vocab-item {
+      background-color: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .vocab-item:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(139, 61, 255, 0.1); }
+    .vocab-item.selected {
+      background-color: rgba(139, 61, 255, 0.05);
+      border-color: var(--primary);
+    }
+    
+    .vocab-char { font-size: 1.5rem; font-weight: bold; }
+    .vocab-pinyin { font-size: 0.8rem; color: var(--text-muted); }
+    
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .vocab-split-btn {
+      background: #E5E7EB;
+      color: #0E1318;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-left: auto;
+      font-weight: bold;
+    }
+    .vocab-split-btn:hover { background: #cbd5e1; }
+    
+    .char-split-container {
+      display: none;
+      flex-direction: row;
+      gap: 15px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+    }
+    
+    .char-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(139, 61, 255, 0.2);
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(139, 61, 255, 0.3); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .result-box {
+      margin-top: 20px;
+      display: none;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 80px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: #FFFFFF;
+      color: var(--text);
+      font-size: 0.9rem;
+      resize: none;
+      margin-bottom: 10px;
+    }
+    
+    .copy-btn {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .copy-btn:hover {
+      background: var(--border);
+      color: var(--text);
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Dashboard Guru</h1>
+      <p>Buat tugas menulis huruf Mandarin (Brush Master) untuk murid</p>
+    </header>
+
+    <div class="card">
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Nama Guru</label>
+          <select id="teacher-select">
+            <option value="">-- Pilih Guru --</option>
+            <option value="Giovanni">Giovanni</option>
+            <option value="Ivana">Ivana</option>
+            <option value="Imelda">Imelda</option>
+            <option value="Shinta">Shinta</option>
+            <option value="Juminah">Juminah</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Kelas</label>
+          <select id="class-select" disabled>
+            <option value="">-- Pilih Kelas --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Buku Meihua</label>
+          <select id="book-select">
+            <option value="">-- Pilih Buku --</option>
+            <option value="meihua1">Meihua 1</option>
+            <option value="meihua2">Meihua 2</option>
+            <option value="meihua3">Meihua 3</option>
+            <option value="meihua4">Meihua 4</option>
+            <option value="meihua5">Meihua 5</option>
+            <option value="meihua6">Meihua 6</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Bab / Unit</label>
+          <select id="unit-select" disabled>
+            <option value="">-- Pilih Bab --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="vocab-container" style="display:none;">
+        <label>Pilih Kosakata (Kata yang akan ditugaskan)</label>
+        <div class="vocab-list" id="vocab-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Jumlah Ulangan per Karakter</label>
+        <input type="number" id="rep-count" value="3" min="1" max="20">
+      </div>
+      
+      <div class="form-group" style="display:flex; flex-direction:column; gap:10px;">
+        <label style="margin-bottom:0;">Opsi Latihan Mengetik di Akhir Kata:</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" id="require-pinyin" style="width:20px; height:20px; cursor:pointer;" checked>
+          <label for="require-pinyin" style="margin:0; text-transform:none; font-weight:normal;">Wajib ketik Pinyin</label>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" id="require-meaning" style="width:20px; height:20px; cursor:pointer;" checked>
+          <label for="require-meaning" style="margin:0; text-transform:none; font-weight:normal;">Wajib ketik Arti</label>
+        </div>
+      </div>
+
+      <button class="btn" id="generate-btn" disabled>Buat Link Tugas</button>
+      
+      <div class="result-box" id="result-box">
+        <label>Link Tugas (Kirim ini ke murid)</label>
+        <textarea id="link-output" readonly></textarea>
+        <button class="btn copy-btn" id="copy-btn">Salin Link</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bookSelect = document.getElementById('book-select');
+    const unitSelect = document.getElementById('unit-select');
+    const vocabContainer = document.getElementById('vocab-container');
+    const vocabList = document.getElementById('vocab-list');
+    const repCount = document.getElementById('rep-count');
+    const generateBtn = document.getElementById('generate-btn');
+    const resultBox = document.getElementById('result-box');
+    const linkOutput = document.getElementById('link-output');
+    const copyBtn = document.getElementById('copy-btn');
+    const teacherSelect = document.getElementById('teacher-select');
+    const classSelect = document.getElementById('class-select');
+
+    const teacherMap = {
+       "Giovanni": ["1A", "1B", "1C", "1D", "1E", "2A", "2B"],
+       "Ivana": ["2C", "2D", "2E", "3A", "4A", "4B", "4C"],
+       "Imelda": ["4D", "4E", "3B", "5B", "5C", "5D"],
+       "Shinta": ["5A", "3C", "3D", "3E"],
+       "Juminah": ["5E", "6A", "6B", "6C", "6D", "6E"]
+    };
+
+    teacherSelect.addEventListener('change', () => {
+       classSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+       if (teacherSelect.value && teacherMap[teacherSelect.value]) {
+          teacherMap[teacherSelect.value].forEach(cls => {
+             const opt = document.createElement('option');
+             opt.value = cls;
+             opt.textContent = 'Kelas ' + cls;
+             classSelect.appendChild(opt);
+          });
+          classSelect.disabled = false;
+       } else {
+          classSelect.disabled = true;
+          classSelect.value = "";
+       }
+       updateGenerateBtn();
+    });
+
+    classSelect.addEventListener('change', updateGenerateBtn);
+
+    function formatPinyin(py) {
+      if (!py || py.includes(' ')) return py;
+      const pinyinRegex = /(?:zh|ch|sh|b|p|m|f|d|t|n|l|g|k|h|j|q|x|r|z|c|s|y|w)?(?:[aeiouüvāáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜ]+)(?:ng|n|r)?/ig;
+      const matches = py.match(pinyinRegex);
+      if (matches) return matches.join(' ');
+      return py;
+    }
+
+    let selectedVocabIndices = {};
+
+    // Initialize units
+    for(let i=1; i<=10; i++) {
+      let opt = document.createElement('option');
+      opt.value = 'unit' + i;
+      opt.textContent = 'Unit ' + i;
+      unitSelect.appendChild(opt);
+    }
+
+    bookSelect.addEventListener('change', () => {
+      if(bookSelect.value) {
+        unitSelect.disabled = false;
+        loadVocab();
+      } else {
+        unitSelect.disabled = true;
+        unitSelect.value = "";
+        vocabContainer.style.display = 'none';
+        updateGenerateBtn();
+      }
+    });
+
+    unitSelect.addEventListener('change', loadVocab);
+
+    function loadVocab() {
+      const book = bookSelect.value;
+      const unit = unitSelect.value;
+      
+      if(!book || !unit) {
+        vocabContainer.style.display = 'none';
+        selectedVocabIndices = {};
+        updateGenerateBtn();
+        return;
+      }
+
+      const unitData = _meihuaDB[book] && _meihuaDB[book][unit];
+      if(!unitData || !unitData.vocab) {
+        vocabList.innerHTML = '<p>Tidak ada data untuk unit ini.</p>';
+        vocabContainer.style.display = 'block';
+        return;
+      }
+
+      vocabList.innerHTML = '';
+      selectedVocabIndices = {};
+      
+      unitData.vocab.forEach((v, vIndex) => {
+        if(!v.char) return;
+        
+        const div = document.createElement('div');
+        div.className = 'vocab-item';
+        div.style.flexDirection = 'column';
+        div.style.alignItems = 'stretch';
+        
+        const topRow = document.createElement('div');
+        topRow.style.display = 'flex';
+        topRow.style.alignItems = 'center';
+        topRow.style.gap = '12px';
+        
+        const mainCb = document.createElement('input');
+        mainCb.type = 'checkbox';
+        mainCb.className = 'main-cb';
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.innerHTML = `
+          <div class="vocab-char">${v.char}</div>
+          <div class="vocab-pinyin">${formatPinyin(v.pinyin)}</div>
+        `;
+        
+        topRow.appendChild(mainCb);
+        topRow.appendChild(infoDiv);
+        
+        let splitBtn = null;
+        let splitContainer = null;
+        let isSplit = false;
+        
+        if (v.char.length > 1) {
+          splitBtn = document.createElement('button');
+          splitBtn.className = 'vocab-split-btn';
+          splitBtn.textContent = 'Split';
+          topRow.appendChild(splitBtn);
+          
+          splitContainer = document.createElement('div');
+          splitContainer.className = 'char-split-container';
+          
+          for(let i=0; i<v.char.length; i++) {
+            const charItem = document.createElement('label');
+            charItem.className = 'char-checkbox-item';
+            
+            const charCb = document.createElement('input');
+            charCb.type = 'checkbox';
+            charCb.className = 'sub-cb';
+            charCb.dataset.charIndex = i;
+            
+            charItem.appendChild(charCb);
+            charItem.appendChild(document.createTextNode(v.char[i]));
+            splitContainer.appendChild(charItem);
+            
+            charCb.addEventListener('change', () => {
+               updateSelection();
+            });
+          }
+          
+          splitBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isSplit = !isSplit;
+            if(isSplit) {
+              splitContainer.style.display = 'flex';
+              splitBtn.textContent = 'Unsplit';
+              mainCb.style.display = 'none';
+              mainCb.checked = false;
+            } else {
+              splitContainer.style.display = 'none';
+              splitBtn.textContent = 'Split';
+              mainCb.style.display = 'block';
+              splitContainer.querySelectorAll('.sub-cb').forEach(cb => cb.checked = false);
+            }
+            updateSelection();
+          });
+        }
+        
+        div.appendChild(topRow);
+        if(splitContainer) div.appendChild(splitContainer);
+        
+        mainCb.addEventListener('change', () => {
+           updateSelection();
+        });
+        
+        div.addEventListener('click', (e) => {
+          if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !isSplit) {
+            mainCb.checked = !mainCb.checked;
+            updateSelection();
+          }
+        });
+        
+        function updateSelection() {
+          let selectedChars = [];
+          if(!isSplit && mainCb.checked) {
+             div.classList.add('selected');
+             for(let i=0; i<v.char.length; i++) selectedChars.push(i);
+          } else if (isSplit) {
+             const subs = splitContainer.querySelectorAll('.sub-cb');
+             let anyChecked = false;
+             subs.forEach(sub => {
+               if(sub.checked) {
+                 anyChecked = true;
+                 selectedChars.push(parseInt(sub.dataset.charIndex));
+               }
+             });
+             if(anyChecked) div.classList.add('selected');
+             else div.classList.remove('selected');
+          } else {
+             div.classList.remove('selected');
+          }
+          
+          if(selectedChars.length > 0) {
+             selectedVocabIndices[vIndex] = selectedChars;
+          } else {
+             delete selectedVocabIndices[vIndex];
+          }
+          updateGenerateBtn();
+        }
+        
+        vocabList.appendChild(div);
+      });
+      
+      vocabContainer.style.display = 'block';
+      updateGenerateBtn();
+    }
+
+    function updateGenerateBtn() {
+      if(!bookSelect.value || !unitSelect.value || Object.keys(selectedVocabIndices).length === 0 || !classSelect.value) {
+        generateBtn.disabled = true;
+      } else {
+        generateBtn.disabled = false;
+      }
+    }
+
+    generateBtn.addEventListener('click', () => {
+      const reps = parseInt(repCount.value) || 3;
+      const requirePinyin = document.getElementById('require-pinyin').checked;
+      const requireMeaning = document.getElementById('require-meaning').checked;
+      
+      const vStrs = [];
+      for(const [vIndex, chars] of Object.entries(selectedVocabIndices)) {
+         vStrs.push(`${vIndex}:${chars.join(',')}`);
+      }
+      
+      const payload = {
+        cls: classSelect.value,
+        b: bookSelect.value,
+        u: unitSelect.value,
+        v: vStrs.join('|'),
+        r: reps,
+        tp: requirePinyin ? 1 : 0,
+        tm: requireMeaning ? 1 : 0
+      };
+      
+      // Convert to base64
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      
+      // Get current path to generate student URL
+      let baseUrl = window.location.href.replace('teacher.html', 'student.html');
+      // Just in case they are on index.html or something else
+      const lastSlash = baseUrl.lastIndexOf('/');
+      baseUrl = baseUrl.substring(0, lastSlash) + '/student.html';
+      
+      const finalUrl = `${baseUrl}?data=${encoded}`;
+      
+      linkOutput.value = finalUrl;
+      resultBox.style.display = 'block';
+    });
+
+    copyBtn.addEventListener('click', () => {
+      linkOutput.select();
+      document.execCommand('copy');
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Tersalin!';
+      setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
+    });
+
+  </script>
+</body>
+</html>

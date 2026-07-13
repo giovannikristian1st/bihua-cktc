@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Brush Master - Tugas Murid</title>
+  
+  <script src="hanzi-writer.min.js"></script>
+  <script src="brushstrokedb.js"></script>
+  <script src="vocabdb.js"></script>
+  <script src="meihuadb.js"></script>
+  <script src="students.js"></script>
+  <script src="config.js"></script>
+  
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background:#F9FAFB;
+      color:#0E1318;
+      font-family: 'Times New Roman', Times, 'Kaiti', 'KaiTi', STKaiti, serif;
+      height:100vh;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+    .hidden { display:none !important; }
+    
+    /* ── Screens ── */
+    .screen { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:1; background:#F9FAFB; padding: 20px;}
+    
+    /* ── Login Screen ── */
+    .login-card {
+      background:#FFFFFF;
+      padding:30px; border-radius:16px;
+      width:100%; max-width:400px;
+      text-align:center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    .login-card h2 { margin-bottom: 20px; color: #8B3DFF; }
+    select.student-select {
+      width:100%; padding:12px; border-radius:8px;
+      background:#FFFFFF; color:#0E1318; border:1px solid #E5E7EB;
+      font-size:1.1rem; margin-bottom: 20px; outline:none; transition: border-color 0.2s;
+    }
+    select.student-select:focus { border-color: #8B3DFF; }
+    .btn {
+      width:100%; padding:14px;
+      background:linear-gradient(135deg,#00C4CC,#8B3DFF);
+      color:#FFFFFF; font-weight:bold; font-size:1.1rem;
+      border:none; border-radius:8px; cursor:pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(139,61,255,0.2);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(139,61,255,0.3); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Game Screen ── */
+    #screen-game { justify-content: flex-start; padding: 0; }
+    
+    .header {
+      width: 100%; padding: 15px 20px;
+      background: #FFFFFF;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #E5E7EB;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+    .student-name-display { font-weight: bold; color: #8B3DFF; }
+    .progress-text { color: #5E6A75; font-size: 0.9rem;}
+
+    .game-area {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      width: 100%; padding: 20px;
+    }
+
+    .char-info {
+      text-align: center; margin-bottom: 20px;
+    }
+    .char-pinyin { font-size: 1.5rem; color: #00C4CC; letter-spacing: 2px; font-weight: bold; }
+    .char-meaning { font-size: 1rem; color: #5E6A75; margin-top: 5px; }
+
+    .writer-container {
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+    }
+    #writer-target {
+      position: relative;
+      display: inline-block;
+      width: 400px;
+      height: 400px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      border: 1px solid #E5E7EB;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transform-origin: top center;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); border-color: #E5E7EB; }
+      20%, 60% { transform: translateX(-8px); border-color: #ef4444; }
+      40%, 80% { transform: translateX(8px); border-color: #ef4444; }
+    }
+    .shake-error {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    .rep-dots {
+      display: flex; gap: 8px; justify-content: center; margin-top: 20px;
+    }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid #00C4CC;
+    }
+    .dot.filled { background: #00C4CC; }
+
+    .mistake-counter {
+      margin-top: 15px; color: #ef4444; font-weight: bold; font-size: 0.9rem;
+    }
+
+    /* ── Typing Screen ── */
+    #screen-typing { background:#F9FAFB; }
+    .typing-card {
+      background:#FFFFFF;
+      padding:30px; border-radius:16px; width:100%; max-width:400px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08); text-align:center;
+    }
+    .typing-card h3 { color:#0E1318; margin-bottom:20px; font-size:1.4rem; }
+    
+    .typing-context { margin-bottom: 25px; padding: 15px; background: #F3F4F6; border-radius: 12px; }
+    .typing-context-char { font-size: 2.5rem; font-weight: bold; color: #8B3DFF; margin-bottom: 5px; }
+    .typing-context-pinyin { font-size: 1.1rem; color: #4B5563; font-family: sans-serif; }
+    .typing-context-meaning { font-size: 1.1rem; color: #4B5563; margin-top: 2px; font-family: sans-serif; }
+
+    .typing-group { margin-bottom: 20px; text-align:left; }
+    .typing-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .typing-group input { width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 8px; }
+    .typing-error { color: #ef4444; font-size: 0.8rem; margin-top: 5px; display: none; }
+
+    /* ── Finish Screen ── */
+    .finish-card {
+      background:#FFFFFF;
+      padding:40px; border-radius:16px;
+      width:100%; max-width:400px;
+      text-align:center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    .finish-card h2 { font-size: 2.5rem; color: #00C4CC; margin-bottom: 10px; }
+    .status-text { margin: 20px 0; font-size: 1.1rem; color: #5E6A75; }
+    .loader {
+      border: 4px solid #E5E7EB; border-top: 4px solid #8B3DFF;
+      border-radius: 50%; width: 40px; height: 40px;
+      animation: spin 1s linear infinite; margin: 0 auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen">
+    <div class="login-card">
+      <h2>Mulai Tugas</h2>
+      <p style="margin-bottom: 15px; color: #5E6A75;" id="login-info">Memuat data tugas...</p>
+      
+      <select id="student-select" class="student-select">
+        <option value="">-- Pilih Nama Anda --</option>
+      </select>
+      
+      <button id="start-btn" class="btn" disabled>Mulai Mengerjakan</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen hidden">
+    <div class="header">
+      <div class="student-name-display" id="display-name">Nama Murid</div>
+      <div class="progress-text" id="progress-text">Kata 1 / 5</div>
+    </div>
+
+    <div class="game-area">
+      <div class="full-word-context" id="full-word-context" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px; color: #0E1318; text-align: center;"></div>
+      
+      <div class="char-info">
+        <div class="char-pinyin" id="char-pinyin">pīn yīn</div>
+        <div class="char-meaning" id="char-meaning">Meaning</div>
+      </div>
+
+      <div class="writer-container" id="writer-container">
+        <div id="writer-target"></div>
+      </div>
+
+      <div class="rep-dots" id="rep-dots"></div>
+      
+      <div class="mistake-counter" id="mistake-counter">Kesalahan: 0</div>
+    </div>
+  </div>
+
+  <!-- TYPING SCREEN -->
+  <div id="screen-typing" class="screen hidden">
+    <div class="typing-card">
+      <h3>Ketik Pinyin & Arti</h3>
+      <div class="typing-context">
+        <div class="typing-context-char" id="typing-word"></div>
+        <div class="typing-context-pinyin" id="typing-word-pinyin"></div>
+        <div class="typing-context-meaning" id="typing-word-meaning"></div>
+      </div>
+      <div class="typing-group" id="group-pinyin">
+        <label>Pinyin:</label>
+        <input type="text" id="typing-pinyin" placeholder="contoh: shenme" autocomplete="off">
+        <div class="typing-error" id="typing-pinyin-err">Pinyin kurang tepat, coba lagi!</div>
+      </div>
+      <div class="typing-group" id="group-meaning">
+        <label>Arti (Bahasa Indonesia):</label>
+        <input type="text" id="typing-meaning" placeholder="contoh: apa" autocomplete="off">
+        <div class="typing-error" id="typing-meaning-err">Arti kurang tepat, coba lagi!</div>
+      </div>
+      <button class="btn" id="typing-submit">Lanjut</button>
+    </div>
+  </div>
+
+  <!-- FINISH SCREEN -->
+  <div id="screen-finish" class="screen hidden">
+    <div class="finish-card">
+      <h2>Selesai!</h2>
+      <p>Kamu telah menyelesaikan semua tugas.</p>
+      <div class="status-text" id="submit-status">
+        <div class="loader"></div>
+        <p style="margin-top:10px;">Mengirim data ke guru...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let assignmentData = null; 
+    let studentName = "";
+    
+    let tasks = [];
+    let repetitions = 1;
+    let currentTaskIndex = 0;
+    let currentRepIndex = 0;
+    
+    let drawnChars = new Set();
+    
+    let mistakesMap = {}; // { '一': 2 }
+    let currentWordMistakes = 0;
+    
+    let writer = null;
+
+    // Elements
+    const screenLogin = document.getElementById('screen-login');
+    const screenGame = document.getElementById('screen-game');
+    const screenTyping = document.getElementById('screen-typing');
+    const screenFinish = document.getElementById('screen-finish');
+    
+    const studentSelect = document.getElementById('student-select');
+    const startBtn = document.getElementById('start-btn');
+    const loginInfo = document.getElementById('login-info');
+
+    function formatPinyin(py) {
+      if (!py || py.includes(' ')) return py;
+      const pinyinRegex = /(?:zh|ch|sh|b|p|m|f|d|t|n|l|g|k|h|j|q|x|r|z|c|s|y|w)?(?:[aeiouüvāáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜ]+)(?:ng|n|r)?/ig;
+      const matches = py.match(pinyinRegex);
+      if (matches) return matches.join(' ');
+      return py;
+    }
+
+    // Parse URL Params
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      const dataParam = params.get('data');
+      if(!dataParam) {
+        loginInfo.textContent = "Error: Link tugas tidak valid (Data kosong).";
+        return;
+      }
+
+      try {
+        const decoded = decodeURIComponent(escape(atob(dataParam)));
+        assignmentData = JSON.parse(decoded);
+        repetitions = assignmentData.r || 1;
+        
+        assignmentData.tasks = [];
+        
+        if (assignmentData.w) {
+          // Backward compatibility for old format
+          assignmentData.tasks = assignmentData.w.map(c => ({
+             char: c,
+             word: c,
+             pinyin: (typeof _vocabDB !== 'undefined' && _vocabDB[c]) ? _vocabDB[c].p : "",
+             meaning: (typeof _vocabDB !== 'undefined' && _vocabDB[c]) ? _vocabDB[c].m : "",
+             isLastCharInWord: true
+          }));
+        } else if (assignmentData.v && assignmentData.b && assignmentData.u) {
+          const uData = (typeof _meihuaDB !== 'undefined') ? _meihuaDB[assignmentData.b][assignmentData.u].vocab : [];
+          
+          const vParts = assignmentData.v.split('|');
+          vParts.forEach(vp => {
+            const [vIdx, charIndices] = vp.split(':');
+            const vObj = uData[parseInt(vIdx)];
+            if(vObj) {
+              const cIds = charIndices.split(',').map(Number);
+              cIds.forEach((cId, arrIndex) => {
+                assignmentData.tasks.push({
+                   char: vObj.char[cId],
+                   word: vObj.char,
+                   pinyin: vObj.pinyin,
+                   meaning: vObj.id || vObj.en,
+                   isLastCharInWord: arrIndex === cIds.length - 1
+                });
+              });
+            }
+          });
+        }
+        
+        tasks = assignmentData.tasks;
+        if(tasks.length === 0) throw new Error("Kosakata kosong");
+
+        // Populate student list based on class
+        if (typeof _studentsDB !== 'undefined' && assignmentData.cls) {
+          const classStudents = _studentsDB[assignmentData.cls];
+          if (classStudents && classStudents.length > 0) {
+             classStudents.forEach(name => {
+                let opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                studentSelect.appendChild(opt);
+             });
+          } else {
+             loginInfo.textContent = "Error: Kelas " + assignmentData.cls + " tidak ditemukan di database siswa.";
+          }
+        } else if (typeof _studentsDB !== 'undefined') {
+          // Fallback if no class
+          for(let cls in _studentsDB) {
+             _studentsDB[cls].forEach(name => {
+                let opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                studentSelect.appendChild(opt);
+             });
+          }
+        }
+        
+        loginInfo.innerHTML = `Mengerjakan <b>${tasks.length}</b> huruf (x${repetitions})`;
+      } catch(e) {
+        loginInfo.textContent = "Error: Link tugas rusak atau tidak valid.";
+        console.error(e);
+      }
+    };
+
+    studentSelect.addEventListener('change', () => {
+      startBtn.disabled = !studentSelect.value || !assignmentData;
+    });
+
+    startBtn.addEventListener('click', () => {
+      studentName = studentSelect.value;
+      
+      // Init mistake map
+      tasks.forEach(t => mistakesMap[t.char] = 0);
+
+      document.getElementById('display-name').textContent = studentName;
+      
+      screenLogin.classList.add('hidden');
+      screenGame.classList.remove('hidden');
+      
+      setTimeout(loadWord, 100);
+    });
+
+    function loadWord() {
+      if(currentTaskIndex >= tasks.length) {
+        finishGame();
+        return;
+      }
+      
+      const task = tasks[currentTaskIndex];
+      
+      if(drawnChars.has(task.char)) {
+         checkTypingAndNext();
+         return;
+      }
+      
+      document.getElementById('progress-text').textContent = `Huruf ${currentTaskIndex + 1} / ${tasks.length}`;
+      
+      let highlightedWord = "";
+      for(let i=0; i<task.word.length; i++) {
+        if(task.word[i] === task.char) {
+           highlightedWord += `<span style="color:#8B3DFF">${task.word[i]}</span>`;
+        } else {
+           highlightedWord += task.word[i];
+        }
+      }
+      document.getElementById('full-word-context').innerHTML = highlightedWord;
+      
+      document.getElementById('char-pinyin').textContent = formatPinyin(task.pinyin) || "—";
+      document.getElementById('char-meaning').textContent = task.meaning || "—";
+
+      // Update dots
+      updateDots();
+      
+      // Reset mistake counter for this screen
+      currentWordMistakes = 0;
+      updateMistakeUI();
+
+      // Init or update HanziWriter
+      const target = document.getElementById('writer-target');
+      
+      // Scaling responsive ala brushmaster
+      const scale = Math.min(1, (window.innerWidth - 40) / 400);
+      target.style.transform = `scale(${scale})`;
+      document.getElementById('writer-container').style.height = (400 * scale) + 'px';
+
+      if(!writer) {
+        target.innerHTML = '';
+        writer = HanziWriter.create('writer-target', task.char, {
+          width: 400,
+          height: 400,
+          padding: 10,
+          showCharacter: false,
+          showOutline: true,
+          strokeColor: '#1e293b',
+          outlineColor: '#e2e8f0',
+          drawingColor: '#8B3DFF',
+          drawingWidth: 25,
+          drawingFadeDuration: 400,
+          highlightOnComplete: true,
+          highlightColor: '#00C4CC',
+          leniency: 0.65,
+          charDataLoader: function(c, onLoad) {
+            onLoad((typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[c]) || null);
+          }
+        });
+        setTimeout(startQuiz, 300);
+      } else {
+        writer.setCharacter(task.char).then(() => {
+          setTimeout(startQuiz, 100);
+        });
+      }
+    }
+
+    function startQuiz() {
+      writer.quiz({
+        showHintAfterMisses: 3,
+        onMistake: function(strokeData) {
+          const char = tasks[currentTaskIndex].char;
+          mistakesMap[char]++;
+          currentWordMistakes++;
+          updateMistakeUI();
+          
+          const target = document.getElementById('writer-target');
+          target.classList.remove('shake-error');
+          void target.offsetWidth; // trigger reflow
+          target.classList.add('shake-error');
+        },
+        onComplete: function() {
+          setTimeout(handleRepetition, 600);
+        }
+      });
+    }
+
+    function updateDots() {
+      const container = document.getElementById('rep-dots');
+      container.innerHTML = '';
+      for(let i=0; i<repetitions; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i < currentRepIndex ? ' filled' : '');
+        container.appendChild(dot);
+      }
+    }
+
+    function updateMistakeUI() {
+      const el = document.getElementById('mistake-counter');
+      if(currentWordMistakes > 0) {
+        el.textContent = `Kesalahan: ${currentWordMistakes}`;
+        el.style.opacity = '1';
+      } else {
+        el.style.opacity = '0';
+      }
+    }
+
+    function normalizeText(t) {
+      if(!t) return "";
+      let s = t.toLowerCase().replace(/[\s\d]/g, '');
+      const toneMap = {
+          'ā':'a', 'á':'a', 'ǎ':'a', 'à':'a',
+          'ē':'e', 'é':'e', 'ě':'e', 'è':'e',
+          'ī':'i', 'í':'i', 'ǐ':'i', 'ì':'i',
+          'ō':'o', 'ó':'o', 'ǒ':'o', 'ò':'o',
+          'ū':'u', 'ú':'u', 'ǔ':'u', 'ù':'u',
+          'ǖ':'u', 'ǘ':'u', 'ǚ':'u', 'ǜ':'u', 'ü':'u'
+      };
+      s = s.replace(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]/g, m => toneMap[m]);
+      s = s.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()'"?]/g, '');
+      return s;
+    }
+    
+    function checkTextMatch(input, target) {
+        return normalizeText(input) === normalizeText(target);
+    }
+
+    function checkTypingAndNext() {
+      const task = tasks[currentTaskIndex];
+      if((assignmentData.tp === 1 || assignmentData.tm === 1) && task.isLastCharInWord) {
+         showTypingModal(task);
+      } else {
+         nextTask();
+      }
+    }
+
+    function showTypingModal(task) {
+      screenGame.classList.add('hidden');
+      screenTyping.classList.remove('hidden');
+      
+      document.getElementById('typing-word').textContent = task.fullWord;
+      document.getElementById('typing-word-pinyin').textContent = formatPinyin(task.pinyin);
+      document.getElementById('typing-word-meaning').textContent = task.meaning;
+      
+      document.getElementById('typing-pinyin').value = "";
+      document.getElementById('typing-meaning').value = "";
+      document.getElementById('typing-pinyin-err').style.display = 'none';
+      document.getElementById('typing-meaning-err').style.display = 'none';
+      
+      const groupPinyin = document.getElementById('group-pinyin');
+      const groupMeaning = document.getElementById('group-meaning');
+      
+      if(assignmentData.tp === 1) {
+        groupPinyin.style.display = 'block';
+      } else {
+        groupPinyin.style.display = 'none';
+      }
+      
+      if(assignmentData.tm === 1) {
+        groupMeaning.style.display = 'block';
+      } else {
+        groupMeaning.style.display = 'none';
+      }
+      
+      document.getElementById('typing-submit').onclick = () => {
+         checkTypingSubmit(task);
+      };
+    }
+
+    function checkTypingSubmit(task) {
+      const pyInput = document.getElementById('typing-pinyin').value;
+      const mnInput = document.getElementById('typing-meaning').value;
+      const pyErr = document.getElementById('typing-pinyin-err');
+      const mnErr = document.getElementById('typing-meaning-err');
+      
+      pyErr.style.display = 'none';
+      mnErr.style.display = 'none';
+      
+      let pinyinMatch = true;
+      let meaningMatch = true;
+      
+      if(assignmentData.tp === 1) {
+        pinyinMatch = checkTextMatch(pyInput, task.pinyin);
+      }
+      
+      if(assignmentData.tm === 1) {
+        meaningMatch = checkTextMatch(mnInput, task.meaning);
+      }
+      
+      if(!pinyinMatch) pyErr.style.display = 'block';
+      if(!meaningMatch) mnErr.style.display = 'block';
+      
+      if(pinyinMatch && meaningMatch) {
+         screenTyping.classList.add('hidden');
+         screenGame.classList.remove('hidden');
+         nextTask();
+      }
+    }
+
+    function nextTask() {
+       currentTaskIndex++;
+       currentRepIndex = 0;
+       setTimeout(loadWord, 100);
+    }
+
+    function handleRepetition() {
+      currentRepIndex++;
+      updateDots();
+      
+      if(currentRepIndex >= repetitions) {
+        drawnChars.add(tasks[currentTaskIndex].char);
+        checkTypingAndNext();
+      } else {
+        writer.hideCharacter();
+        setTimeout(() => {
+            currentWordMistakes = 0;
+            updateMistakeUI();
+            startQuiz();
+        }, 300);
+      }
+    }
+
+    function finishGame() {
+      screenGame.classList.add('hidden');
+      screenFinish.classList.remove('hidden');
+      submitData();
+    }
+
+    function submitData() {
+      const statusEl = document.getElementById('submit-status');
+      
+      const payload = {
+        cls: assignmentData.cls,
+        studentName: studentName,
+        totalWords: tasks.length,
+        assignment: { words: tasks.map(t => t.char), repetitions: repetitions },
+        mistakes: mistakesMap,
+        status: "Selesai"
+      };
+
+      const url = APP_CONFIG.GOOGLE_APPS_SCRIPT_URL;
+      
+      if(url.includes("SILAKAN_GANTI")) {
+        statusEl.innerHTML = `<p style="color:#ef4444;">❌ Pengiriman gagal: URL Google Apps Script belum diatur oleh Guru (di config.js).</p>`;
+        return;
+      }
+
+      // Send via text/plain to avoid CORS preflight options request on Google Apps Script
+      fetch(url, {
+        method: 'POST',
+        mode: 'no-cors', // Mencegah error CORS karena Google Apps Script redirect
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        // Karena no-cors, response bersifat opaque (tidak bisa dibaca/dikonversi ke json).
+        // Kita asumsikan sukses karena POST request sudah terkirim ke server Google.
+        statusEl.innerHTML = `<p style="color:#00C4CC; font-size:1.2rem; font-weight:bold;">✔️ Nilai berhasil dikirim ke Guru!</p>`;
+      })
+      .catch(error => {
+        statusEl.innerHTML = `<p style="color:#ef4444;">❌ Gagal mengirim: Pastikan Anda terhubung ke internet.</p>`;
+        console.error(error);
+      });
+    }
+
+  </script>
+</body>
+</html>
