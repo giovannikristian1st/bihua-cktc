@@ -408,8 +408,11 @@
       
       // Scaling responsive ala brushmaster
       const scale = Math.min(1, (window.innerWidth - 40) / 400);
+      target.style.transformOrigin = 'top left';
       target.style.transform = `scale(${scale})`;
-      document.getElementById('writer-container').style.height = (400 * scale) + 'px';
+      const container = document.getElementById('writer-container');
+      container.style.width = (400 * scale) + 'px';
+      container.style.height = (400 * scale) + 'px';
 
       if(!writer) {
         target.innerHTML = '';
