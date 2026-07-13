@@ -406,26 +406,28 @@
       // Init or update HanziWriter
       const target = document.getElementById('writer-target');
       
-      // Scaling responsive ala brushmaster
-      const scale = Math.min(1, (window.innerWidth - 40) / 400);
-      target.style.transformOrigin = 'top left';
-      target.style.transform = `scale(${scale})`;
+      // Use native sizing for HanziWriter so pointer coordinates are accurate
+      const size = Math.min(400, window.innerWidth - 40);
+      target.style.transform = 'none'; // Ensure no CSS scaling
+      target.style.width = size + 'px';
+      target.style.height = size + 'px';
+      
       const container = document.getElementById('writer-container');
-      container.style.width = (400 * scale) + 'px';
-      container.style.height = (400 * scale) + 'px';
+      container.style.width = size + 'px';
+      container.style.height = size + 'px';
 
       if(!writer) {
         target.innerHTML = '';
         writer = HanziWriter.create('writer-target', task.char, {
-          width: 400,
-          height: 400,
+          width: size,
+          height: size,
           padding: 10,
           showCharacter: false,
           showOutline: true,
           strokeColor: '#1e293b',
           outlineColor: '#e2e8f0',
           drawingColor: '#8B3DFF',
-          drawingWidth: 25,
+          drawingWidth: 25 * (size / 400), // Scale drawing width proportionally
           drawingFadeDuration: 400,
           highlightOnComplete: true,
           highlightColor: '#00C4CC',
