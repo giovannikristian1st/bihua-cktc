@@ -457,7 +457,7 @@
           drawingFadeDuration: 400,
           highlightOnComplete: true,
           highlightColor: '#00C4CC',
-          leniency: 0.85, // Dikurangi sensitivitas errornya (lebih longgar)
+          leniency: 3.0, // Dinaikkan menjadi 3.0 (sangat longgar) agar lekukan font bisa diabaikan dengan tarikan lurus
           charDataLoader: function(c, onLoad, onError) {
             if (typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[c]) {
                onLoad(BM_STROKE_DATA[c]);
