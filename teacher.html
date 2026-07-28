@@ -30,7 +30,8 @@
     }
     
     .container {
-      max-width: 800px;
+      max-width: 1100px;
+      width: 95%;
       margin: 0 auto;
     }
     
@@ -93,9 +94,9 @@
     
     .vocab-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 12px;
-      margin-top: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
     }
     
     .vocab-item {
@@ -201,6 +202,54 @@
       color: var(--text);
       box-shadow: none;
     }
+    
+    .matrix-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+      /* Add wrapping for smaller screens or better HD layout */
+      flex-wrap: wrap;
+    }
+    .matrix-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--border);
+      margin-bottom: 4px;
+    }
+    .matrix-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    .matrix-row-label {
+      font-weight: bold;
+      min-width: 95px;
+      font-size: 1.05rem;
+      color: var(--primary);
+    }
+    .matrix-btn {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-size: 1rem;
+    }
+    .matrix-btn:hover { background: #f1f5f9; }
+    .matrix-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      font-weight: bold;
+    }
+    .matrix-btn.has-selection {
+      border-bottom: 3px solid #ff4757; /* Penanda merah jika ada kata yg dipilih */
+    }
   </style>
 </head>
 <body>
@@ -233,25 +282,10 @@
         </div>
       </div>
 
-      <div class="grid-2">
-        <div class="form-group">
-          <label>Buku Meihua</label>
-          <select id="book-select">
-            <option value="">-- Pilih Buku --</option>
-            <option value="meihua1">Meihua 1</option>
-            <option value="meihua2">Meihua 2</option>
-            <option value="meihua3">Meihua 3</option>
-            <option value="meihua4">Meihua 4</option>
-            <option value="meihua5">Meihua 5</option>
-            <option value="meihua6">Meihua 6</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label>Bab / Unit</label>
-          <select id="unit-select" disabled>
-            <option value="">-- Pilih Bab --</option>
-          </select>
+      <div class="form-group">
+        <label>Pilih Buku & Bab (Silakan klik tombol Bab di bawah)</label>
+        <div class="matrix-container" id="matrix-container">
+          <!-- Populated by JS -->
         </div>
       </div>
 
@@ -290,8 +324,6 @@
   </div>
 
   <script>
-    const bookSelect = document.getElementById('book-select');
-    const unitSelect = document.getElementById('unit-select');
     const vocabContainer = document.getElementById('vocab-container');
     const vocabList = document.getElementById('vocab-list');
     const repCount = document.getElementById('rep-count');
@@ -301,6 +333,7 @@
     const copyBtn = document.getElementById('copy-btn');
     const teacherSelect = document.getElementById('teacher-select');
     const classSelect = document.getElementById('class-select');
+    const matrixContainer = document.getElementById('matrix-container');
 
     const teacherMap = {
        "Giovanni": ["1A", "1B", "1C", "1D", "1E", "2A", "2B"],
@@ -337,53 +370,119 @@
       return py;
     }
 
-    let selectedVocabIndices = {};
+    let globalSelection = {}; // { "meihua1": { "unit1": { vIndex: [charIndices] } } }
+    let currentBook = null;
+    let currentUnit = null;
 
-    // Initialize units
-    for(let i=1; i<=10; i++) {
-      let opt = document.createElement('option');
-      opt.value = 'unit' + i;
-      opt.textContent = 'Unit ' + i;
-      unitSelect.appendChild(opt);
+    // Build the 6x10 matrix
+    function buildMatrix() {
+      matrixContainer.innerHTML = '';
+      for (let b = 1; b <= 6; b++) {
+        const row = document.createElement('div');
+        row.className = 'matrix-row';
+        
+        const label = document.createElement('div');
+        label.className = 'matrix-row-label';
+        label.textContent = 'Meihua ' + b;
+        row.appendChild(label);
+        
+        for (let u = 1; u <= 10; u++) {
+          const btn = document.createElement('button');
+          btn.className = 'matrix-btn';
+          btn.textContent = 'Bab ' + u;
+          btn.id = `btn-meihua${b}-unit${u}`;
+          
+          btn.addEventListener('click', () => {
+             btn.classList.toggle('active');
+             loadVocab();
+          });
+          
+          row.appendChild(btn);
+        }
+        matrixContainer.appendChild(row);
+      }
+    }
+    
+    buildMatrix();
+
+    function getSelectedCharCount() {
+       let count = 0;
+       for (const bk in globalSelection) {
+          for (const ut in globalSelection[bk]) {
+             for (const vIdx in globalSelection[bk][ut]) {
+                count += globalSelection[bk][ut][vIdx].length;
+             }
+          }
+       }
+       return count;
     }
 
-    bookSelect.addEventListener('change', () => {
-      if(bookSelect.value) {
-        unitSelect.disabled = false;
-        loadVocab();
+    function updateGenerateBtn() {
+      const count = getSelectedCharCount();
+      if(count === 0 || !classSelect.value) {
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Buat Link Tugas';
       } else {
-        unitSelect.disabled = true;
-        unitSelect.value = "";
-        vocabContainer.style.display = 'none';
-        updateGenerateBtn();
+        generateBtn.disabled = false;
+        generateBtn.textContent = `Buat Link Tugas (${count} Kosakata)`;
       }
-    });
-
-    unitSelect.addEventListener('change', loadVocab);
+      
+      // Update visual indicators on the grid
+      document.querySelectorAll('.matrix-btn').forEach(btn => {
+         const match = btn.id.match(/btn-(meihua\d+)-(unit\d+)/);
+         if (match) {
+            const b = match[1];
+            const u = match[2];
+            if (globalSelection[b] && globalSelection[b][u] && Object.keys(globalSelection[b][u]).length > 0) {
+               btn.classList.add('has-selection');
+            } else {
+               btn.classList.remove('has-selection');
+            }
+         }
+      });
+    }
 
     function loadVocab() {
-      const book = bookSelect.value;
-      const unit = unitSelect.value;
-      
-      if(!book || !unit) {
-        vocabContainer.style.display = 'none';
-        selectedVocabIndices = {};
-        updateGenerateBtn();
-        return;
-      }
-
-      const unitData = _meihuaDB[book] && _meihuaDB[book][unit];
-      if(!unitData || !unitData.vocab) {
-        vocabList.innerHTML = '<p>Tidak ada data untuk unit ini.</p>';
-        vocabContainer.style.display = 'block';
-        return;
-      }
-
       vocabList.innerHTML = '';
-      selectedVocabIndices = {};
+      const activeBtns = document.querySelectorAll('.matrix-btn.active');
       
-      unitData.vocab.forEach((v, vIndex) => {
-        if(!v.char) return;
+      if(activeBtns.length === 0) {
+         vocabContainer.style.display = 'none';
+         return;
+      }
+
+      vocabContainer.style.display = 'block';
+
+      activeBtns.forEach(btn => {
+         const match = btn.id.match(/btn-(meihua\d+)-(unit\d+)/);
+         if (!match) return;
+         const book = match[1];
+         const unit = match[2];
+
+         const unitData = _meihuaDB[book] && _meihuaDB[book][unit];
+         if(!unitData || !unitData.vocab) return;
+
+         // Chapter Header
+         const header = document.createElement('h3');
+         header.style.gridColumn = '1 / -1'; // Memaksa baris baru penuhi grid
+         header.style.marginTop = '20px';
+         header.style.marginBottom = '5px';
+         header.style.color = '#FFFFFF';
+         header.style.backgroundColor = 'var(--primary)';
+         header.style.padding = '8px 15px';
+         header.style.borderRadius = '8px';
+         header.style.fontSize = '1.1rem';
+         header.style.boxShadow = '0 2px 8px rgba(139, 61, 255, 0.2)';
+         header.textContent = `${book.replace('meihua', 'Meihua ')} - ${unit.replace('unit', 'Bab ')}`;
+         vocabList.appendChild(header);
+
+         if (!globalSelection[book]) globalSelection[book] = {};
+         if (!globalSelection[book][unit]) globalSelection[book][unit] = {};
+         
+         const currentSelection = globalSelection[book][unit];
+         
+         unitData.vocab.forEach((v, vIndex) => {
+           if(!v.char) return;
         
         const div = document.createElement('div');
         div.className = 'vocab-item';
@@ -398,6 +497,13 @@
         const mainCb = document.createElement('input');
         mainCb.type = 'checkbox';
         mainCb.className = 'main-cb';
+        
+        // Restore check state if it exists in globalSelection
+        const savedSelection = currentSelection[vIndex];
+        if (savedSelection && savedSelection.length === v.char.length) {
+            mainCb.checked = true;
+            div.classList.add('selected');
+        }
         
         const infoDiv = document.createElement('div');
         infoDiv.innerHTML = `
@@ -430,6 +536,10 @@
             charCb.className = 'sub-cb';
             charCb.dataset.charIndex = i;
             
+            if (savedSelection && savedSelection.includes(i)) {
+               charCb.checked = true;
+            }
+            
             charItem.appendChild(charCb);
             charItem.appendChild(document.createTextNode(v.char[i]));
             splitContainer.appendChild(charItem);
@@ -455,6 +565,14 @@
             }
             updateSelection();
           });
+        }
+        
+        if (savedSelection && savedSelection.length > 0 && savedSelection.length < v.char.length && splitContainer) {
+           isSplit = true;
+           splitContainer.style.display = 'flex';
+           splitBtn.textContent = 'Unsplit';
+           mainCb.style.display = 'none';
+           div.classList.add('selected');
         }
         
         div.appendChild(topRow);
@@ -492,26 +610,17 @@
           }
           
           if(selectedChars.length > 0) {
-             selectedVocabIndices[vIndex] = selectedChars;
+             currentSelection[vIndex] = selectedChars;
           } else {
-             delete selectedVocabIndices[vIndex];
+             delete currentSelection[vIndex];
           }
           updateGenerateBtn();
         }
         
         vocabList.appendChild(div);
-      });
-      
-      vocabContainer.style.display = 'block';
-      updateGenerateBtn();
-    }
-
-    function updateGenerateBtn() {
-      if(!bookSelect.value || !unitSelect.value || Object.keys(selectedVocabIndices).length === 0 || !classSelect.value) {
-        generateBtn.disabled = true;
-      } else {
-        generateBtn.disabled = false;
-      }
+      }); // end vocab forEach
+     }); // end activeBtns forEach
+     updateGenerateBtn();
     }
 
     generateBtn.addEventListener('click', () => {
@@ -519,16 +628,26 @@
       const requirePinyin = document.getElementById('require-pinyin').checked;
       const requireMeaning = document.getElementById('require-meaning').checked;
       
-      const vStrs = [];
-      for(const [vIndex, chars] of Object.entries(selectedVocabIndices)) {
-         vStrs.push(`${vIndex}:${chars.join(',')}`);
+      // Build optimized payload v-map
+      // format: { "meihua1": { "unit1": "0:0,1|1:0", "unit2": "2:0" }, "meihua2": ... }
+      const vMap = {};
+      for (const bk in globalSelection) {
+         for (const ut in globalSelection[bk]) {
+            const unitSelection = globalSelection[bk][ut];
+            if (Object.keys(unitSelection).length === 0) continue;
+            
+            if (!vMap[bk]) vMap[bk] = {};
+            const vStrs = [];
+            for (const [vIndex, chars] of Object.entries(unitSelection)) {
+               vStrs.push(`${vIndex}:${chars.join(',')}`);
+            }
+            vMap[bk][ut] = vStrs.join('|');
+         }
       }
       
       const payload = {
         cls: classSelect.value,
-        b: bookSelect.value,
-        u: unitSelect.value,
-        v: vStrs.join('|'),
+        v: vMap,
         r: reps,
         tp: requirePinyin ? 1 : 0,
         tm: requireMeaning ? 1 : 0

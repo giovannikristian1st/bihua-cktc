@@ -294,6 +294,7 @@
              isLastCharInWord: true
           }));
         } else if (assignmentData.v && assignmentData.b && assignmentData.u) {
+          // Format Lama (String V)
           const uData = (typeof _meihuaDB !== 'undefined') ? _meihuaDB[assignmentData.b][assignmentData.u].vocab : [];
           
           const vParts = assignmentData.v.split('|');
@@ -313,6 +314,31 @@
               });
             }
           });
+        } else if (assignmentData.v && typeof assignmentData.v === 'object') {
+          // Format Baru (Nested Object)
+          for (const bk in assignmentData.v) {
+            for (const ut in assignmentData.v[bk]) {
+              const uData = (typeof _meihuaDB !== 'undefined' && _meihuaDB[bk] && _meihuaDB[bk][ut]) ? _meihuaDB[bk][ut].vocab : [];
+              const vStrs = assignmentData.v[bk][ut].split('|');
+              
+              vStrs.forEach(vp => {
+                const [vIdx, charIndices] = vp.split(':');
+                const vObj = uData[parseInt(vIdx)];
+                if(vObj) {
+                  const cIds = charIndices.split(',').map(Number);
+                  cIds.forEach((cId, arrIndex) => {
+                    assignmentData.tasks.push({
+                       char: vObj.char[cId],
+                       word: vObj.char,
+                       pinyin: vObj.pinyin,
+                       meaning: vObj.id || vObj.en,
+                       isLastCharInWord: arrIndex === cIds.length - 1
+                    });
+                  });
+                }
+              });
+            }
+          }
         }
         
         tasks = assignmentData.tasks;
@@ -432,8 +458,24 @@
           highlightOnComplete: true,
           highlightColor: '#00C4CC',
           leniency: 0.85, // Dikurangi sensitivitas errornya (lebih longgar)
-          charDataLoader: function(c, onLoad) {
-            onLoad((typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[c]) || null);
+          charDataLoader: function(c, onLoad, onError) {
+            if (typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[c]) {
+               onLoad(BM_STROKE_DATA[c]);
+            } else {
+               fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + c + '.json')
+                 .then(response => {
+                    if (!response.ok) throw new Error('Not found');
+                    return response.json();
+                 })
+                 .then(data => {
+                    if (typeof BM_STROKE_DATA !== 'undefined') BM_STROKE_DATA[c] = data;
+                    onLoad(data);
+                 })
+                 .catch(err => {
+                    console.error('Gagal mengambil data untuk: ' + c, err);
+                    if (onError) onError(err);
+                 });
+            }
           }
         });
         setTimeout(startQuiz, 300);
