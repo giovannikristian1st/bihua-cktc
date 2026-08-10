@@ -89,7 +89,7 @@
     #screen-game { justify-content: flex-start; padding: 0; }
     
     .header {
-      width: 100%; padding: 15px 20px;
+      width: 100%; padding: 15px 55px 15px 20px; /* added right padding to avoid overlap */
       background: var(--bg-card);
       display: flex; justify-content: space-between; align-items: center;
       border-bottom: 1px solid var(--border-color);
@@ -191,7 +191,7 @@
     
     /* Options Gear */
     .options-btn {
-       position: absolute; top: 15px; right: 20px;
+       position: absolute; top: 15px; right: 15px;
        background: transparent; border: none; font-size: 1.5rem; cursor: pointer;
        z-index: 10; color: var(--primary);
     }

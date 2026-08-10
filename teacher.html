@@ -159,14 +159,7 @@
 
         <div class="form-group">
           <label>Jumlah Pengulangan</label>
-          <select id="repetition">
-            <option value="1">1 Kali</option>
-            <option value="2">2 Kali</option>
-            <option value="3" selected>3 Kali</option>
-            <option value="4">4 Kali</option>
-            <option value="5">5 Kali</option>
-            <option value="10">10 Kali</option>
-          </select>
+          <input type="number" id="repetition" class="form-control" value="3" min="1" max="100" style="width: 100px;">
         </div>
       </div>
       
@@ -663,13 +656,29 @@
                    const el = document.createElement('div');
                    el.className = 'vocab-item';
                    el.style.borderColor = 'var(--primary)';
+                   el.style.position = 'relative';
+                   el.title = 'Klik untuk menghapus';
                    el.innerHTML = `
                       <div style="flex-grow:1;">
                          <div class="vocab-char">${chars.map(i => v.char[i]).join('')}</div>
                          <div class="vocab-pinyin">${v.pinyin}</div>
                       </div>
                       <div style="font-size:0.7rem; color:#888; text-align:right;">${b}<br>${u}</div>
+                      <div style="position:absolute; top:-8px; right:-8px; background:red; color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; cursor:pointer;">×</div>
                    `;
+                   
+                   el.addEventListener('click', () => {
+                       delete selectedVocabs[b][u][idx];
+                       if (Object.keys(selectedVocabs[b][u]).length === 0) delete selectedVocabs[b][u];
+                       if (Object.keys(selectedVocabs[b]).length === 0) delete selectedVocabs[b];
+                       
+                       updateCombinedView();
+                       // Update main vocab list visually if it's the currently open unit
+                       if (typeof currentBook !== 'undefined' && currentBook === b && currentUnit === u) {
+                           renderVocabs();
+                       }
+                   });
+                   
                    cList.appendChild(el);
                 }
              }
@@ -725,7 +734,7 @@
           }
       }
       
-      const payload = { cls: cls, r: rep, v: vObj, tm: requireMeaning ? 1 : 0 };
+      const payload = { cls: cls, r: rep, v: vObj, tm: requireMeaning ? 1 : 0, guru: document.getElementById('teacher-name').value };
       const payloadString = JSON.stringify(payload);
       
       let baseUrl = window.location.href.replace('teacher.html', 'student.html');
@@ -780,43 +789,80 @@
           const res = await fetch(`${getGASUrl()}?action=getTasks`);
           const d = await res.json();
           if (d.status === 'success' && d.data) {
-             let tasks = d.data.reverse();
-             tasks.forEach(t => {
-                let payload = {};
-                try { payload = JSON.parse(t.payload); } catch(e) {}
-                const cls = payload.cls || '-';
-                
-                // Get Bab info
-                let babStr = [];
-                if(payload.v) {
-                   for(const b in payload.v) {
-                      for(const u in payload.v[b]) {
-                         babStr.push(`${b} ${u}`);
-                      }
-                   }
-                }
-                const dateObj = new Date(t.date);
-                const dateStr = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID');
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                   <td>${t.id}</td>
-                   <td>${dateStr}</td>
-                   <td>${cls}</td>
-                   <td><small>${babStr.join(', ')}</small></td>
-                   <td>
-                      <button class="btn" style="padding:6px 12px; margin-bottom:5px;" onclick="viewTaskResults('${t.id}', '${cls}', '${babStr.join(', ')}')">Lihat Hasil</button>
-                      <button class="btn copy-btn" style="padding:6px 12px; color:red; border-color:red;" onclick="deleteTask('${t.id}')">Hapus</button>
-                   </td>
-                `;
-                tbody.appendChild(tr);
+             window.allHistoryTasks = d.data.reverse();
+             
+             const filterSelect = document.getElementById('history-teacher-filter');
+             const currentVal = filterSelect.value;
+             filterSelect.innerHTML = '<option value="ALL">Semua Guru</option>';
+             const teacherSet = new Set();
+             
+             window.allHistoryTasks.forEach(t => {
+                try {
+                   const payload = JSON.parse(t.payload);
+                   if (payload.guru) teacherSet.add(payload.guru);
+                } catch(e) {}
              });
+             
+             for (const t in DB_TEACHERS) {
+                 teacherSet.add(t);
+             }
+             
+             Array.from(teacherSet).sort().forEach(tName => {
+                 const opt = document.createElement('option');
+                 opt.value = tName;
+                 opt.textContent = tName;
+                 filterSelect.appendChild(opt);
+             });
+             if(teacherSet.has(currentVal)) filterSelect.value = currentVal;
+             
+             renderHistoryTable();
           }
        } catch (err) {
           console.error(err);
           alert("Gagal memuat riwayat tugas.");
        }
        hideLoading();
+    }
+    
+    function renderHistoryTable() {
+       const tbody = document.getElementById('task-list-body');
+       tbody.innerHTML = '';
+       if (!window.allHistoryTasks) return;
+       
+       const filterGuru = document.getElementById('history-teacher-filter').value;
+       
+       window.allHistoryTasks.forEach(t => {
+          let payload = {};
+          try { payload = JSON.parse(t.payload); } catch(e) {}
+          const cls = payload.cls || '-';
+          const guru = payload.guru || '-';
+          
+          if (filterGuru !== 'ALL' && guru !== filterGuru) return;
+          
+          let babStr = [];
+          if(payload.v) {
+             for(const b in payload.v) {
+                for(const u in payload.v[b]) {
+                   babStr.push(`${b} ${u}`);
+                }
+             }
+          }
+          const dateObj = new Date(t.date);
+          const dateStr = dateObj.toLocaleDateString('id-ID');
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+             <td>${dateStr}</td>
+             <td>${guru}</td>
+             <td>${cls}</td>
+             <td><small>${babStr.join(', ')}</small></td>
+             <td>
+                <button class="btn" style="padding:6px 12px; margin-bottom:5px;" onclick="viewTaskResults('${t.id}', '${cls}', '${babStr.join(', ')}')">Lihat Hasil</button>
+                <button class="btn copy-btn" style="padding:6px 12px; color:red; border-color:red;" onclick="deleteTask('${t.id}')">Hapus</button>
+             </td>
+          `;
+          tbody.appendChild(tr);
+       });
     }
     
     async function viewTaskResults(id, cls, babInfo) {
