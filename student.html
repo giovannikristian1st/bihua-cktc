@@ -163,6 +163,20 @@
 
     .mistake-counter { margin-top: 15px; color: #ef4444; font-weight: bold; font-size: 0.9rem; }
 
+    /* ── Drawing Controls ── */
+    .controls {
+      display: flex; gap: 15px; justify-content: center;
+      margin-top: 25px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto;
+    }
+    .controls .btn.action {
+      width: 60px; height: 60px; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+    }
+    .controls svg {
+      width: 28px; height: 28px;
+    }
+
     /* ── Typing Screen ── */
     #screen-typing { background: var(--bg-body); }
     .typing-card {
@@ -248,9 +262,37 @@
       <button id="start-btn" class="btn" disabled>Mulai Mengerjakan</button>
     </div>
   </div>
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen hidden">
+    <div class="header">
+      <div class="student-name-display" id="display-name"></div>
+      <div class="progress-text" id="progress-text"></div>
+    </div>
+    
+    <div class="game-area">
+      <div class="char-info">
+        <div id="full-word-context" style="font-size: 1.8rem; margin-bottom: 5px; font-weight: bold; color: var(--text-main);"></div>
+        <div class="char-pinyin" id="char-pinyin"></div>
+        <div class="char-meaning" id="char-meaning"></div>
+      </div>
+      
+      <div class="writer-container" id="writer-container">
+        <div id="writer-target"></div>
+      </div>
+      
+      <div class="mistake-counter" id="mistake-counter" style="display:none;"></div>
+      
+      <div class="rep-dots" id="rep-dots"></div>
+    </div>
+    
+    <div class="controls">
 
-  
-  
+      <button class="btn action" id="btn-next" title="Next Stroke" style="display:none;">
+        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+      </button>
+      <button class="btn" id="btn-next-word" style="display:none; width:100%; margin-left:10px;">Lanjut</button>
+    </div>
+  </div>
 
   <!-- TYPING SCREEN -->
   <div id="screen-typing" class="screen hidden">
@@ -568,6 +610,10 @@
           themeList.classList.remove('show');
        }
     });
+
+
+    document.getElementById('btn-next').addEventListener('click', () => checkTypingAndNext());
+    document.getElementById('btn-next-word').addEventListener('click', () => checkTypingAndNext());
 
     // Check Start Button
     function checkStartBtn() {
@@ -1066,11 +1112,15 @@
        let sortedData = [...currentLeaderboardData];
        if (currentLbMode === 'time') {
            // Sort by fastestTime ascending. Exclude 0 unless everyone is 0.
-           sortedData = sortedData.filter(u => u.fastestTime > 0);
-           sortedData.sort((a, b) => a.fastestTime - b.fastestTime);
+           sortedData = sortedData.filter(u => (u.fastestTime || 0) > 0);
+           sortedData.sort((a, b) => (a.fastestTime || 0) - (b.fastestTime || 0));
        } else {
            // Sort by completions descending
-           sortedData.sort((a, b) => b.completions - a.completions);
+           sortedData.sort((a, b) => {
+               const compA = a.completions !== undefined ? a.completions : (a.count || 0);
+               const compB = b.completions !== undefined ? b.completions : (b.count || 0);
+               return compB - compA;
+           });
        }
        
        if (sortedData.length === 0) {
@@ -1088,7 +1138,8 @@
           else if(rankStr === 2) rankStr = '🥈';
           else if(rankStr === 3) rankStr = '🥉';
           
-          let statStr = currentLbMode === 'time' ? formatDuration(user.fastestTime) : `${user.completions}x Selesai`;
+          let completions = user.completions !== undefined ? user.completions : (user.count || 0);
+          let statStr = currentLbMode === 'time' ? formatDuration(user.fastestTime || 0) : `${completions}x Selesai`;
           
           div.innerHTML = `
              <div class="lb-rank">${rankStr}</div>
