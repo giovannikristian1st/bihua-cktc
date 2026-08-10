@@ -360,61 +360,6 @@
     ];
     let selectedTheme = 'theme-normal';
     document.body.className = selectedTheme;
-    
-    function renderThemeOptions() {
-       const grid = document.getElementById('theme-grid');
-       grid.innerHTML = '';
-       THEMES.forEach(t => {
-          const btn = document.createElement('div');
-          btn.className = 'theme-btn';
-          if(t.id === selectedTheme) btn.classList.add('active');
-          btn.innerHTML = `
-             <div class="color-preview" style="background: ${t.color}"></div>
-             <span>${t.name}</span>
-          `;
-          btn.onclick = () => {
-             document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-             btn.classList.add('active');
-             selectedTheme = t.id;
-             document.body.className = selectedTheme; // Live preview
-          };
-          grid.appendChild(btn);
-       });
-    }
-    
-    
-    
-    document.getElementById('btn-save-theme').addEventListener('click', () => {
-       const btn = document.getElementById('btn-save-theme');
-       btn.disabled = true;
-       btn.textContent = 'Menyimpan...';
-       
-       fetch(gasUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'saveStudentTheme', cls: assignmentData.cls || "Umum", name: studentName, theme: selectedTheme })
-       }).then(() => {
-          btn.disabled = false;
-          btn.textContent = 'Simpan & Mulai';
-          
-          // Kembali ke game jika sudah login
-          if (tasks.length > 0) {
-             document.getElementById('screen-game').classList.remove('hidden');
-          } else {
-             // If accessed before game starts
-             loadWord();
-             document.getElementById('screen-game').classList.remove('hidden');
-          }
-       }).catch(() => {
-          btn.disabled = false;
-          btn.textContent = 'Simpan & Mulai';
-          // tetep masuk game aja kalau error
-          
-          if (tasks.length === 0) loadWord();
-          document.getElementById('screen-game').classList.remove('hidden');
-       });
-    });
 
 
     let gasUrl = APP_CONFIG.GOOGLE_APPS_SCRIPT_URL;
