@@ -276,20 +276,7 @@
             </tbody>
          </table>
        </div>
-       <h3 style="margin-top:25px; margin-bottom:10px; color:var(--primary);">🏆 Papan Peringkat (Leaderboard)</h3>
-       <div style="overflow-x:auto;">
-         <table class="data-table">
-            <thead>
-               <tr style="background:#F59E0B; color:white;">
-                  <th style="border-radius:8px 0 0 0;">Peringkat</th>
-                  <th>Nama Murid</th>
-                  <th style="border-radius:0 8px 0 0;">Total Kesalahan</th>
-               </tr>
-            </thead>
-            <tbody id="task-leaderboard-body">
-            </tbody>
-         </table>
-       </div>
+
     </div>
   </div>
 
@@ -397,12 +384,14 @@
         if(saved) {
             try {
                 const state = JSON.parse(saved);
-                if(state.kelas) document.getElementById('class-select').value = state.kelas;
-                if(state.repetition) document.getElementById('repetition').value = state.repetition;
-                if(state.pinyin !== undefined) document.getElementById('require-pinyin').checked = state.pinyin;
-                if(state.meaning !== undefined) document.getElementById('require-meaning').checked = state.meaning;
-                if(state.teacherName) { const tn = document.getElementById('teacher-name'); if(tn) tn.value = state.teacherName; }
-                if(state.filterGuru) document.getElementById('history-teacher-filter').value = state.filterGuru;
+                const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+                const safeCheck = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
+                if(state.kelas) safeSet('class-select', state.kelas);
+                if(state.repetition) safeSet('repetition', state.repetition);
+                if(state.pinyin !== undefined) safeCheck('require-pinyin', state.pinyin);
+                if(state.meaning !== undefined) safeCheck('require-meaning', state.meaning);
+                if(state.teacherName) safeSet('teacher-name', state.teacherName);
+                if(state.filterGuru) safeSet('history-teacher-filter', state.filterGuru);
                 
                 if(state.selectedVocabs && typeof state.selectedVocabs === 'object') {
                     try {
@@ -415,7 +404,7 @@
                 if(state.activeView && ['view-dashboard','view-history','view-options'].includes(state.activeView)) {
                     showView(state.activeView);
                 }
-            } catch(e) {}
+            } catch(e) { console.error('restoreTeacherState error:', e); }
         }
     }
 
@@ -1024,9 +1013,6 @@
              lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray;">Belum ada yang masuk papan peringkat untuk tugas ini.</td></tr>';
           }
        } catch (e) {
-          lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat papan peringkat. Pastikan koneksi lancar.</td></tr>';
-       }
-    } catch (e) {
           lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat papan peringkat. Pastikan koneksi lancar.</td></tr>';
        }
     }
