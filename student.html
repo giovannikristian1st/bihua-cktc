@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Brush Master - Tugas Murid</title>
+  <link rel="stylesheet" href="themes.css">
   
   <script src="hanzi-writer.min.js"></script>
   <script src="brushstrokedb.js"></script>
@@ -12,152 +13,192 @@
   <script src="students.js"></script>
   <script src="config.js"></script>
   
+  
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background:#F9FAFB;
-      color:#0E1318;
-      font-family: 'Times New Roman', Times, 'Kaiti', 'KaiTi', STKaiti, serif;
+      background: var(--bg-body);
+      color: var(--text-main);
+      font-family: var(--font-family);
       height:100vh;
       overflow:hidden;
       display:flex;
       flex-direction:column;
+      transition: background 0.3s, color 0.3s;
     }
     .hidden { display:none !important; }
     
     /* ── Screens ── */
-    .screen { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:1; background:#F9FAFB; padding: 20px;}
+    .screen { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:1; background:var(--bg-body); padding: 20px;}
     
     /* ── Login Screen ── */
     .login-card {
-      background:#FFFFFF;
-      padding:30px; border-radius:16px;
+      background: var(--bg-card);
+      padding:30px; border-radius: var(--border-radius);
       width:100%; max-width:400px;
       text-align:center;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s;
     }
-    .login-card h2 { margin-bottom: 20px; color: #8B3DFF; }
+    .login-card h2 { margin-bottom: 20px; color: var(--primary); }
     select.student-select {
-      width:100%; padding:12px; border-radius:8px;
-      background:#FFFFFF; color:#0E1318; border:1px solid #E5E7EB;
+      width:100%; padding:12px; border-radius:var(--btn-radius);
+      background: var(--bg-card); color: var(--text-main); border:1px solid var(--border-color);
       font-size:1.1rem; margin-bottom: 20px; outline:none; transition: border-color 0.2s;
     }
-    select.student-select:focus { border-color: #8B3DFF; }
+    select.student-select:focus { border-color: var(--primary); }
+    
     .btn {
       width:100%; padding:14px;
-      background:linear-gradient(135deg,#00C4CC,#8B3DFF);
-      color:#FFFFFF; font-weight:bold; font-size:1.1rem;
-      border:none; border-radius:8px; cursor:pointer;
+      background: var(--primary-gradient);
+      color: #FFFFFF; font-weight:bold; font-size:1.1rem;
+      border:none; border-radius: var(--btn-radius); cursor:pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(139,61,255,0.2);
+      box-shadow: var(--btn-shadow);
     }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(139,61,255,0.3); }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Theme Select Screen ── */
+    #screen-theme { overflow-y: auto; display: block; padding-top: 50px; }
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+      margin-bottom: 30px;
+    }
+    .theme-btn {
+      padding: 15px 10px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .theme-btn:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--card-shadow); }
+    .theme-btn.active { border-color: var(--primary); background: var(--primary-gradient); color: white; }
+    
+    .color-preview { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
     /* ── Game Screen ── */
     #screen-game { justify-content: flex-start; padding: 0; }
     
     .header {
       width: 100%; padding: 15px 20px;
-      background: #FFFFFF;
+      background: var(--bg-card);
       display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #E5E7EB;
+      border-bottom: 1px solid var(--border-color);
       flex-shrink: 0;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      box-shadow: var(--card-shadow);
     }
-    .student-name-display { font-weight: bold; color: #8B3DFF; }
-    .progress-text { color: #5E6A75; font-size: 0.9rem;}
+    .student-name-display { font-weight: bold; color: var(--primary); }
+    .progress-text { color: var(--text-muted); font-size: 0.9rem;}
 
     .game-area {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       width: 100%; padding: 20px;
+      overflow-y: auto;
     }
 
-    .char-info {
-      text-align: center; margin-bottom: 20px;
-    }
-    .char-pinyin { font-size: 1.5rem; color: #00C4CC; letter-spacing: 2px; font-weight: bold; }
-    .char-meaning { font-size: 1rem; color: #5E6A75; margin-top: 5px; }
+    .char-info { text-align: center; margin-bottom: 20px; }
+    .char-pinyin { font-size: 1.5rem; color: var(--primary-dark); letter-spacing: 2px; font-weight: bold; }
+    .char-meaning { font-size: 1rem; color: var(--text-muted); margin-top: 5px; }
 
-    .writer-container {
-      margin: 0 auto;
-      text-align: center;
-      position: relative;
-    }
+    .writer-container { margin: 0 auto; text-align: center; position: relative; }
     #writer-target {
-      position: relative;
-      display: inline-block;
-      width: 400px;
-      height: 400px;
-      background: #FFFFFF;
-      border-radius: 12px;
-      border: 1px solid #E5E7EB;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      position: relative; display: inline-block;
+      width: 400px; height: 400px;
+      background: #FFFFFF; /* Canvas is always white for contrast */
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
       transform-origin: top center;
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); border-color: #E5E7EB; }
+      0%, 100% { transform: translateX(0); border-color: var(--border-color); }
       20%, 60% { transform: translateX(-8px); border-color: #ef4444; }
       40%, 80% { transform: translateX(8px); border-color: #ef4444; }
     }
-    .shake-error {
-      animation: shake 0.5s ease-in-out;
-    }
+    .shake-error { animation: shake 0.5s ease-in-out; }
 
-    .rep-dots {
-      display: flex; gap: 8px; justify-content: center; margin-top: 20px;
-    }
+    .rep-dots { display: flex; gap: 8px; justify-content: center; margin-top: 20px; }
     .dot {
       width: 12px; height: 12px; border-radius: 50%;
-      border: 2px solid #00C4CC;
+      border: 2px solid var(--primary-dark);
     }
-    .dot.filled { background: #00C4CC; }
+    .dot.filled { background: var(--primary-dark); }
 
-    .mistake-counter {
-      margin-top: 15px; color: #ef4444; font-weight: bold; font-size: 0.9rem;
-    }
+    .mistake-counter { margin-top: 15px; color: #ef4444; font-weight: bold; font-size: 0.9rem; }
 
     /* ── Typing Screen ── */
-    #screen-typing { background:#F9FAFB; }
+    #screen-typing { background: var(--bg-body); }
     .typing-card {
-      background:#FFFFFF;
-      padding:30px; border-radius:16px; width:100%; max-width:400px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08); text-align:center;
+      background: var(--bg-card);
+      padding:30px; border-radius:var(--border-radius); width:100%; max-width:400px;
+      box-shadow: var(--card-shadow); text-align:center; border: 1px solid var(--border-color);
     }
-    .typing-card h3 { color:#0E1318; margin-bottom:20px; font-size:1.4rem; }
+    .typing-card h3 { color: var(--text-main); margin-bottom:20px; font-size:1.4rem; }
     
-    .typing-context { margin-bottom: 25px; padding: 15px; background: #F3F4F6; border-radius: 12px; }
-    .typing-context-char { font-size: 2.5rem; font-weight: bold; color: #8B3DFF; margin-bottom: 5px; }
-    .typing-context-pinyin { font-size: 1.1rem; color: #4B5563; font-family: sans-serif; }
-    .typing-context-meaning { font-size: 1.1rem; color: #4B5563; margin-top: 2px; font-family: sans-serif; }
+    .typing-context { margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: var(--border-radius); }
+    .typing-context-char { font-size: 2.5rem; font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+    .typing-context-pinyin { font-size: 1.1rem; color: var(--text-muted); font-family: sans-serif; }
+    .typing-context-meaning { font-size: 1.1rem; color: var(--text-muted); margin-top: 2px; font-family: sans-serif; }
 
     .typing-group { margin-bottom: 20px; text-align:left; }
-    .typing-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    .typing-group input { width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 8px; }
+    .typing-group label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--text-main); }
+    .typing-group input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--btn-radius); background: var(--bg-body); color: var(--text-main); outline: none; }
+    .typing-group input:focus { border-color: var(--primary); }
     .typing-error { color: #ef4444; font-size: 0.8rem; margin-top: 5px; display: none; }
 
     /* ── Finish Screen ── */
     .finish-card {
-      background:#FFFFFF;
-      padding:40px; border-radius:16px;
+      background: var(--bg-card);
+      padding:40px; border-radius:var(--border-radius);
       width:100%; max-width:400px;
-      text-align:center;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      text-align:center; border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
     }
-    .finish-card h2 { font-size: 2.5rem; color: #00C4CC; margin-bottom: 10px; }
-    .status-text { margin: 20px 0; font-size: 1.1rem; color: #5E6A75; }
+    .finish-card h2 { font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 10px; }
+    .status-text { margin: 20px 0; font-size: 1.1rem; color: var(--text-muted); }
+    
     .loader {
-      border: 4px solid #E5E7EB; border-top: 4px solid #8B3DFF;
+      border: 4px solid var(--border-color); border-top: 4px solid var(--primary);
       border-radius: 50%; width: 40px; height: 40px;
       animation: spin 1s linear infinite; margin: 0 auto;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
+    
+    /* ── Leaderboard ── */
+    .lb-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 15px; background: rgba(0,0,0,0.05); border-radius: var(--btn-radius); margin-bottom: 8px;
+      text-align: left; font-family: sans-serif; font-size: 0.95rem; border: 1px solid transparent;
+      color: var(--text-main);
+    }
+    .lb-item.me {
+      background: rgba(139, 61, 255, 0.1); border: 1px solid var(--primary); font-weight: bold;
+    }
+    .lb-rank { font-weight: bold; width: 30px; color: var(--text-muted); }
+    .lb-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
+    .lb-count { font-weight: bold; color: var(--primary-dark); }
+    
+    /* Options Gear */
+    .options-btn {
+       position: absolute; top: 15px; right: 20px;
+       background: transparent; border: none; font-size: 1.5rem; cursor: pointer;
+       z-index: 10; color: var(--primary);
+    }
   </style>
+
 </head>
-<body>
+<body class="theme-normal">
 
   <!-- LOGIN SCREEN -->
   <div id="screen-login" class="screen">
@@ -173,8 +214,24 @@
     </div>
   </div>
 
+  
+  <!-- THEME SELECTION SCREEN -->
+  <div id="screen-theme" class="screen hidden" style="justify-content: flex-start; padding-top: 40px;">
+    <div style="max-width: 800px; width: 100%; text-align: center;">
+      <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px;">Pilih Gaya Visualmu</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Gaya yang kamu pilih akan disimpan dan diaplikasikan pada setiap tugas berikutnya.</p>
+      
+      <div class="theme-grid" id="theme-grid">
+         <!-- Theme buttons injected via JS -->
+      </div>
+      
+      <button class="btn" id="btn-save-theme" style="max-width: 300px; margin: 0 auto; display: block;">Simpan & Mulai</button>
+    </div>
+  </div>
+
   <!-- GAME SCREEN -->
   <div id="screen-game" class="screen hidden">
+    <button class="options-btn" id="btn-open-options" title="Ganti Tema">⚙️</button>
     <div class="header">
       <div class="student-name-display" id="display-name">Nama Murid</div>
       <div class="progress-text" id="progress-text">Kata 1 / 5</div>
@@ -224,11 +281,31 @@
   <!-- FINISH SCREEN -->
   <div id="screen-finish" class="screen hidden">
     <div class="finish-card">
-      <h2>Selesai!</h2>
-      <p>Kamu telah menyelesaikan semua tugas.</p>
-      <div class="status-text" id="submit-status">
-        <div class="loader"></div>
-        <p style="margin-top:10px;">Mengirim data ke guru...</p>
+      <div id="finish-content">
+        <h2>Selesai!</h2>
+        <p>Kamu telah menyelesaikan semua tugas.</p>
+        <div class="status-text" id="submit-status">
+          <div class="loader"></div>
+          <p style="margin-top:10px;">Mengirim data ke guru...</p>
+        </div>
+        
+        <div id="finish-options" style="display:none; margin-top: 20px; flex-direction: column; gap: 12px;">
+          <button class="btn" id="btn-show-leaderboard" style="background:#00C4CC;">🏆 Papan Peringkat</button>
+          <button class="btn" id="btn-restart" style="background:#FFA500;">🔄 Kerjakan Lagi</button>
+          <button class="btn" id="btn-close" style="background:#ef4444;">🚪 Selesai</button>
+        </div>
+        
+        <div id="leaderboard-section" style="display:none; margin-top: 25px;">
+          <h3 style="color: #8B3DFF; margin-bottom: 15px; font-family: sans-serif;">🏆 Papan Peringkat Kelas</h3>
+          <div id="leaderboard-list" style="max-height: 220px; overflow-y: auto; padding-right: 5px;">
+             <!-- items populated by JS -->
+          </div>
+        </div>
+      </div>
+      
+      <div id="thank-you-msg" style="display:none; margin-top: 10px; padding: 20px 0;">
+        <h1 style="font-size: 6rem; color: #8B3DFF; margin: 0; line-height: 1;">感恩</h1>
+        <p style="font-size: 1.8rem; color: #5E6A75; margin-top: 10px; font-weight: bold;">gǎn ēn</p>
       </div>
     </div>
   </div>
@@ -260,6 +337,90 @@
     const startBtn = document.getElementById('start-btn');
     const loginInfo = document.getElementById('login-info');
 
+    // --- THEMES CONFIG ---
+    const THEMES = [
+      { id: 'theme-normal', name: 'Normal', color: '#8B3DFF' },
+      { id: 'theme-cyberpunk', name: 'Cyberpunk', color: '#F3E600' },
+      { id: 'theme-minimalist', name: 'Minimalist', color: '#000000' },
+      { id: 'theme-neobrutalism', name: 'Neo-Brutalism', color: '#FF4911' },
+      { id: 'theme-vaporwave', name: 'Vaporwave', color: '#05FFA1' },
+      { id: 'theme-glassmorphism', name: 'Glassmorphism', color: '#E94560' },
+      { id: 'theme-retrofuturism', name: 'Retrofuturism', color: '#F1C40F' },
+      { id: 'theme-pixel', name: 'Retro Pixel', color: '#FF0000' },
+      { id: 'theme-gothic', name: 'Dark Gothic', color: '#8B0000' },
+      { id: 'theme-esports', name: 'Esports Clean', color: '#E11D48' },
+      { id: 'theme-flatvector', name: 'Flat Cozy', color: '#F28C38' },
+      { id: 'theme-skeuomorphic', name: 'Skeuomorphic', color: '#4CAF50' },
+      { id: 'theme-grimdark', name: 'Grimdark', color: '#556B2F' },
+      { id: 'theme-anime', name: 'Anime Cel', color: '#FF69B4' },
+      { id: 'theme-corporate', name: 'Corporate', color: '#0056B3' },
+      { id: 'theme-synthwave', name: 'Synthwave', color: '#FF00FF' }
+    ];
+    let selectedTheme = 'theme-normal';
+    document.body.className = selectedTheme;
+    
+    function renderThemeOptions() {
+       const grid = document.getElementById('theme-grid');
+       grid.innerHTML = '';
+       THEMES.forEach(t => {
+          const btn = document.createElement('div');
+          btn.className = 'theme-btn';
+          if(t.id === selectedTheme) btn.classList.add('active');
+          btn.innerHTML = `
+             <div class="color-preview" style="background: ${t.color}"></div>
+             <span>${t.name}</span>
+          `;
+          btn.onclick = () => {
+             document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+             btn.classList.add('active');
+             selectedTheme = t.id;
+             document.body.className = selectedTheme; // Live preview
+          };
+          grid.appendChild(btn);
+       });
+    }
+    
+    document.getElementById('btn-open-options').addEventListener('click', () => {
+       document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+       document.getElementById('screen-theme').classList.remove('hidden');
+       renderThemeOptions();
+    });
+    
+    document.getElementById('btn-save-theme').addEventListener('click', () => {
+       const btn = document.getElementById('btn-save-theme');
+       btn.disabled = true;
+       btn.textContent = 'Menyimpan...';
+       
+       fetch(gasUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'saveStudentTheme', cls: assignmentData.cls || "Umum", name: studentName, theme: selectedTheme })
+       }).then(() => {
+          btn.disabled = false;
+          btn.textContent = 'Simpan & Mulai';
+          document.getElementById('screen-theme').classList.add('hidden');
+          // Kembali ke game jika sudah login
+          if (tasks.length > 0) {
+             document.getElementById('screen-game').classList.remove('hidden');
+          } else {
+             // If accessed before game starts
+             loadWord();
+             document.getElementById('screen-game').classList.remove('hidden');
+          }
+       }).catch(() => {
+          btn.disabled = false;
+          btn.textContent = 'Simpan & Mulai';
+          // tetep masuk game aja kalau error
+          document.getElementById('screen-theme').classList.add('hidden');
+          if (tasks.length === 0) loadWord();
+          document.getElementById('screen-game').classList.remove('hidden');
+       });
+    });
+
+
+    let gasUrl = APP_CONFIG.GOOGLE_APPS_SCRIPT_URL;
+
     function formatPinyin(py) {
       if (!py || py.includes(' ')) return py;
       const pinyinRegex = /(?:zh|ch|sh|b|p|m|f|d|t|n|l|g|k|h|j|q|x|r|z|c|s|y|w)?(?:[aeiouüvāáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜ]+)(?:ng|n|r)?/ig;
@@ -272,13 +433,43 @@
     window.onload = () => {
       const params = new URLSearchParams(window.location.search);
       const dataParam = params.get('data');
-      if(!dataParam) {
-        loginInfo.textContent = "Error: Link tugas tidak valid (Data kosong).";
-        return;
+      const idParam = params.get('id');
+      const gParam = params.get('g');
+      
+      if (gParam) {
+          gasUrl = `https://script.google.com/macros/s/${gParam}/exec`;
       }
-
+      
+      if(idParam) {
+         loginInfo.textContent = "Memuat tugas...";
+         fetch(`${gasUrl}?action=getLink&id=${idParam}`)
+           .then(res => res.json())
+           .then(resData => {
+              if (resData.status === 'success' && resData.payload) {
+                 processAssignmentData(resData.payload, true);
+              } else {
+                 throw new Error(resData.message || "Link tugas tidak ditemukan.");
+              }
+           })
+           .catch(err => {
+              loginInfo.textContent = "Error: " + err.message;
+              console.error(err);
+           });
+      } else if (dataParam) {
+         processAssignmentData(dataParam, false);
+      } else {
+         loginInfo.textContent = "Error: Link tugas tidak valid (Data kosong).";
+      }
+    };
+    
+    function processAssignmentData(payloadStr, isPlainJson) {
       try {
-        const decoded = decodeURIComponent(escape(atob(dataParam)));
+        let decoded;
+        if (isPlainJson) {
+           decoded = payloadStr;
+        } else {
+           decoded = decodeURIComponent(escape(atob(payloadStr)));
+        }
         assignmentData = JSON.parse(decoded);
         repetitions = assignmentData.r || 1;
         
@@ -374,7 +565,7 @@
         loginInfo.textContent = "Error: Link tugas rusak atau tidak valid.";
         console.error(e);
       }
-    };
+    }
 
     studentSelect.addEventListener('change', () => {
       startBtn.disabled = !studentSelect.value || !assignmentData;
@@ -433,7 +624,7 @@
       const target = document.getElementById('writer-target');
       
       // Use native sizing for HanziWriter so pointer coordinates are accurate
-      const size = Math.min(400, window.innerWidth - 40);
+      const size = Math.min(400, window.innerWidth - 60); // Dikurangi 60px agar aman dari padding/border di layar HP
       target.style.transform = 'none'; // Ensure no CSS scaling
       target.style.width = size + 'px';
       target.style.height = size + 'px';
@@ -555,6 +746,21 @@
       }
     }
 
+    function finishGame() {
+      screenGame.classList.add('hidden');
+      screenFinish.classList.remove('hidden');
+      document.getElementById('finish-content').style.display = 'block';
+      document.getElementById('thank-you-msg').style.display = 'none';
+      document.getElementById('finish-options').style.display = 'none';
+      document.getElementById('leaderboard-section').style.display = 'none';
+      
+      document.getElementById('submit-status').innerHTML = `
+        <div class="loader"></div>
+        <p style="margin-top:10px;">Mengirim data ke guru...</p>
+      `;
+      submitData();
+    }
+
     function showTypingModal(task) {
       screenGame.classList.add('hidden');
       screenTyping.classList.remove('hidden');
@@ -641,50 +847,136 @@
       }
     }
 
-    function finishGame() {
-      screenGame.classList.add('hidden');
-      screenFinish.classList.remove('hidden');
-      submitData();
-    }
-
     function submitData() {
       const statusEl = document.getElementById('submit-status');
       
       const payload = {
-        cls: assignmentData.cls,
-        studentName: studentName,
-        totalWords: tasks.length,
-        assignment: { words: tasks.map(t => t.char), repetitions: repetitions },
-        mistakes: mistakesMap,
-        status: "Selesai"
+         action: "submit",
+         cls: assignmentData.cls || "Tidak diketahui",
+         studentName: studentName,
+         totalWords: tasks.length,
+         assignment: {
+            words: tasks.filter(t => t.isLastCharInWord).map(t => t.fullWord || t.char),
+            repetitions: repetitions
+         },
+         mistakes: mistakesMap,
+         status: "Selesai"
       };
 
-      const url = APP_CONFIG.GOOGLE_APPS_SCRIPT_URL;
-      
-      if(url.includes("SILAKAN_GANTI")) {
+      if(gasUrl.includes("SILAKAN_GANTI")) {
         statusEl.innerHTML = `<p style="color:#ef4444;">❌ Pengiriman gagal: URL Google Apps Script belum diatur oleh Guru (di config.js).</p>`;
         return;
       }
-
-      // Send via text/plain to avoid CORS preflight options request on Google Apps Script
-      fetch(url, {
-        method: 'POST',
-        mode: 'no-cors', // Mencegah error CORS karena Google Apps Script redirect
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        // Karena no-cors, response bersifat opaque (tidak bisa dibaca/dikonversi ke json).
-        // Kita asumsikan sukses karena POST request sudah terkirim ke server Google.
-        statusEl.innerHTML = `<p style="color:#00C4CC; font-size:1.2rem; font-weight:bold;">✔️ Nilai berhasil dikirim ke Guru!</p>`;
-      })
-      .catch(error => {
-        statusEl.innerHTML = `<p style="color:#ef4444;">❌ Gagal mengirim: Pastikan Anda terhubung ke internet.</p>`;
-        console.error(error);
+      
+      fetch(gasUrl, {
+         method: 'POST',
+         mode: 'no-cors',
+         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+         body: JSON.stringify(payload)
+      }).then(() => {
+         statusEl.innerHTML = `
+           <div style="color: #10B981; font-size: 3rem; margin-bottom: 10px;">✓</div>
+           <p style="color: #10B981; font-weight: bold;">Tugas berhasil dikirim!</p>
+         `;
+         document.getElementById('finish-options').style.display = 'flex';
+         fetchLeaderboard(); // Ambil di background
+      }).catch(err => {
+         statusEl.innerHTML = `
+           <div style="color: #ef4444; font-size: 3rem; margin-bottom: 10px;">✗</div>
+           <p style="color: #ef4444; font-weight: bold;">Gagal mengirim data.</p>
+           <p style="font-size: 0.9rem;">Pastikan internet lancar.</p>
+         `;
+         document.getElementById('finish-options').style.display = 'flex';
       });
     }
+
+    function fetchLeaderboard() {
+       if (!assignmentData.cls) return; 
+       
+       const payload = {
+          action: "getLeaderboard",
+          cls: assignmentData.cls
+       };
+       
+       fetch(gasUrl, {
+         method: 'POST',
+         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+         body: JSON.stringify(payload)
+       })
+       .then(response => response.json())
+       .then(data => {
+          if (data.status === "success" && data.leaderboard) {
+             renderLeaderboard(data.leaderboard);
+          }
+       })
+       .catch(err => {
+          console.error("Gagal memuat leaderboard", err);
+          const pLoad = document.getElementById('submit-status').querySelector('p:last-child');
+          if(pLoad) pLoad.textContent = "";
+       });
+    }
+    
+    function renderLeaderboard(board) {
+       const pLoad = document.getElementById('submit-status').querySelector('p:last-child');
+       if(pLoad) pLoad.style.display = 'none'; 
+       
+       const section = document.getElementById('leaderboard-section');
+       const list = document.getElementById('leaderboard-list');
+       
+       list.innerHTML = "";
+       if (board.length === 0) {
+          list.innerHTML = "<p style='color: #5E6A75;'>Belum ada data.</p>";
+       } else {
+          board.forEach((user, idx) => {
+             const div = document.createElement('div');
+             div.className = 'lb-item';
+             if (user.name === studentName) div.classList.add('me');
+             
+             let medal = (idx + 1) + ".";
+             if (idx === 0) medal = "🥇";
+             else if (idx === 1) medal = "🥈";
+             else if (idx === 2) medal = "🥉";
+             
+             div.innerHTML = `
+                <div class="lb-rank">${medal}</div>
+                <div class="lb-name">${user.name}</div>
+                <div class="lb-count">${user.count}x</div>
+             `;
+             list.appendChild(div);
+          });
+       }
+       // Tidak usah langsung ubah style block di sini, tunggu ditekan tombolnya
+    }
+
+    // Event Listeners Opsi Selesai
+    document.getElementById('btn-show-leaderboard').addEventListener('click', () => {
+       const section = document.getElementById('leaderboard-section');
+       if (section.style.display === 'none') {
+          section.style.display = 'block';
+       } else {
+          section.style.display = 'none';
+       }
+    });
+
+    document.getElementById('btn-restart').addEventListener('click', () => {
+       screenFinish.classList.add('hidden');
+       screenGame.classList.remove('hidden');
+       
+       currentTaskIndex = 0;
+       currentRepIndex = 0;
+       drawnChars.clear();
+       currentWordMistakes = 0;
+       
+       mistakesMap = {};
+       tasks.forEach(t => mistakesMap[t.char] = 0);
+       
+       loadWord();
+    });
+
+    document.getElementById('btn-close').addEventListener('click', () => {
+       document.getElementById('finish-content').style.display = 'none';
+       document.getElementById('thank-you-msg').style.display = 'block';
+    });
 
   </script>
 </body>

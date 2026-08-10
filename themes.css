@@ -1,0 +1,293 @@
+
+/* 
+   BRUSH MASTER DYNAMIC THEMES
+   16 Styles implementation
+*/
+
+/* 1. NORMAL (Default) */
+.theme-normal {
+    --bg-body: #F9FAFB;
+    --bg-card: #FFFFFF;
+    --text-main: #0E1318;
+    --text-muted: #5E6A75;
+    --primary: #8B3DFF;
+    --primary-dark: #00C4CC;
+    --primary-gradient: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    --border-color: #E5E7EB;
+    --card-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    --btn-shadow: 0 4px 12px rgba(139,61,255,0.2);
+    --border-radius: 16px;
+    --btn-radius: 8px;
+    --font-family: 'Times New Roman', Times, 'Kaiti', 'KaiTi', STKaiti, serif;
+}
+
+/* 2. CYBERPUNK */
+.theme-cyberpunk {
+    --bg-body: #0B0C10;
+    --bg-card: #1F2833;
+    --text-main: #66FCF1;
+    --text-muted: #C5C6C7;
+    --primary: #F3E600;
+    --primary-dark: #FF003C;
+    --primary-gradient: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    --border-color: #45A29E;
+    --card-shadow: 0 0 15px rgba(102, 252, 241, 0.3);
+    --btn-shadow: 0 0 20px rgba(243, 230, 0, 0.5);
+    --border-radius: 0px;
+    --btn-radius: 0px;
+    --font-family: 'Courier New', Courier, monospace;
+}
+
+/* 3. MINIMALIST */
+.theme-minimalist {
+    --bg-body: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --text-main: #000000;
+    --text-muted: #666666;
+    --primary: #000000;
+    --primary-dark: #333333;
+    --primary-gradient: #000000;
+    --border-color: #DDDDDD;
+    --card-shadow: none;
+    --btn-shadow: none;
+    --border-radius: 0px;
+    --btn-radius: 0px;
+    --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 4. NEO-BRUTALISM */
+.theme-neobrutalism {
+    --bg-body: #FFF8E7;
+    --bg-card: #FFFFFF;
+    --text-main: #000000;
+    --text-muted: #333333;
+    --primary: #FF4911;
+    --primary-dark: #000000;
+    --primary-gradient: #FF4911;
+    --border-color: #000000;
+    --card-shadow: 6px 6px 0px #000000;
+    --btn-shadow: 4px 4px 0px #000000;
+    --border-radius: 4px;
+    --btn-radius: 4px;
+    --font-family: 'Courier New', Courier, monospace;
+}
+.theme-neobrutalism .login-card, .theme-neobrutalism .finish-card, .theme-neobrutalism .typing-card, .theme-neobrutalism .btn, .theme-neobrutalism select, .theme-neobrutalism input {
+    border: 3px solid #000000 !important;
+}
+
+/* 5. VAPORWAVE */
+.theme-vaporwave {
+    --bg-body: linear-gradient(180deg, #FF71CE 0%, #01CDFE 100%);
+    --bg-card: rgba(255, 255, 255, 0.9);
+    --text-main: #B967FF;
+    --text-muted: #FF71CE;
+    --primary: #05FFA1;
+    --primary-dark: #B967FF;
+    --primary-gradient: linear-gradient(90deg, #B967FF, #05FFA1);
+    --border-color: #FFB5E8;
+    --card-shadow: 0 10px 20px rgba(185, 103, 255, 0.4);
+    --btn-shadow: 0 4px 15px rgba(5, 255, 161, 0.6);
+    --border-radius: 0px;
+    --btn-radius: 0px;
+    --font-family: 'Arial', sans-serif;
+}
+
+/* 6. GLASSMORPHISM */
+.theme-glassmorphism {
+    --bg-body: linear-gradient(135deg, #1A1A2E, #16213E);
+    --bg-card: rgba(255, 255, 255, 0.1);
+    --text-main: #FFFFFF;
+    --text-muted: #CCCCCC;
+    --primary: #E94560;
+    --primary-dark: #0F3460;
+    --primary-gradient: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+    --border-color: rgba(255, 255, 255, 0.2);
+    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --btn-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    --border-radius: 20px;
+    --btn-radius: 12px;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.theme-glassmorphism .login-card, .theme-glassmorphism .finish-card, .theme-glassmorphism .typing-card, .theme-glassmorphism .header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* 7. RETROFUTURISM */
+.theme-retrofuturism {
+    --bg-body: #2C3E50;
+    --bg-card: #E74C3C;
+    --text-main: #ECF0F1;
+    --text-muted: #F39C12;
+    --primary: #F1C40F;
+    --primary-dark: #D35400;
+    --primary-gradient: linear-gradient(135deg, #D35400, #F1C40F);
+    --border-color: #C0392B;
+    --card-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    --btn-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
+    --border-radius: 30px;
+    --btn-radius: 20px;
+    --font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+/* 8. RETRO PIXEL */
+.theme-pixel {
+    --bg-body: #000000;
+    --bg-card: #0000AA;
+    --text-main: #FFFFFF;
+    --text-muted: #AAAAAA;
+    --primary: #FF0000;
+    --primary-dark: #AA0000;
+    --primary-gradient: #FF0000;
+    --border-color: #FFFFFF;
+    --card-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5);
+    --btn-shadow: inset -4px -4px 0px 0px rgba(170,0,0,1);
+    --border-radius: 0px;
+    --btn-radius: 0px;
+    --font-family: 'Courier New', Courier, monospace; /* Idealnya press start 2p */
+}
+
+/* 9. DARK GOTHIC FANTASY */
+.theme-gothic {
+    --bg-body: #121212;
+    --bg-card: #1E1E1E;
+    --text-main: #E0E0E0;
+    --text-muted: #888888;
+    --primary: #8B0000;
+    --primary-dark: #4A0000;
+    --primary-gradient: linear-gradient(to bottom, #8B0000, #4A0000);
+    --border-color: #333333;
+    --card-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    --btn-shadow: 0 5px 15px rgba(139, 0, 0, 0.5);
+    --border-radius: 5px;
+    --btn-radius: 3px;
+    --font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+/* 10. MODERN ESPORTS CLEAN */
+.theme-esports {
+    --bg-body: #111111;
+    --bg-card: #18181B;
+    --text-main: #FFFFFF;
+    --text-muted: #A1A1AA;
+    --primary: #E11D48;
+    --primary-dark: #9F1239;
+    --primary-gradient: linear-gradient(135deg, #E11D48, #9F1239);
+    --border-color: #27272A;
+    --card-shadow: 0 10px 40px rgba(225, 29, 72, 0.1);
+    --btn-shadow: 0 4px 20px rgba(225, 29, 72, 0.3);
+    --border-radius: 4px;
+    --btn-radius: 2px;
+    --font-family: 'Impact', 'Arial Black', sans-serif;
+}
+.theme-esports .login-card, .theme-esports .finish-card, .theme-esports .typing-card { transform: skewX(-2deg); }
+.theme-esports .login-card > *, .theme-esports .finish-card > *, .theme-esports .typing-card > * { transform: skewX(2deg); }
+
+/* 11. FLAT VECTOR / COZY */
+.theme-flatvector {
+    --bg-body: #FDF6E3;
+    --bg-card: #FFF2D1;
+    --text-main: #5C4A3D;
+    --text-muted: #A69688;
+    --primary: #F28C38;
+    --primary-dark: #C97223;
+    --primary-gradient: #F28C38;
+    --border-color: #E6D0A7;
+    --card-shadow: 0 4px 0px #E6D0A7;
+    --btn-shadow: 0 4px 0px #C97223;
+    --border-radius: 24px;
+    --btn-radius: 20px;
+    --font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+}
+
+/* 12. SKEUOMORPHIC */
+.theme-skeuomorphic {
+    --bg-body: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" fill="%23D5D5D5"/><circle cx="5" cy="5" r="1" fill="%23C0C0C0"/></svg>');
+    --bg-card: linear-gradient(to bottom, #EEEEEE, #CCCCCC);
+    --text-main: #333333;
+    --text-muted: #666666;
+    --primary: #4CAF50;
+    --primary-dark: #388E3C;
+    --primary-gradient: linear-gradient(to bottom, #81C784, #388E3C);
+    --border-color: #999999;
+    --card-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 5px 15px rgba(0,0,0,0.3);
+    --btn-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 5px rgba(0,0,0,0.3);
+    --border-radius: 12px;
+    --btn-radius: 6px;
+    --font-family: 'Arial', sans-serif;
+}
+
+/* 13. GRIMDARK */
+.theme-grimdark {
+    --bg-body: #2B2B2B;
+    --bg-card: #3C3C3C;
+    --text-main: #A0A0A0;
+    --text-muted: #666666;
+    --primary: #556B2F;
+    --primary-dark: #3E4E23;
+    --primary-gradient: linear-gradient(to right, #3E4E23, #556B2F);
+    --border-color: #1A1A1A;
+    --card-shadow: 0 5px 15px rgba(0,0,0,0.9);
+    --btn-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    --border-radius: 2px;
+    --btn-radius: 2px;
+    --font-family: 'Courier New', Courier, monospace;
+}
+
+/* 14. ANIME / CEL-SHADED */
+.theme-anime {
+    --bg-body: #87CEEB;
+    --bg-card: #FFFFFF;
+    --text-main: #333333;
+    --text-muted: #777777;
+    --primary: #FF69B4;
+    --primary-dark: #FF1493;
+    --primary-gradient: #FF69B4;
+    --border-color: #333333;
+    --card-shadow: 4px 4px 0px #333333;
+    --btn-shadow: 2px 2px 0px #333333;
+    --border-radius: 16px;
+    --btn-radius: 8px;
+    --font-family: 'Verdana', sans-serif;
+}
+.theme-anime .login-card, .theme-anime .finish-card, .theme-anime .typing-card, .theme-anime .btn, .theme-anime select, .theme-anime input {
+    border: 3px solid #333333 !important;
+}
+
+/* 15. CLEAN CORPORATE */
+.theme-corporate {
+    --bg-body: #F4F7F6;
+    --bg-card: #FFFFFF;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --primary: #0056B3;
+    --primary-dark: #003D82;
+    --primary-gradient: #0056B3;
+    --border-color: #E2E8F0;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --btn-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --border-radius: 4px;
+    --btn-radius: 4px;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 16. ARCADE / SYNTHWAVE */
+.theme-synthwave {
+    --bg-body: #090014;
+    --bg-card: #1A0033;
+    --text-main: #FFFFFF;
+    --text-muted: #00FFFF;
+    --primary: #FF00FF;
+    --primary-dark: #8A2BE2;
+    --primary-gradient: linear-gradient(180deg, #FF00FF, #00FFFF);
+    --border-color: #00FFFF;
+    --card-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+    --btn-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+    --border-radius: 0px;
+    --btn-radius: 0px;
+    --font-family: 'Lucida Console', Monaco, monospace;
+}
+.theme-synthwave .btn {
+    text-transform: uppercase;
+    font-weight: 900;
+}

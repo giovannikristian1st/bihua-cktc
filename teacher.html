@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brush Master - Dashboard Guru</title>
+  <title>Brush Master - Portal Guru</title>
   
-  <!-- Load databases -->
   <script src="meihuadb.js"></script>
   <script src="vocabdb.js"></script>
+  <script src="config.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   
   <style>
     :root {
@@ -26,656 +27,943 @@
       color: var(--text);
       font-family: 'Times New Roman', Times, 'Kaiti', 'KaiTi', STKaiti, serif;
       line-height: 1.6;
-      padding: 20px;
+      padding: 0;
     }
+    
+    .nav-bar {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .nav-title { font-size: 1.5rem; font-weight: bold; }
+    
+    .nav-links { display: flex; gap: 15px; }
+    .nav-btn {
+       background: rgba(255,255,255,0.2);
+       border: none;
+       color: white;
+       padding: 8px 16px;
+       border-radius: 6px;
+       cursor: pointer;
+       font-weight: bold;
+       transition: background 0.2s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.3); }
+    .nav-btn.active { background: white; color: var(--primary); }
     
     .container {
       max-width: 1100px;
       width: 95%;
       margin: 0 auto;
+      padding-bottom: 50px;
     }
     
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
+    header { text-align: center; margin-bottom: 30px; }
+    h1 { font-size: 2.5rem; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
     
-    h1 {
-      font-size: 2.5rem;
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 5px;
-    }
+    .card { background-color: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); margin-bottom: 24px; }
     
-    .card {
-      background-color: var(--card);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-      margin-bottom: 24px;
-    }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    select, input[type="text"], input[type="number"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background-color: #FFFFFF; color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s ease; }
+    select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 61, 255, 0.15); }
     
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--text-muted);
-      font-weight: 600;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    select, input[type="number"] {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background-color: #FFFFFF;
-      color: var(--text);
-      font-size: 1rem;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-    select:focus, input:focus { 
-      border-color: var(--primary); 
-      box-shadow: 0 0 0 3px rgba(139, 61, 255, 0.15); 
-    }
-    
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    
-    .vocab-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-    
-    .vocab-item {
-      background-color: #FFFFFF;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
+    .vocab-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+    .vocab-item { background-color: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
     .vocab-item:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(139, 61, 255, 0.1); }
-    .vocab-item.selected {
-      background-color: rgba(139, 61, 255, 0.05);
-      border-color: var(--primary);
-    }
-    
+    .vocab-item.selected { background-color: rgba(139, 61, 255, 0.05); border-color: var(--primary); }
     .vocab-char { font-size: 1.5rem; font-weight: bold; }
     .vocab-pinyin { font-size: 0.8rem; color: var(--text-muted); }
     
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
+    input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
     
-    .vocab-split-btn {
-      background: #E5E7EB;
-      color: #0E1318;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      margin-left: auto;
-      font-weight: bold;
-    }
+    .vocab-split-btn { background: #E5E7EB; color: #0E1318; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin-left: auto; font-weight: bold; }
     .vocab-split-btn:hover { background: #cbd5e1; }
     
-    .char-split-container {
-      display: none;
-      flex-direction: row;
-      gap: 15px;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px dashed var(--border);
-    }
+    .char-split-container { display: none; flex-direction: row; gap: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+    .char-checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 1.1rem; cursor: pointer; }
     
-    .char-checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-    
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(139, 61, 255, 0.2);
-    }
+    .btn { display: inline-block; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(139, 61, 255, 0.2); text-align: center; }
     .btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(139, 61, 255, 0.3); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     
-    .result-box {
-      margin-top: 20px;
-      display: none;
-    }
+    .result-box { margin-top: 20px; display: none; }
+    textarea { width: 100%; height: 80px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background-color: #FFFFFF; color: var(--text); font-size: 0.9rem; resize: none; margin-bottom: 10px; }
     
-    textarea {
-      width: 100%;
-      height: 80px;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background-color: #FFFFFF;
-      color: var(--text);
-      font-size: 0.9rem;
-      resize: none;
-      margin-bottom: 10px;
-    }
+    .copy-btn { background: var(--bg); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+    .copy-btn:hover { background: var(--border); color: var(--text); box-shadow: none; }
     
-    .copy-btn {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      box-shadow: none;
-    }
-    .copy-btn:hover {
-      background: var(--border);
-      color: var(--text);
-      box-shadow: none;
-    }
-    
-    .matrix-container {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 20px;
-      /* Add wrapping for smaller screens or better HD layout */
-      flex-wrap: wrap;
-    }
-    .matrix-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      padding-bottom: 8px;
-      border-bottom: 1px dashed var(--border);
-      margin-bottom: 4px;
-    }
-    .matrix-row:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-    }
-    .matrix-row-label {
-      font-weight: bold;
-      min-width: 95px;
-      font-size: 1.05rem;
-      color: var(--primary);
-    }
-    .matrix-btn {
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: white;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-      font-size: 1rem;
-    }
+    .matrix-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .matrix-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px dashed var(--border); margin-bottom: 4px; }
+    .matrix-row:last-child { border-bottom: none; margin-bottom: 0; }
+    .matrix-row-label { font-weight: bold; min-width: 95px; font-size: 1.05rem; color: var(--primary); }
+    .matrix-btn { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: white; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-size: 1rem; }
     .matrix-btn:hover { background: #f1f5f9; }
-    .matrix-btn.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-      font-weight: bold;
-    }
-    .matrix-btn.has-selection {
-      border-bottom: 3px solid #ff4757; /* Penanda merah jika ada kata yg dipilih */
-    }
+    .matrix-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
+    .matrix-btn.has-selection { position: relative; border-color: var(--primary); }
+    .matrix-btn.has-selection::after { content: ''; position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; background: #10B981; border-radius: 50%; border: 2px solid white; }
+    
+    .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    table.data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    table.data-table th { padding: 12px; background: #E5E7EB; }
+    table.data-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+    table.data-table tr:hover { background: #F9FAFB; }
   </style>
 </head>
 <body>
+  <div class="nav-bar">
+    <div class="nav-title">Brush Master Admin</div>
+    <div class="nav-links">
+      <button class="nav-btn active" id="nav-dashboard">Buat Tugas</button>
+      <button class="nav-btn" id="nav-history">Riwayat Tugas</button>
+      <button class="nav-btn" id="nav-options">⚙️ Options</button>
+    </div>
+  </div>
 
-  <div class="container">
+  <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; flex-direction:column;">
+     <div class="spinner"></div>
+     <p style="margin-top:20px; font-weight:bold; font-size:1.2rem;" id="loading-text">Memuat Data...</p>
+  </div>
+
+  <div class="container" id="view-dashboard">
     <header>
-      <h1>Dashboard Guru</h1>
-      <p>Buat tugas menulis huruf Mandarin (Brush Master) untuk murid</p>
+      <h1>Portal Guru</h1>
+      <p style="color:var(--text-muted)">Buat tugas menulis Hanzi dengan mudah</p>
     </header>
 
     <div class="card">
+      <div class="form-group">
+        <label>Nama Guru</label>
+        <select id="teacher-name">
+          <option value="">Pilih Guru...</option>
+        </select>
+      </div>
+
       <div class="grid-2">
-        <div class="form-group">
-          <label>Nama Guru</label>
-          <select id="teacher-select">
-            <option value="">-- Pilih Guru --</option>
-            <option value="Giovanni">Giovanni</option>
-            <option value="Ivana">Ivana</option>
-            <option value="Imelda">Imelda</option>
-            <option value="Shinta">Shinta</option>
-            <option value="Juminah">Juminah</option>
-          </select>
-        </div>
-        
         <div class="form-group">
           <label>Kelas</label>
           <select id="class-select" disabled>
-            <option value="">-- Pilih Kelas --</option>
+            <option value="">Pilih Kelas...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Jumlah Pengulangan</label>
+          <select id="repetition">
+            <option value="1">1 Kali</option>
+            <option value="2">2 Kali</option>
+            <option value="3" selected>3 Kali</option>
+            <option value="4">4 Kali</option>
+            <option value="5">5 Kali</option>
+            <option value="10">10 Kali</option>
           </select>
         </div>
       </div>
-
-      <div class="form-group">
-        <label>Pilih Buku & Bab (Silakan klik tombol Bab di bawah)</label>
-        <div class="matrix-container" id="matrix-container">
-          <!-- Populated by JS -->
-        </div>
+      
+      <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:10px; margin-bottom:25px;">
+        <input type="checkbox" id="require-meaning">
+        <label for="require-meaning" style="margin-bottom:0; cursor:pointer;">Wajib ketik arti Pinyin (Bahasa Indonesia)</label>
       </div>
+    </div>
 
-      <div class="form-group" id="vocab-container" style="display:none;">
-        <label>Pilih Kosakata (Kata yang akan ditugaskan)</label>
-        <div class="vocab-list" id="vocab-list">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Jumlah Ulangan per Karakter</label>
-        <input type="number" id="rep-count" value="3" min="1" max="20">
+    <div class="card" id="vocab-card" style="display:none;">
+      <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display:inline-block;">Pilih Buku (Meihua)</h3>
+      <div class="matrix-container" id="book-matrix"></div>
+      
+      <div id="unit-container" style="display:none; margin-top:20px;">
+         <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display:inline-block;">Pilih Bab</h3>
+         <div class="matrix-container" id="unit-matrix"></div>
       </div>
       
-      <div class="form-group" style="display:flex; flex-direction:column; gap:10px;">
-        <label style="margin-bottom:0;">Opsi Latihan Mengetik di Akhir Kata:</label>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <input type="checkbox" id="require-pinyin" style="width:20px; height:20px; cursor:pointer;" checked>
-          <label for="require-pinyin" style="margin:0; text-transform:none; font-weight:normal;">Wajib ketik Pinyin</label>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <input type="checkbox" id="require-meaning" style="width:20px; height:20px; cursor:pointer;" checked>
-          <label for="require-meaning" style="margin:0; text-transform:none; font-weight:normal;">Wajib ketik Arti</label>
-        </div>
+      <div id="vocab-selection-container" style="display:none; margin-top:20px; padding-top:20px; border-top:1px dashed var(--border);">
+         <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display:inline-block;">Pilih Kosakata</h3>
+         <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <label style="margin:0;">Kosakata Bab <span id="current-unit-label"></span></label>
+            <div>
+               <button id="select-all-btn" style="background:#00C4CC; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:bold; margin-right:5px;">Pilih Semua</button>
+               <button id="deselect-all-btn" style="background:#E5E7EB; color:#0E1318; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:bold;">Hapus Semua</button>
+            </div>
+         </div>
+         <div class="vocab-list" id="vocab-list"></div>
       </div>
-
-      <button class="btn" id="generate-btn" disabled>Buat Link Tugas</button>
       
-      <div class="result-box" id="result-box">
-        <label>Link Tugas (Kirim ini ke murid)</label>
-        <textarea id="link-output" readonly></textarea>
-        <button class="btn copy-btn" id="copy-btn">Salin Link</button>
+      <div id="combined-vocab-container" style="display:none; margin-top:30px; padding-top:20px; border-top:2px solid var(--primary);">
+         <h3 style="margin-bottom: 15px; color: var(--primary);">Total Kosakata Terpilih</h3>
+         <div class="vocab-list" id="combined-vocab-list"></div>
       </div>
+    </div>
+
+    <button class="btn" id="generate-btn" disabled>Buat Link Tugas</button>
+
+    <div class="result-box card" id="result-box">
+      <label>Link Tugas (Bagikan ke Siswa):</label>
+      <textarea id="link-output" readonly></textarea>
+      <button class="btn copy-btn" id="copy-btn">📋 Salin Link</button>
+      <p id="copy-status" style="color:var(--primary); font-size:0.9rem; font-weight:bold; text-align:center; margin-top:10px; display:none;">Link disalin ke clipboard!</p>
+    </div>
+  </div>
+  
+  <div class="container" id="view-history" style="display:none;">
+     <header>
+      <h1>Riwayat Tugas</h1>
+      <p style="color:var(--text-muted)">Pantau tugas dan hasil pekerjaan murid</p>
+    </header>
+    <div class="card">
+       <button class="btn copy-btn" style="width:auto; margin-bottom:20px;" onclick="fetchTasks()">🔄 Refresh Daftar Tugas</button>
+       <div style="overflow-x:auto;">
+         <table class="data-table">
+            <thead>
+               <tr style="background:var(--primary); color:white;">
+                  <th style="border-radius:8px 0 0 0;">ID</th>
+                  <th>Tanggal</th>
+                  <th>Kelas</th>
+                  <th>Bab</th>
+                  <th style="border-radius:0 8px 0 0;">Aksi</th>
+               </tr>
+            </thead>
+            <tbody id="task-list-body">
+            </tbody>
+         </table>
+       </div>
+    </div>
+  </div>
+  
+  <div class="container" id="view-task-details" style="display:none;">
+     <header>
+      <h1>Detail Hasil Tugas</h1>
+      <button class="btn copy-btn" style="width:auto; margin:10px auto;" onclick="showView('view-history')">🔙 Kembali ke Riwayat</button>
+    </header>
+    <div class="card">
+       <h3 id="detail-task-id" style="margin-bottom:10px; color:var(--primary);">ID: -</h3>
+       <p id="detail-task-info" style="margin-bottom:20px; color:var(--text-muted);"></p>
+       <div style="overflow-x:auto;">
+         <table class="data-table">
+            <thead>
+               <tr style="background:var(--primary-dark); color:white;">
+                  <th style="border-radius:8px 0 0 0;">Nama Murid</th>
+                  <th>Waktu</th>
+                  <th>Status</th>
+                  <th>Selesai (Kali)</th>
+                  <th style="border-radius:0 8px 0 0;">Kesalahan</th>
+               </tr>
+            </thead>
+            <tbody id="task-results-body">
+            </tbody>
+         </table>
+       </div>
+    </div>
+  </div>
+
+  <div class="container" id="view-options" style="display:none;">
+     <header>
+      <h1>Pengaturan</h1>
+      <p style="color:var(--text-muted)">Konfigurasi Guru, Siswa, dan Server</p>
+    </header>
+    
+    <div class="card">
+       <h2 style="margin-bottom:15px; color:var(--primary);">👨‍🏫 Manajemen Guru</h2>
+       <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">Tambahkan nama guru beserta kelas yang diajar. Pisahkan kelas dengan koma (contoh: 1A,1B,2C).</p>
+       <div style="overflow-x:auto;">
+         <table class="data-table" style="margin-bottom:15px;">
+            <thead>
+               <tr>
+                  <th>Nama Guru</th>
+                  <th>Kelas yang Diajar</th>
+                  <th style="width:80px;">Aksi</th>
+               </tr>
+            </thead>
+            <tbody id="teachers-tbody"></tbody>
+         </table>
+       </div>
+       <button class="btn copy-btn" style="width:auto; margin-bottom:15px;" onclick="addTeacherRow()">➕ Tambah Guru</button>
+       <button class="btn" style="width:auto;" onclick="saveTeachers()">💾 Simpan Konfigurasi Guru</button>
+    </div>
+    
+    <div class="card">
+       <h2 style="margin-bottom:15px; color:var(--primary-dark);">🎓 Manajemen Siswa</h2>
+       <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">Update daftar siswa per kelas menggunakan file Excel (.xlsx).</p>
+       <div style="display:flex; gap:15px; flex-wrap:wrap;">
+          <button class="btn copy-btn" style="width:auto;" onclick="downloadStudentsExcel()">📥 Download Format Excel</button>
+          <div style="position:relative;">
+             <button class="btn" style="width:auto;" onclick="document.getElementById('upload-excel').click()">📤 Upload Excel (Update)</button>
+             <input type="file" id="upload-excel" accept=".xlsx" style="display:none;" onchange="uploadStudentsExcel(event)">
+          </div>
+       </div>
+       <p id="student-upload-status" style="margin-top:10px; color:var(--primary-dark); font-weight:bold;"></p>
+    </div>
+    
+    <div class="card">
+       <h2 style="margin-bottom:15px; color:#F59E0B;">⚙️ Pengaturan Server (GAS URL)</h2>
+       <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">Jika Anda menyalin file Google Sheet ke akun Drive lain, masukkan URL App Script yang baru di sini.</p>
+       <button class="btn copy-btn" style="width:auto; margin-bottom:15px;" onclick="showTutorial()">📖 Lihat Tutorial Copy Sheet</button>
+       <input type="text" id="custom-gas-url" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;">
+       <button class="btn" style="width:auto;" onclick="saveCustomGasUrl()">💾 Simpan URL Server</button>
     </div>
   </div>
 
   <script>
-    const vocabContainer = document.getElementById('vocab-container');
-    const vocabList = document.getElementById('vocab-list');
-    const repCount = document.getElementById('rep-count');
+    // --- APP STATE ---
+    let DB_TEACHERS = {};
+    let DB_STUDENTS = {};
+    const FALLBACK_TEACHERS = {
+       "Entah Siapa": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"]
+    };
+    
+    function getGASUrl() {
+       return localStorage.getItem('customGASUrl') || APP_CONFIG.GOOGLE_APPS_SCRIPT_URL;
+    }
+    
+    function showLoading(text) {
+       document.getElementById('loading-text').textContent = text;
+       document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    function hideLoading() {
+       document.getElementById('loading-overlay').style.display = 'none';
+    }
+    
+    function showTutorial() {
+       alert("TUTORIAL MENGUBAH DATABASE:\n\n1. Buka file Google Sheet Brush Master Anda, lalu klik File -> Make a Copy (Buat Salinan).\n2. Di Sheet salinan tersebut, klik Extensions (Ekstensi) -> Apps Script.\n3. Di halaman Apps Script, klik tombol biru 'Deploy' di kanan atas -> 'New Deployment'.\n4. Pilih tipe 'Web App'. Ubah 'Who has access' menjadi 'Anyone' (Siapa saja).\n5. Klik Deploy dan berikan otorisasi Google jika diminta.\n6. Copy URL yang muncul (berakhiran /exec).\n7. Paste URL tersebut di Textbox Pengaturan Server ini dan klik Simpan.\n\nSelamat! Sekarang Anda memiliki database mandiri.");
+    }
+
+    // --- NAVIGATION ---
+    function showView(viewId) {
+       document.getElementById('view-dashboard').style.display = 'none';
+       document.getElementById('view-history').style.display = 'none';
+       document.getElementById('view-task-details').style.display = 'none';
+       document.getElementById('view-options').style.display = 'none';
+       document.getElementById(viewId).style.display = 'block';
+    }
+    
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+       btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          const id = e.target.id;
+          if(id === 'nav-dashboard') showView('view-dashboard');
+          if(id === 'nav-history') {
+             showView('view-history');
+             fetchTasks();
+          }
+          if(id === 'nav-options') {
+             showView('view-options');
+             renderTeachersOptions();
+             document.getElementById('custom-gas-url').value = getGASUrl();
+          }
+       });
+    });
+
+    // --- INIT ---
+    window.onload = async () => {
+       showLoading("Sinkronisasi Database...");
+       try {
+          const resT = await fetch(`${getGASUrl()}?action=getTeachers`);
+          const dataT = await resT.json();
+          if(dataT.status === 'success') {
+             try { DB_TEACHERS = JSON.parse(dataT.data); } catch(e) {}
+          }
+          if(Object.keys(DB_TEACHERS).length === 0) DB_TEACHERS = FALLBACK_TEACHERS;
+          
+          const resS = await fetch(`${getGASUrl()}?action=getStudents`);
+          const dataS = await resS.json();
+          if(dataS.status === 'success') {
+             try { DB_STUDENTS = JSON.parse(dataS.data); } catch(e) {}
+          }
+          
+          initDashboard();
+       } catch (err) {
+          console.error(err);
+          alert("Gagal terhubung ke Server. Pastikan URL benar di Options.");
+          DB_TEACHERS = FALLBACK_TEACHERS;
+          initDashboard();
+       }
+       hideLoading();
+    };
+
+    // --- DASHBOARD LOGIC ---
+    let selectedVocabs = {};
+    let currentTeacher = "";
+    
     const generateBtn = document.getElementById('generate-btn');
     const resultBox = document.getElementById('result-box');
     const linkOutput = document.getElementById('link-output');
     const copyBtn = document.getElementById('copy-btn');
-    const teacherSelect = document.getElementById('teacher-select');
-    const classSelect = document.getElementById('class-select');
-    const matrixContainer = document.getElementById('matrix-container');
-
-    const teacherMap = {
-       "Giovanni": ["1A", "1B", "1C", "1D", "1E", "2A", "2B"],
-       "Ivana": ["2C", "2D", "2E", "3A", "4A", "4B", "4C"],
-       "Imelda": ["4D", "4E", "3B", "5B", "5C", "5D"],
-       "Shinta": ["5A", "3C", "3D", "3E"],
-       "Juminah": ["5E", "6A", "6B", "6C", "6D", "6E"]
-    };
-
-    teacherSelect.addEventListener('change', () => {
-       classSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-       if (teacherSelect.value && teacherMap[teacherSelect.value]) {
-          teacherMap[teacherSelect.value].forEach(cls => {
-             const opt = document.createElement('option');
-             opt.value = cls;
-             opt.textContent = 'Kelas ' + cls;
-             classSelect.appendChild(opt);
-          });
-          classSelect.disabled = false;
-       } else {
-          classSelect.disabled = true;
-          classSelect.value = "";
+    
+    function initDashboard() {
+       const ts = document.getElementById('teacher-name');
+       ts.innerHTML = '<option value="">Pilih Guru...</option>';
+       for(const t in DB_TEACHERS) {
+          const opt = document.createElement('option');
+          opt.value = t;
+          opt.textContent = t;
+          ts.appendChild(opt);
        }
-       updateGenerateBtn();
-    });
-
-    classSelect.addEventListener('change', updateGenerateBtn);
-
-    function formatPinyin(py) {
-      if (!py || py.includes(' ')) return py;
-      const pinyinRegex = /(?:zh|ch|sh|b|p|m|f|d|t|n|l|g|k|h|j|q|x|r|z|c|s|y|w)?(?:[aeiouüvāáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜ]+)(?:ng|n|r)?/ig;
-      const matches = py.match(pinyinRegex);
-      if (matches) return matches.join(' ');
-      return py;
-    }
-
-    let globalSelection = {}; // { "meihua1": { "unit1": { vIndex: [charIndices] } } }
-    let currentBook = null;
-    let currentUnit = null;
-
-    // Build the 6x10 matrix
-    function buildMatrix() {
-      matrixContainer.innerHTML = '';
-      for (let b = 1; b <= 6; b++) {
-        const row = document.createElement('div');
-        row.className = 'matrix-row';
-        
-        const label = document.createElement('div');
-        label.className = 'matrix-row-label';
-        label.textContent = 'Meihua ' + b;
-        row.appendChild(label);
-        
-        for (let u = 1; u <= 10; u++) {
-          const btn = document.createElement('button');
-          btn.className = 'matrix-btn';
-          btn.textContent = 'Bab ' + u;
-          btn.id = `btn-meihua${b}-unit${u}`;
-          
-          btn.addEventListener('click', () => {
-             btn.classList.toggle('active');
-             loadVocab();
-          });
-          
-          row.appendChild(btn);
-        }
-        matrixContainer.appendChild(row);
-      }
+       renderBookMatrix();
     }
     
-    buildMatrix();
-
-    function getSelectedCharCount() {
+    document.getElementById('teacher-name').addEventListener('change', (e) => {
+       currentTeacher = e.target.value;
+       const cs = document.getElementById('class-select');
+       cs.innerHTML = '<option value="">Pilih Kelas...</option>';
+       if(!currentTeacher) {
+          cs.disabled = true;
+          document.getElementById('vocab-card').style.display = 'none';
+          updateGenerateBtn();
+          return;
+       }
+       cs.disabled = false;
+       const classes = DB_TEACHERS[currentTeacher] || [];
+       classes.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.trim();
+          opt.textContent = c.trim();
+          cs.appendChild(opt);
+       });
+       document.getElementById('vocab-card').style.display = 'block';
+       updateGenerateBtn();
+    });
+    
+    document.getElementById('class-select').addEventListener('change', updateGenerateBtn);
+    
+    // Matrix Renderers
+    function renderBookMatrix() {
+       const container = document.getElementById('book-matrix');
+       container.innerHTML = '';
+       let books = Object.keys(_meihuaDB);
+       books.sort((a,b) => parseInt(a.replace('Buku ','')) - parseInt(b.replace('Buku ','')));
+       
+       let chunked = [];
+       for (let i = 0; i < books.length; i += 6) {
+           chunked.push(books.slice(i, i + 6));
+       }
+       
+       chunked.forEach((rowBooks) => {
+           const row = document.createElement('div');
+           row.className = 'matrix-row';
+           row.innerHTML = `<div class="matrix-row-label">Meihua</div>`;
+           
+           rowBooks.forEach(b => {
+              const btn = document.createElement('button');
+              btn.className = 'matrix-btn book-btn';
+              btn.textContent = b;
+              btn.onclick = () => {
+                 document.querySelectorAll('.book-btn').forEach(el => el.classList.remove('active'));
+                 btn.classList.add('active');
+                 renderUnitMatrix(b);
+              };
+              if (selectedVocabs[b] && Object.keys(selectedVocabs[b]).length > 0) {
+                 btn.classList.add('has-selection');
+              }
+              row.appendChild(btn);
+           });
+           container.appendChild(row);
+       });
+    }
+    
+    let currentBook = '';
+    function renderUnitMatrix(book) {
+       currentBook = book;
+       document.getElementById('unit-container').style.display = 'block';
+       document.getElementById('vocab-selection-container').style.display = 'none';
+       
+       const container = document.getElementById('unit-matrix');
+       container.innerHTML = '';
+       let units = Object.keys(_meihuaDB[book]);
+       units.sort((a,b) => parseInt(a.replace('Bab ','')) - parseInt(b.replace('Bab ','')));
+       
+       const row = document.createElement('div');
+       row.className = 'matrix-row';
+       row.innerHTML = `<div class="matrix-row-label">Pilih Bab</div>`;
+       
+       units.forEach(u => {
+          const btn = document.createElement('button');
+          btn.className = 'matrix-btn unit-btn';
+          btn.textContent = u;
+          btn.onclick = () => {
+             document.querySelectorAll('.unit-btn').forEach(el => el.classList.remove('active'));
+             btn.classList.add('active');
+             renderVocabSelection(book, u);
+          };
+          if (selectedVocabs[book] && selectedVocabs[book][u] && Object.keys(selectedVocabs[book][u]).length > 0) {
+             btn.classList.add('has-selection');
+          }
+          row.appendChild(btn);
+       });
+       container.appendChild(row);
+    }
+    
+    let currentUnit = '';
+    function renderVocabSelection(book, unit) {
+       currentUnit = unit;
+       document.getElementById('vocab-selection-container').style.display = 'block';
+       document.getElementById('current-unit-label').textContent = `${book} - ${unit}`;
+       
+       const list = document.getElementById('vocab-list');
+       list.innerHTML = '';
+       
+       const vocabs = _meihuaDB[book][unit].vocab;
+       
+       if (!selectedVocabs[book]) selectedVocabs[book] = {};
+       if (!selectedVocabs[book][unit]) selectedVocabs[book][unit] = {};
+       
+       vocabs.forEach((v, index) => {
+          const item = document.createElement('div');
+          item.className = 'vocab-item';
+          if (selectedVocabs[book][unit][index]) item.classList.add('selected');
+          
+          let content = `<div style="flex-grow:1;">
+             <div class="vocab-char">${v.char}</div>
+             <div class="vocab-pinyin">${v.pinyin}</div>
+             <div class="vocab-pinyin">${v.id || v.en}</div>
+          </div>`;
+          
+          item.innerHTML = content;
+          
+          const checkboxLabel = document.createElement('label');
+          checkboxLabel.style.marginBottom = 0;
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = !!selectedVocabs[book][unit][index];
+          
+          checkbox.onclick = (e) => {
+             e.stopPropagation();
+             toggleVocab(book, unit, index);
+             if (checkbox.checked) item.classList.add('selected');
+             else item.classList.remove('selected');
+          };
+          
+          const charSplitContainer = document.createElement('div');
+          charSplitContainer.className = 'char-split-container';
+          
+          if (v.char.length > 1) {
+             const splitBtn = document.createElement('button');
+             splitBtn.className = 'vocab-split-btn';
+             splitBtn.textContent = 'Pecah Huruf';
+             splitBtn.onclick = (e) => {
+                 e.stopPropagation();
+                 charSplitContainer.style.display = charSplitContainer.style.display === 'flex' ? 'none' : 'flex';
+             };
+             item.appendChild(splitBtn);
+             
+             let selChars = selectedVocabs[book][unit][index] || [];
+             for(let i=0; i<v.char.length; i++) {
+                 const chLabel = document.createElement('label');
+                 chLabel.className = 'char-checkbox-item';
+                 const chBox = document.createElement('input');
+                 chBox.type = 'checkbox';
+                 chBox.checked = selChars.includes(i);
+                 chBox.onclick = (e) => {
+                    e.stopPropagation();
+                    let sc = selectedVocabs[book][unit][index] || [];
+                    if (chBox.checked) {
+                       if(!sc.includes(i)) sc.push(i);
+                    } else {
+                       sc = sc.filter(x => x !== i);
+                    }
+                    if (sc.length > 0) {
+                       selectedVocabs[book][unit][index] = sc;
+                       item.classList.add('selected');
+                       checkbox.checked = true;
+                    } else {
+                       delete selectedVocabs[book][unit][index];
+                       item.classList.remove('selected');
+                       checkbox.checked = false;
+                    }
+                    updateCombinedView();
+                 };
+                 chLabel.appendChild(chBox);
+                 chLabel.appendChild(document.createTextNode(v.char[i]));
+                 charSplitContainer.appendChild(chLabel);
+             }
+          }
+          
+          checkboxLabel.appendChild(checkbox);
+          item.insertBefore(checkboxLabel, item.firstChild);
+          
+          item.onclick = () => checkbox.click();
+          
+          const wrapper = document.createElement('div');
+          wrapper.appendChild(item);
+          wrapper.appendChild(charSplitContainer);
+          
+          list.appendChild(wrapper);
+       });
+       updateCombinedView();
+    }
+    
+    function toggleVocab(book, unit, index) {
+       const v = _meihuaDB[book][unit].vocab[index];
+       if (selectedVocabs[book][unit][index]) {
+          delete selectedVocabs[book][unit][index];
+       } else {
+          selectedVocabs[book][unit][index] = Array.from({length: v.char.length}, (_, i) => i);
+       }
+       updateCombinedView();
+    }
+    
+    document.getElementById('select-all-btn').onclick = () => {
+       if(!currentBook || !currentUnit) return;
+       const vocabs = _meihuaDB[currentBook][currentUnit].vocab;
+       vocabs.forEach((v, index) => {
+          selectedVocabs[currentBook][currentUnit][index] = Array.from({length: v.char.length}, (_, i) => i);
+       });
+       renderVocabSelection(currentBook, currentUnit);
+    };
+    
+    document.getElementById('deselect-all-btn').onclick = () => {
+       if(!currentBook || !currentUnit) return;
+       delete selectedVocabs[currentBook][currentUnit];
+       renderVocabSelection(currentBook, currentUnit);
+    };
+    
+    function updateCombinedView() {
+       const cList = document.getElementById('combined-vocab-list');
+       cList.innerHTML = '';
        let count = 0;
-       for (const bk in globalSelection) {
-          for (const ut in globalSelection[bk]) {
-             for (const vIdx in globalSelection[bk][ut]) {
-                count += globalSelection[bk][ut][vIdx].length;
+       
+       for (const b in selectedVocabs) {
+          for (const u in selectedVocabs[b]) {
+             for (const idx in selectedVocabs[b][u]) {
+                const chars = selectedVocabs[b][u][idx];
+                if (chars.length > 0) {
+                   count++;
+                   const v = _meihuaDB[b][u].vocab[idx];
+                   const el = document.createElement('div');
+                   el.className = 'vocab-item';
+                   el.style.borderColor = var(--primary);
+                   el.innerHTML = `
+                      <div style="flex-grow:1;">
+                         <div class="vocab-char">${chars.map(i => v.char[i]).join('')}</div>
+                         <div class="vocab-pinyin">${v.pinyin}</div>
+                      </div>
+                      <div style="font-size:0.7rem; color:#888; text-align:right;">${b}<br>${u}</div>
+                   `;
+                   cList.appendChild(el);
+                }
              }
           }
        }
-       return count;
-    }
-
-    function updateGenerateBtn() {
-      const count = getSelectedCharCount();
-      if(count === 0 || !classSelect.value) {
-        generateBtn.disabled = true;
-        generateBtn.textContent = 'Buat Link Tugas';
-      } else {
-        generateBtn.disabled = false;
-        generateBtn.textContent = `Buat Link Tugas (${count} Kosakata)`;
-      }
-      
-      // Update visual indicators on the grid
-      document.querySelectorAll('.matrix-btn').forEach(btn => {
-         const match = btn.id.match(/btn-(meihua\d+)-(unit\d+)/);
-         if (match) {
-            const b = match[1];
-            const u = match[2];
-            if (globalSelection[b] && globalSelection[b][u] && Object.keys(globalSelection[b][u]).length > 0) {
-               btn.classList.add('has-selection');
-            } else {
-               btn.classList.remove('has-selection');
-            }
-         }
-      });
-    }
-
-    function loadVocab() {
-      vocabList.innerHTML = '';
-      const activeBtns = document.querySelectorAll('.matrix-btn.active');
-      
-      if(activeBtns.length === 0) {
-         vocabContainer.style.display = 'none';
-         return;
-      }
-
-      vocabContainer.style.display = 'block';
-
-      activeBtns.forEach(btn => {
-         const match = btn.id.match(/btn-(meihua\d+)-(unit\d+)/);
-         if (!match) return;
-         const book = match[1];
-         const unit = match[2];
-
-         const unitData = _meihuaDB[book] && _meihuaDB[book][unit];
-         if(!unitData || !unitData.vocab) return;
-
-         // Chapter Header
-         const header = document.createElement('h3');
-         header.style.gridColumn = '1 / -1'; // Memaksa baris baru penuhi grid
-         header.style.marginTop = '20px';
-         header.style.marginBottom = '5px';
-         header.style.color = '#FFFFFF';
-         header.style.backgroundColor = 'var(--primary)';
-         header.style.padding = '8px 15px';
-         header.style.borderRadius = '8px';
-         header.style.fontSize = '1.1rem';
-         header.style.boxShadow = '0 2px 8px rgba(139, 61, 255, 0.2)';
-         header.textContent = `${book.replace('meihua', 'Meihua ')} - ${unit.replace('unit', 'Bab ')}`;
-         vocabList.appendChild(header);
-
-         if (!globalSelection[book]) globalSelection[book] = {};
-         if (!globalSelection[book][unit]) globalSelection[book][unit] = {};
-         
-         const currentSelection = globalSelection[book][unit];
-         
-         unitData.vocab.forEach((v, vIndex) => {
-           if(!v.char) return;
-        
-        const div = document.createElement('div');
-        div.className = 'vocab-item';
-        div.style.flexDirection = 'column';
-        div.style.alignItems = 'stretch';
-        
-        const topRow = document.createElement('div');
-        topRow.style.display = 'flex';
-        topRow.style.alignItems = 'center';
-        topRow.style.gap = '12px';
-        
-        const mainCb = document.createElement('input');
-        mainCb.type = 'checkbox';
-        mainCb.className = 'main-cb';
-        
-        // Restore check state if it exists in globalSelection
-        const savedSelection = currentSelection[vIndex];
-        if (savedSelection && savedSelection.length === v.char.length) {
-            mainCb.checked = true;
-            div.classList.add('selected');
-        }
-        
-        const infoDiv = document.createElement('div');
-        infoDiv.innerHTML = `
-          <div class="vocab-char">${v.char}</div>
-          <div class="vocab-pinyin">${formatPinyin(v.pinyin)}</div>
-        `;
-        
-        topRow.appendChild(mainCb);
-        topRow.appendChild(infoDiv);
-        
-        let splitBtn = null;
-        let splitContainer = null;
-        let isSplit = false;
-        
-        if (v.char.length > 1) {
-          splitBtn = document.createElement('button');
-          splitBtn.className = 'vocab-split-btn';
-          splitBtn.textContent = 'Split';
-          topRow.appendChild(splitBtn);
-          
-          splitContainer = document.createElement('div');
-          splitContainer.className = 'char-split-container';
-          
-          for(let i=0; i<v.char.length; i++) {
-            const charItem = document.createElement('label');
-            charItem.className = 'char-checkbox-item';
-            
-            const charCb = document.createElement('input');
-            charCb.type = 'checkbox';
-            charCb.className = 'sub-cb';
-            charCb.dataset.charIndex = i;
-            
-            if (savedSelection && savedSelection.includes(i)) {
-               charCb.checked = true;
-            }
-            
-            charItem.appendChild(charCb);
-            charItem.appendChild(document.createTextNode(v.char[i]));
-            splitContainer.appendChild(charItem);
-            
-            charCb.addEventListener('change', () => {
-               updateSelection();
-            });
-          }
-          
-          splitBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            isSplit = !isSplit;
-            if(isSplit) {
-              splitContainer.style.display = 'flex';
-              splitBtn.textContent = 'Unsplit';
-              mainCb.style.display = 'none';
-              mainCb.checked = false;
-            } else {
-              splitContainer.style.display = 'none';
-              splitBtn.textContent = 'Split';
-              mainCb.style.display = 'block';
-              splitContainer.querySelectorAll('.sub-cb').forEach(cb => cb.checked = false);
-            }
-            updateSelection();
+       
+       document.getElementById('combined-vocab-container').style.display = count > 0 ? 'block' : 'none';
+       updateGenerateBtn();
+       renderBookMatrix(); // update markers
+       
+       // Update unit markers if visible
+       if(currentBook) {
+          document.querySelectorAll('.unit-btn').forEach(btn => {
+             const u = btn.textContent;
+             if(selectedVocabs[currentBook] && selectedVocabs[currentBook][u] && Object.keys(selectedVocabs[currentBook][u]).length > 0) {
+                btn.classList.add('has-selection');
+             } else {
+                btn.classList.remove('has-selection');
+             }
           });
-        }
-        
-        if (savedSelection && savedSelection.length > 0 && savedSelection.length < v.char.length && splitContainer) {
-           isSplit = true;
-           splitContainer.style.display = 'flex';
-           splitBtn.textContent = 'Unsplit';
-           mainCb.style.display = 'none';
-           div.classList.add('selected');
-        }
-        
-        div.appendChild(topRow);
-        if(splitContainer) div.appendChild(splitContainer);
-        
-        mainCb.addEventListener('change', () => {
-           updateSelection();
-        });
-        
-        div.addEventListener('click', (e) => {
-          if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !isSplit) {
-            mainCb.checked = !mainCb.checked;
-            updateSelection();
-          }
-        });
-        
-        function updateSelection() {
-          let selectedChars = [];
-          if(!isSplit && mainCb.checked) {
-             div.classList.add('selected');
-             for(let i=0; i<v.char.length; i++) selectedChars.push(i);
-          } else if (isSplit) {
-             const subs = splitContainer.querySelectorAll('.sub-cb');
-             let anyChecked = false;
-             subs.forEach(sub => {
-               if(sub.checked) {
-                 anyChecked = true;
-                 selectedChars.push(parseInt(sub.dataset.charIndex));
-               }
-             });
-             if(anyChecked) div.classList.add('selected');
-             else div.classList.remove('selected');
-          } else {
-             div.classList.remove('selected');
-          }
-          
-          if(selectedChars.length > 0) {
-             currentSelection[vIndex] = selectedChars;
-          } else {
-             delete currentSelection[vIndex];
-          }
-          updateGenerateBtn();
-        }
-        
-        vocabList.appendChild(div);
-      }); // end vocab forEach
-     }); // end activeBtns forEach
-     updateGenerateBtn();
+       }
     }
-
+    
+    function updateGenerateBtn() {
+       const cls = document.getElementById('class-select').value;
+       let hasVocab = false;
+       for (const b in selectedVocabs) {
+          for (const u in selectedVocabs[b]) {
+             if (Object.keys(selectedVocabs[b][u]).length > 0) { hasVocab = true; break; }
+          }
+          if (hasVocab) break;
+       }
+       generateBtn.disabled = !(currentTeacher && cls && hasVocab);
+    }
+    
     generateBtn.addEventListener('click', () => {
-      const reps = parseInt(repCount.value) || 3;
-      const requirePinyin = document.getElementById('require-pinyin').checked;
+      const cls = document.getElementById('class-select').value;
+      const rep = document.getElementById('repetition').value;
       const requireMeaning = document.getElementById('require-meaning').checked;
       
-      // Build optimized payload v-map
-      // format: { "meihua1": { "unit1": "0:0,1|1:0", "unit2": "2:0" }, "meihua2": ... }
-      const vMap = {};
-      for (const bk in globalSelection) {
-         for (const ut in globalSelection[bk]) {
-            const unitSelection = globalSelection[bk][ut];
-            if (Object.keys(unitSelection).length === 0) continue;
-            
-            if (!vMap[bk]) vMap[bk] = {};
-            const vStrs = [];
-            for (const [vIndex, chars] of Object.entries(unitSelection)) {
-               vStrs.push(`${vIndex}:${chars.join(',')}`);
-            }
-            vMap[bk][ut] = vStrs.join('|');
-         }
+      let vObj = {};
+      for (const b in selectedVocabs) {
+          for (const u in selectedVocabs[b]) {
+             const keys = Object.keys(selectedVocabs[b][u]);
+             if(keys.length > 0) {
+                if(!vObj[b]) vObj[b] = {};
+                const parts = [];
+                for (const idx of keys) {
+                   parts.push(`${idx}:${selectedVocabs[b][u][idx].join(',')}`);
+                }
+                vObj[b][u] = parts.join('|');
+             }
+          }
       }
       
-      const payload = {
-        cls: classSelect.value,
-        v: vMap,
-        r: reps,
-        tp: requirePinyin ? 1 : 0,
-        tm: requireMeaning ? 1 : 0
-      };
+      const payload = { cls: cls, r: rep, v: vObj, tm: requireMeaning ? 1 : 0 };
+      const payloadString = JSON.stringify(payload);
       
-      // Convert to base64
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      
-      // Get current path to generate student URL
       let baseUrl = window.location.href.replace('teacher.html', 'student.html');
-      // Just in case they are on index.html or something else
       const lastSlash = baseUrl.lastIndexOf('/');
       baseUrl = baseUrl.substring(0, lastSlash) + '/student.html';
       
-      const finalUrl = `${baseUrl}?data=${encoded}`;
+      const shortId = Math.random().toString(36).substring(2, 8);
       
-      linkOutput.value = finalUrl;
-      resultBox.style.display = 'block';
+      generateBtn.disabled = true;
+      generateBtn.textContent = 'Menyimpan Link...';
+      
+      fetch(getGASUrl(), {
+         method: 'POST',
+         mode: 'no-cors',
+         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+         body: JSON.stringify({ action: 'saveLink', id: shortId, payload: payloadString })
+      }).then(() => {
+         let gMatch = getGASUrl().match(/\/s\/(.*?)\//);
+         let gParam = gMatch ? "&g=" + gMatch[1] : "";
+         const finalUrl = `${baseUrl}?id=${shortId}${gParam}`;
+         
+         linkOutput.value = finalUrl;
+         resultBox.style.display = 'block';
+         
+         // Clear
+         selectedVocabs = {};
+         updateCombinedView();
+         document.getElementById('vocab-selection-container').style.display = 'none';
+         
+      }).catch(err => {
+         alert("Gagal menyimpan link: " + err);
+      }).finally(() => {
+         generateBtn.textContent = 'Buat Link Tugas';
+         updateGenerateBtn();
+      });
     });
 
     copyBtn.addEventListener('click', () => {
       linkOutput.select();
       document.execCommand('copy');
-      const originalText = copyBtn.textContent;
-      copyBtn.textContent = 'Tersalin!';
-      setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
+      const st = document.getElementById('copy-status');
+      st.style.display = 'block';
+      setTimeout(() => st.style.display = 'none', 3000);
     });
 
+    // --- HISTORY LOGIC ---
+    async function fetchTasks() {
+       showLoading("Memuat Riwayat Tugas...");
+       const tbody = document.getElementById('task-list-body');
+       tbody.innerHTML = '';
+       try {
+          const res = await fetch(`${getGASUrl()}?action=getTasks`);
+          const d = await res.json();
+          if (d.status === 'success' && d.data) {
+             let tasks = d.data.reverse();
+             tasks.forEach(t => {
+                let payload = {};
+                try { payload = JSON.parse(t.payload); } catch(e) {}
+                const cls = payload.cls || '-';
+                
+                // Get Bab info
+                let babStr = [];
+                if(payload.v) {
+                   for(const b in payload.v) {
+                      for(const u in payload.v[b]) {
+                         babStr.push(`${b} ${u}`);
+                      }
+                   }
+                }
+                const dateObj = new Date(t.date);
+                const dateStr = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID');
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                   <td>${t.id}</td>
+                   <td>${dateStr}</td>
+                   <td>${cls}</td>
+                   <td><small>${babStr.join(', ')}</small></td>
+                   <td>
+                      <button class="btn" style="padding:6px 12px; margin-bottom:5px;" onclick="viewTaskResults('${t.id}', '${cls}', '${babStr.join(', ')}')">Lihat Hasil</button>
+                      <button class="btn copy-btn" style="padding:6px 12px; color:red; border-color:red;" onclick="deleteTask('${t.id}')">Hapus</button>
+                   </td>
+                `;
+                tbody.appendChild(tr);
+             });
+          }
+       } catch (err) {
+          console.error(err);
+          alert("Gagal memuat riwayat tugas.");
+       }
+       hideLoading();
+    }
+    
+    async function viewTaskResults(id, cls, babInfo) {
+       document.getElementById('detail-task-id').textContent = `ID Tugas: ${id} (Kelas ${cls})`;
+       document.getElementById('detail-task-info').textContent = `Bab: ${babInfo}`;
+       const tbody = document.getElementById('task-results-body');
+       tbody.innerHTML = '<tr><td colspan="5">Memuat data...</td></tr>';
+       
+       showView('view-task-details');
+       try {
+          const res = await fetch(`${getGASUrl()}?action=getTaskResults&cls=${cls}`);
+          const d = await res.json();
+          tbody.innerHTML = '';
+          if (d.status === 'success' && d.data) {
+             d.data.forEach(r => {
+                // To filter we should actually check if the result belongs to this task ID?
+                // Wait, original GAS didn't save Task ID. It only saves "Tugas" string.
+                // We'll just show all results for the class for now since old results don't have task ID.
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                   <td>${r.name}</td>
+                   <td>${r.time}</td>
+                   <td>${r.status}</td>
+                   <td>${r.count}</td>
+                   <td><small>${r.mistakes}</small></td>
+                `;
+                tbody.appendChild(tr);
+             });
+          }
+       } catch (err) {
+          tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
+       }
+    }
+    
+    async function deleteTask(id) {
+       if(!confirm('Yakin ingin menghapus tugas ini? Link tidak akan bisa dibuka lagi.')) return;
+       showLoading("Menghapus...");
+       try {
+          await fetch(getGASUrl(), {
+             method: 'POST',
+             mode: 'no-cors',
+             body: JSON.stringify({ action: 'deleteLink', id: id })
+          });
+          setTimeout(fetchTasks, 1000);
+       } catch(err) {
+          hideLoading();
+          alert("Error: " + err);
+       }
+    }
+
+    // --- OPTIONS LOGIC ---
+    function renderTeachersOptions() {
+       const tbody = document.getElementById('teachers-tbody');
+       tbody.innerHTML = '';
+       for(const t in DB_TEACHERS) {
+          addTeacherRowUI(t, DB_TEACHERS[t].join(', '));
+       }
+    }
+    
+    function addTeacherRowUI(name = "", classes = "") {
+       const tbody = document.getElementById('teachers-tbody');
+       const tr = document.createElement('tr');
+       tr.innerHTML = `
+          <td><input type="text" class="t-name" value="${name}" placeholder="Nama Guru"></td>
+          <td><input type="text" class="t-classes" value="${classes}" placeholder="1A, 1B"></td>
+          <td><button class="btn copy-btn" style="color:red; border-color:red; padding:8px;" onclick="this.closest('tr').remove()">Hapus</button></td>
+       `;
+       tbody.appendChild(tr);
+    }
+    
+    function addTeacherRow() { addTeacherRowUI(); }
+    
+    function saveTeachers() {
+       const tbody = document.getElementById('teachers-tbody');
+       const rows = tbody.querySelectorAll('tr');
+       const newDB = {};
+       rows.forEach(r => {
+          const name = r.querySelector('.t-name').value.trim();
+          const cls = r.querySelector('.t-classes').value.trim();
+          if(name) {
+             newDB[name] = cls.split(',').map(s => s.trim()).filter(s => s);
+          }
+       });
+       DB_TEACHERS = newDB;
+       
+       showLoading("Menyimpan...");
+       fetch(getGASUrl(), {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({ action: 'saveTeachers', payload: JSON.stringify(DB_TEACHERS) })
+       }).then(() => {
+          hideLoading();
+          alert('Konfigurasi Guru disimpan!');
+          initDashboard(); // Refresh dropdown
+       }).catch(e => {
+          hideLoading();
+          alert('Error: ' + e);
+       });
+    }
+    
+    function downloadStudentsExcel() {
+       const wb = XLSX.utils.book_new();
+       // Create 30 sheets
+       const classes = ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"];
+       
+       classes.forEach(c => {
+          let data = [["No. Absen", "Nama Lengkap"]];
+          let students = DB_STUDENTS[c];
+          // fallback to old DB if not loaded
+          if (!students && typeof _studentsDB !== 'undefined') students = _studentsDB[c];
+          
+          if(students) {
+             students.forEach((name, i) => {
+                data.push([i+1, name]);
+             });
+          }
+          const ws = XLSX.utils.aoa_to_sheet(data);
+          XLSX.utils.book_append_sheet(wb, ws, c);
+       });
+       
+       XLSX.writeFile(wb, "Data_Siswa_BrushMaster.xlsx");
+    }
+    
+    function uploadStudentsExcel(e) {
+       const file = e.target.files[0];
+       if(!file) return;
+       const reader = new FileReader();
+       reader.onload = function(evt) {
+          const data = evt.target.result;
+          const wb = XLSX.read(data, {type: 'binary'});
+          const newDB = {};
+          
+          wb.SheetNames.forEach(sheetName => {
+             const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {header: 1});
+             const students = [];
+             for(let i=1; i<rows.length; i++) {
+                if(rows[i] && rows[i][1]) {
+                   students.push(rows[i][1].toString().trim());
+                }
+             }
+             if(students.length > 0) newDB[sheetName] = students;
+          });
+          
+          DB_STUDENTS = newDB;
+          document.getElementById('student-upload-status').textContent = "File Excel berhasil dibaca! Menyimpan ke server...";
+          
+          fetch(getGASUrl(), {
+             method: 'POST',
+             mode: 'no-cors',
+             body: JSON.stringify({ action: 'saveStudents', payload: JSON.stringify(DB_STUDENTS) })
+          }).then(() => {
+             document.getElementById('student-upload-status').textContent = "Berhasil disimpan di Server!";
+             setTimeout(() => document.getElementById('student-upload-status').textContent = "", 3000);
+          }).catch(err => {
+             document.getElementById('student-upload-status').textContent = "Gagal menyimpan ke server.";
+          });
+       };
+       reader.readAsBinaryString(file);
+    }
+    
+    function saveCustomGasUrl() {
+       const url = document.getElementById('custom-gas-url').value.trim();
+       if(url) {
+          localStorage.setItem('customGASUrl', url);
+       } else {
+          localStorage.removeItem('customGASUrl');
+       }
+       alert("URL Server berhasil disimpan. Halaman akan dimuat ulang.");
+       window.location.reload();
+    }
   </script>
 </body>
 </html>
