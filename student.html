@@ -574,15 +574,36 @@
        startBtn.disabled = !studentSelect.value || !assignmentData;
     }
     
-    // Call populate
+    studentSelect.addEventListener('change', () => {
+       if (studentSelect.value && assignmentData && assignmentData.id) {
+           const progress = checkRestore(studentSelect.value, assignmentData.id);
+           if (progress) {
+               if (confirm(`Ditemukan progres tersimpan untuk ${studentSelect.value}. Ingin melanjutkannya?`)) {
+                   restoreStudentProgress();
+               }
+           }
+       }
+       checkStartBtn();
+    });
+
     populateThemeDropdown();
 
     function applyTheme(themeId) {
         document.body.className = themeId;
-        localStorage.setItem('stroke_app_theme', themeId);
+        try {
+            localStorage.setItem('stroke_app_theme', themeId);
+        } catch(e) {
+            console.warn('localStorage not available', e);
+        }
     }
 
-    const savedTheme = localStorage.getItem('stroke_app_theme');
+    let savedTheme = null;
+    try {
+        savedTheme = localStorage.getItem('stroke_app_theme');
+    } catch(e) {
+        console.warn('localStorage not available', e);
+    }
+    
     if (savedTheme) {
         applyTheme(savedTheme);
         const themeObj = THEMES.find(t => t.id === savedTheme);
@@ -606,17 +627,32 @@
             studentName: studentName,
             currentWordMistakes: currentWordMistakes
         };
-        localStorage.setItem('stroke_app_student_progress_' + assignmentData.id, JSON.stringify(progress));
+        try {
+            localStorage.setItem('stroke_app_student_progress_' + assignmentData.id, JSON.stringify(progress));
+        } catch(e) { console.warn(e); }
+    }
+
+    function checkRestore(studentName, id) {
+        if (!id) return false;
+        try {
+            const saved = localStorage.getItem('stroke_app_student_progress_' + id);
+            if (!saved) return false;
+            
+            const progress = JSON.parse(saved);
+            
+            if (progress.studentName === studentName && progress.currentTaskIndex !== undefined) {
+                return progress;
+            }
+        } catch(e) { console.warn(e); }
+        return false;
     }
 
     function restoreStudentProgress() {
         if (!assignmentData.id) return false;
-        const saved = localStorage.getItem('stroke_app_student_progress_' + assignmentData.id);
-        if (!saved) return false;
+        const progress = checkRestore(studentName, assignmentData.id);
+        if (!progress) return false;
         
         try {
-            const progress = JSON.parse(saved);
-            
             if (progress.studentName && progress.currentTaskIndex !== undefined) {
                 studentName = progress.studentName;
                 document.getElementById('display-name').textContent = studentName;
