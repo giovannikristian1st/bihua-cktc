@@ -316,7 +316,11 @@
     let DB_TEACHERS = {};
     let DB_STUDENTS = {};
     const FALLBACK_TEACHERS = {
-       "Entah Siapa": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"]
+       "Giovanni": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Ivana": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Imelda": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Shinta": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Juminah": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"]
     };
     
     function getGASUrl() {
@@ -658,7 +662,7 @@
                    const v = _meihuaDB[b][u].vocab[idx];
                    const el = document.createElement('div');
                    el.className = 'vocab-item';
-                   el.style.borderColor = var(--primary);
+                   el.style.borderColor = 'var(--primary)';
                    el.innerHTML = `
                       <div style="flex-grow:1;">
                          <div class="vocab-char">${chars.map(i => v.char[i]).join('')}</div>
@@ -987,5 +991,27 @@
        window.location.reload();
     }
   </script>
+
+  <!-- Tutorial Modal -->
+  <div id="tutorial-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:12px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto;">
+      <h2 style="color:var(--primary); margin-bottom:15px;">Cara Deploy App Script & Excel Sendiri</h2>
+      <ol style="margin-left:20px; line-height:1.6;">
+        <li>Buka <a href="https://docs.google.com/spreadsheets/d/1B6o8Y_qX7J7mD6jUqH2N6jW9jX3b6C2B" target="_blank">Google Sheet Template</a> dan buat salinan ke Google Drive Anda (File -> Buat salinan / Make a copy).</li>
+        <li>Di file salinan Anda, klik menu <b>Ekstensi</b> > <b>Apps Script</b>.</li>
+        <li>Hapus semua kode yang ada, lalu copy paste kode App Script yang diperlukan ke sana. (Pastikan Anda sudah memiliki kodenya).</li>
+        <li>Klik tombol <b>Terapkan</b> (Deploy) di sudut kanan atas > <b>Deployment baru</b>.</li>
+        <li>Pilih jenis <b>Aplikasi Web</b>.</li>
+        <li>Atur "Akses ke aplikasi" menjadi <b>Siapa saja</b> (Anyone).</li>
+        <li>Klik <b>Terapkan</b> dan berikan otorisasi akses (jika diminta, pilih akun Anda > Lanjutan > Buka... tidak aman).</li>
+        <li>Copy "URL Aplikasi Web" yang dihasilkan.</li>
+        <li>Paste URL tersebut ke dalam kolom "URL App Script (Custom)" di halaman Options ini, lalu klik Simpan.</li>
+      </ol>
+      <div style="text-align:right; margin-top:20px;">
+        <button class="btn" style="width:auto; padding:8px 16px;" onclick="document.getElementById('tutorial-modal').style.display='none'">Tutup</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
