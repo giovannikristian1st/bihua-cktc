@@ -356,8 +356,12 @@
           }
           if(id === 'nav-options') {
              showView('view-options');
-             renderTeachersOptions();
              document.getElementById('custom-gas-url').value = getGASUrl();
+             try {
+                renderTeachersOptions();
+             } catch(e) {
+                console.error("Error rendering teachers options:", e);
+             }
           }
        });
     });
@@ -371,7 +375,22 @@
           if(dataT.status === 'success') {
              try { DB_TEACHERS = JSON.parse(dataT.data); } catch(e) {}
           }
-          if(Object.keys(DB_TEACHERS).length === 0) DB_TEACHERS = FALLBACK_TEACHERS;
+          // Validation: must be object, not array, and have keys. Values must be arrays.
+          let isValid = false;
+          if (DB_TEACHERS && typeof DB_TEACHERS === 'object' && !Array.isArray(DB_TEACHERS)) {
+             const keys = Object.keys(DB_TEACHERS);
+             if (keys.length > 0) {
+                 isValid = true;
+                 for (const k of keys) {
+                     if (!Array.isArray(DB_TEACHERS[k])) {
+                         isValid = false; break;
+                     }
+                 }
+             }
+          }
+          if (!isValid) {
+             DB_TEACHERS = JSON.parse(JSON.stringify(FALLBACK_TEACHERS));
+          }
           
           const resS = await fetch(`${getGASUrl()}?action=getStudents`);
           const dataS = await resS.json();
@@ -849,7 +868,10 @@
        const tbody = document.getElementById('teachers-tbody');
        tbody.innerHTML = '';
        for(const t in DB_TEACHERS) {
-          addTeacherRowUI(t, DB_TEACHERS[t].join(', '));
+          let classes = "";
+          if (Array.isArray(DB_TEACHERS[t])) classes = DB_TEACHERS[t].join(', ');
+          else if (typeof DB_TEACHERS[t] === 'string') classes = DB_TEACHERS[t];
+          addTeacherRowUI(t, classes);
        }
     }
     
