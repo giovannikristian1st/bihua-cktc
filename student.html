@@ -60,6 +60,32 @@
     .btn:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    
+    /* Custom Dropdown */
+    .custom-select { position: relative; width: 100%; margin-bottom: 20px; text-align: left; }
+    .custom-select-header {
+       padding: 12px; border-radius: var(--btn-radius); background: var(--bg-card);
+       color: var(--text-main); border: 1px solid var(--border-color);
+       font-size: 1.1rem; cursor: pointer; display: flex; justify-content: space-between;
+       align-items: center; transition: border-color 0.2s;
+    }
+    .custom-select-header:hover { border-color: var(--primary); }
+    .custom-select-list {
+       position: absolute; top: 100%; left: 0; right: 0; max-height: 250px; overflow-y: auto;
+       background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--btn-radius);
+       margin-top: 5px; z-index: 100; box-shadow: var(--card-shadow); display: none;
+    }
+    .custom-select-list.show { display: block; }
+    
+    .theme-option {
+       padding: 10px 15px; cursor: pointer; display: flex; justify-content: space-between;
+       align-items: center; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.1);
+       background: var(--bg-card); color: var(--text-main); transition: transform 0.2s;
+    }
+    .theme-option:last-child { border-bottom: none; }
+    .theme-option:hover { filter: brightness(1.1); transform: scale(0.98); }
+    .theme-color-dot { width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
     /* ── Theme Select Screen ── */
     #screen-theme { overflow-y: auto; display: block; padding-top: 50px; }
     .theme-grid {
@@ -210,50 +236,21 @@
         <option value="">-- Pilih Nama Anda --</option>
       </select>
       
+      
+      <div class="custom-select" id="theme-custom-select">
+         <div class="custom-select-header" id="theme-select-header">
+            <span id="theme-select-text">-- Pilih Tema --</span>
+            <span>▼</span>
+         </div>
+         <div class="custom-select-list" id="theme-select-list"></div>
+      </div>
+
       <button id="start-btn" class="btn" disabled>Mulai Mengerjakan</button>
     </div>
   </div>
 
   
-  <!-- THEME SELECTION SCREEN -->
-  <div id="screen-theme" class="screen hidden" style="justify-content: flex-start; padding-top: 40px;">
-    <div style="max-width: 800px; width: 100%; text-align: center;">
-      <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px;">Pilih Gaya Visualmu</h2>
-      <p style="color: var(--text-muted); margin-bottom: 20px;">Gaya yang kamu pilih akan disimpan dan diaplikasikan pada setiap tugas berikutnya.</p>
-      
-      <div class="theme-grid" id="theme-grid">
-         <!-- Theme buttons injected via JS -->
-      </div>
-      
-      <button class="btn" id="btn-save-theme" style="max-width: 300px; margin: 0 auto; display: block;">Simpan & Mulai</button>
-    </div>
-  </div>
-
-  <!-- GAME SCREEN -->
-  <div id="screen-game" class="screen hidden">
-    <button class="options-btn" id="btn-open-options" title="Ganti Tema">⚙️</button>
-    <div class="header">
-      <div class="student-name-display" id="display-name">Nama Murid</div>
-      <div class="progress-text" id="progress-text">Kata 1 / 5</div>
-    </div>
-
-    <div class="game-area">
-      <div class="full-word-context" id="full-word-context" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px; color: #0E1318; text-align: center;"></div>
-      
-      <div class="char-info">
-        <div class="char-pinyin" id="char-pinyin">pīn yīn</div>
-        <div class="char-meaning" id="char-meaning">Meaning</div>
-      </div>
-
-      <div class="writer-container" id="writer-container">
-        <div id="writer-target"></div>
-      </div>
-
-      <div class="rep-dots" id="rep-dots"></div>
-      
-      <div class="mistake-counter" id="mistake-counter">Kesalahan: 0</div>
-    </div>
-  </div>
+  
 
   <!-- TYPING SCREEN -->
   <div id="screen-typing" class="screen hidden">
@@ -385,11 +382,7 @@
        });
     }
     
-    document.getElementById('btn-open-options').addEventListener('click', () => {
-       document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-       document.getElementById('screen-theme').classList.remove('hidden');
-       renderThemeOptions();
-    });
+    
     
     document.getElementById('btn-save-theme').addEventListener('click', () => {
        const btn = document.getElementById('btn-save-theme');
@@ -404,7 +397,7 @@
        }).then(() => {
           btn.disabled = false;
           btn.textContent = 'Simpan & Mulai';
-          document.getElementById('screen-theme').classList.add('hidden');
+          
           // Kembali ke game jika sudah login
           if (tasks.length > 0) {
              document.getElementById('screen-game').classList.remove('hidden');
@@ -417,7 +410,7 @@
           btn.disabled = false;
           btn.textContent = 'Simpan & Mulai';
           // tetep masuk game aja kalau error
-          document.getElementById('screen-theme').classList.add('hidden');
+          
           if (tasks.length === 0) loadWord();
           document.getElementById('screen-game').classList.remove('hidden');
        });
@@ -583,9 +576,77 @@
       }
     }
 
-    studentSelect.addEventListener('change', () => {
-      startBtn.disabled = !studentSelect.value || !assignmentData;
+    studentSelect.addEventListener('change', checkStartBtn);
+
+
+    
+    const themeHeader = document.getElementById('theme-select-header');
+    const themeList = document.getElementById('theme-select-list');
+    const themeText = document.getElementById('theme-select-text');
+
+    function populateThemeDropdown() {
+      if(!themeList) return;
+      themeList.innerHTML = '';
+      THEMES.forEach(t => {
+        const div = document.createElement('div');
+        div.className = `theme-option ${t.id}`;
+        
+        // Inline styles to ensure it picks up its own theme variables
+        div.style.backgroundColor = 'var(--bg-body)';
+        div.style.color = 'var(--primary)';
+        div.style.borderLeft = '4px solid var(--primary)';
+        
+        div.innerHTML = `
+           <span>${t.name}</span>
+           <div class="theme-color-dot" style="background-color: ${t.color};"></div>
+        `;
+        div.addEventListener('click', () => {
+           applyTheme(t.id);
+           themeText.textContent = t.name;
+           themeText.style.color = 'var(--primary)';
+           themeList.classList.remove('show');
+           checkStartBtn();
+        });
+        themeList.appendChild(div);
+      });
+    }
+
+    if(themeHeader) {
+        themeHeader.addEventListener('click', () => {
+           themeList.classList.toggle('show');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+       const selectEl = document.getElementById('theme-custom-select');
+       if (selectEl && !selectEl.contains(e.target) && themeList) {
+          themeList.classList.remove('show');
+       }
     });
+
+    // Check Start Button
+    function checkStartBtn() {
+       startBtn.disabled = !studentSelect.value || !assignmentData;
+    }
+    
+    // Call populate
+    populateThemeDropdown();
+
+    function applyTheme(themeId) {
+        document.body.className = themeId;
+        localStorage.setItem('stroke_app_theme', themeId);
+    }
+
+    const savedTheme = localStorage.getItem('stroke_app_theme');
+    if (savedTheme) {
+        applyTheme(savedTheme);
+        const themeObj = THEMES.find(t => t.id === savedTheme);
+        const themeTextEl = document.getElementById('theme-select-text');
+        if(themeObj && themeTextEl) {
+           themeTextEl.textContent = themeObj.name;
+           themeTextEl.style.color = 'var(--primary)';
+        }
+    }
 
 
     function saveStudentProgress() {
@@ -977,6 +1038,9 @@
       });
     }
 
+    let currentLeaderboardData = [];
+    let currentLbMode = 'time'; // 'time' or 'count'
+    
     function fetchLeaderboard() {
        if (!assignmentData.cls) return; 
        
@@ -994,7 +1058,8 @@
        .then(response => response.json())
        .then(data => {
           if (data.status === "success" && data.leaderboard) {
-             renderLeaderboard(data.leaderboard);
+             currentLeaderboardData = data.leaderboard;
+             renderLeaderboard();
           }
        })
        .catch(err => {
@@ -1004,37 +1069,81 @@
        });
     }
     
-    function renderLeaderboard(board) {
+    function renderLeaderboard() {
        const pLoad = document.getElementById('submit-status').querySelector('p:last-child');
        if(pLoad) pLoad.style.display = 'none'; 
        
-       const section = document.getElementById('leaderboard-section');
        const list = document.getElementById('leaderboard-list');
+       if (!list) return;
+       list.innerHTML = '';
        
-       list.innerHTML = "";
-       if (board.length === 0) {
-          list.innerHTML = "<p style='color: #5E6A75;'>Belum ada data.</p>";
-       } else {
-          board.forEach((user, idx) => {
-             const div = document.createElement('div');
-             div.className = 'lb-item';
-             if (user.name === studentName) div.classList.add('me');
-             
-             let medal = (idx + 1) + ".";
-             if (idx === 0) medal = "🥇";
-             else if (idx === 1) medal = "🥈";
-             else if (idx === 2) medal = "🥉";
-             
-             div.innerHTML = `
-                <div class="lb-rank">${medal}</div>
-                <div class="lb-name">${user.name}</div>
-                <div class="lb-count">${user.count} Salah</div>
-             `;
-             list.appendChild(div);
-          });
+       if(!currentLeaderboardData || currentLeaderboardData.length === 0) {
+          list.innerHTML = '<p style="color:gray; font-size:0.9rem;">Belum ada data di papan peringkat.</p>';
+          return;
        }
-       // Tidak usah langsung ubah style block di sini, tunggu ditekan tombolnya
+       
+       let sortedData = [...currentLeaderboardData];
+       if (currentLbMode === 'time') {
+           // Sort by fastestTime ascending. Exclude 0 unless everyone is 0.
+           sortedData = sortedData.filter(u => u.fastestTime > 0);
+           sortedData.sort((a, b) => a.fastestTime - b.fastestTime);
+       } else {
+           // Sort by completions descending
+           sortedData.sort((a, b) => b.completions - a.completions);
+       }
+       
+       if (sortedData.length === 0) {
+           list.innerHTML = '<p style="color:gray; font-size:0.9rem;">Belum ada data untuk mode ini.</p>';
+           return;
+       }
+       
+       sortedData.slice(0, 10).forEach((user, index) => {
+          const div = document.createElement('div');
+          div.className = 'lb-item';
+          if (user.name === studentName) div.classList.add('me');
+          
+          let rankStr = index + 1;
+          if(rankStr === 1) rankStr = '🥇';
+          else if(rankStr === 2) rankStr = '🥈';
+          else if(rankStr === 3) rankStr = '🥉';
+          
+          let statStr = currentLbMode === 'time' ? formatDuration(user.fastestTime) : `${user.completions}x Selesai`;
+          
+          div.innerHTML = `
+             <div class="lb-rank">${rankStr}</div>
+             <div class="lb-name">${user.name}</div>
+             <div class="lb-count">${statStr}</div>
+          `;
+          list.appendChild(div);
+       });
     }
+    
+    function formatDuration(seconds) {
+        if (!seconds) return '-';
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+       document.body.addEventListener('click', (e) => {
+           if (e.target.id === 'lb-toggle-time') {
+               currentLbMode = 'time';
+               e.target.style.background = 'var(--primary)';
+               e.target.style.color = 'white';
+               const other = document.getElementById('lb-toggle-count');
+               if (other) { other.style.background = '#E5E7EB'; other.style.color = '#0E1318'; }
+               renderLeaderboard();
+           } else if (e.target.id === 'lb-toggle-count') {
+               currentLbMode = 'count';
+               e.target.style.background = 'var(--primary)';
+               e.target.style.color = 'white';
+               const other = document.getElementById('lb-toggle-time');
+               if (other) { other.style.background = '#E5E7EB'; other.style.color = '#0E1318'; }
+               renderLeaderboard();
+           }
+       });
+    });
 
     // Event Listeners Opsi Selesai
     document.getElementById('btn-show-leaderboard').addEventListener('click', () => {
