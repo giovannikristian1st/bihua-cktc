@@ -480,8 +480,8 @@
        if (!assignmentData.id) {
            // Create a simple hash from the payload string to act as unique ID for this link
            let hash = 0;
-           for (let i = 0; i < d.length; i++) {
-               hash = ((hash << 5) - hash) + d.charCodeAt(i);
+           for (let i = 0; i < payloadStr.length; i++) {
+               hash = ((hash << 5) - hash) + payloadStr.charCodeAt(i);
                hash = hash & hash; // Convert to 32bit integer
            }
            assignmentData.id = Math.abs(hash).toString();
