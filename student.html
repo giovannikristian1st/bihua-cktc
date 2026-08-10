@@ -571,6 +571,63 @@
       startBtn.disabled = !studentSelect.value || !assignmentData;
     });
 
+
+    function saveStudentProgress() {
+        if (!assignmentData.id) return;
+        const progress = {
+            currentScreen: !screenFinish.classList.contains('hidden') ? 'finish' : 
+                           !screenTyping.classList.contains('hidden') ? 'typing' : 'game',
+            currentTaskIndex: currentTaskIndex,
+            currentRepIndex: currentRepIndex,
+            mistakesMap: mistakesMap,
+            studentName: studentName,
+            currentWordMistakes: currentWordMistakes
+        };
+        localStorage.setItem('stroke_app_student_progress_' + assignmentData.id, JSON.stringify(progress));
+    }
+
+    function restoreStudentProgress() {
+        if (!assignmentData.id) return false;
+        const saved = localStorage.getItem('stroke_app_student_progress_' + assignmentData.id);
+        if (!saved) return false;
+        
+        try {
+            const progress = JSON.parse(saved);
+            
+            if (progress.studentName && progress.currentTaskIndex !== undefined) {
+                studentName = progress.studentName;
+                document.getElementById('display-name').textContent = studentName;
+                
+                currentTaskIndex = progress.currentTaskIndex;
+                currentRepIndex = progress.currentRepIndex || 0;
+                mistakesMap = progress.mistakesMap || {};
+                currentWordMistakes = progress.currentWordMistakes || 0;
+                
+                if (progress.currentScreen === 'finish') {
+                    screenLogin.classList.add('hidden');
+                    screenFinish.classList.remove('hidden');
+                    document.getElementById('finish-options').style.display = 'flex';
+                    fetchLeaderboard();
+                    return true;
+                } else if (progress.currentScreen === 'typing') {
+                    screenLogin.classList.add('hidden');
+                    showTypingModal(tasks[currentTaskIndex]);
+                    return true;
+                } else if (progress.currentScreen === 'game') {
+                    screenLogin.classList.add('hidden');
+                    screenGame.classList.remove('hidden');
+                    document.getElementById('total-words').textContent = tasks.length;
+                    
+                    drawnChars.clear();
+                    currentWordMistakes = 0;
+                    loadWord();
+                    return true;
+                }
+            }
+        } catch(e) { console.error(e); }
+        return false;
+    }
+
     startBtn.addEventListener('click', () => {
       studentName = studentSelect.value;
       
@@ -582,12 +639,14 @@
       screenLogin.classList.add('hidden');
       screenGame.classList.remove('hidden');
       
+      saveStudentProgress();
       setTimeout(loadWord, 100);
     });
 
     function loadWord() {
       if(currentTaskIndex >= tasks.length) {
         finishGame();
+        saveStudentProgress();
         return;
       }
       
@@ -749,6 +808,7 @@
     function finishGame() {
       screenGame.classList.add('hidden');
       screenFinish.classList.remove('hidden');
+      saveStudentProgress();
       document.getElementById('finish-content').style.display = 'block';
       document.getElementById('thank-you-msg').style.display = 'none';
       document.getElementById('finish-options').style.display = 'none';
@@ -827,11 +887,15 @@
     function nextTask() {
        currentTaskIndex++;
        currentRepIndex = 0;
+       saveStudentProgress();
+       saveStudentProgress();
        setTimeout(loadWord, 100);
     }
 
     function handleRepetition() {
       currentRepIndex++;
+      saveStudentProgress();
+      saveStudentProgress();
       updateDots();
       
       if(currentRepIndex >= repetitions) {
@@ -850,8 +914,11 @@
     function submitData() {
       const statusEl = document.getElementById('submit-status');
       
+      const totalMistakes = Object.values(mistakesMap).reduce((a, b) => a + b, 0);
       const payload = {
          action: "submit",
+         taskId: assignmentData.id,
+         totalMistakes: totalMistakes,
          cls: assignmentData.cls || "Tidak diketahui",
          studentName: studentName,
          totalWords: tasks.length,
@@ -895,6 +962,7 @@
        
        const payload = {
           action: "getLeaderboard",
+          taskId: assignmentData.id,
           cls: assignmentData.cls
        };
        
@@ -940,7 +1008,7 @@
              div.innerHTML = `
                 <div class="lb-rank">${medal}</div>
                 <div class="lb-name">${user.name}</div>
-                <div class="lb-count">${user.count}x</div>
+                <div class="lb-count">${user.count} Salah</div>
              `;
              list.appendChild(div);
           });
@@ -970,6 +1038,7 @@
        mistakesMap = {};
        tasks.forEach(t => mistakesMap[t.char] = 0);
        
+       saveStudentProgress();
        loadWord();
     });
 

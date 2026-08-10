@@ -212,13 +212,21 @@
       <p style="color:var(--text-muted)">Pantau tugas dan hasil pekerjaan murid</p>
     </header>
     <div class="card">
-       <button class="btn copy-btn" style="width:auto; margin-bottom:20px;" onclick="fetchTasks()">🔄 Refresh Daftar Tugas</button>
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <button class="btn copy-btn" style="width:auto;" onclick="fetchTasks()">&#128260; Refresh Daftar Tugas</button>
+          <div>
+            <label style="font-weight:bold; margin-right:10px;">Filter Guru:</label>
+            <select id="history-teacher-filter" class="form-control" style="width:auto; display:inline-block;" onchange="renderHistoryTable()">
+               <option value="ALL">Semua Guru</option>
+            </select>
+          </div>
+       </div>
        <div style="overflow-x:auto;">
          <table class="data-table">
             <thead>
                <tr style="background:var(--primary); color:white;">
-                  <th style="border-radius:8px 0 0 0;">ID</th>
-                  <th>Tanggal</th>
+                  <th style="border-radius:8px 0 0 0;">Tanggal</th>
+                  <th>Guru</th>
                   <th>Kelas</th>
                   <th>Bab</th>
                   <th style="border-radius:0 8px 0 0;">Aksi</th>
@@ -333,6 +341,50 @@
     }
 
     // --- NAVIGATION ---
+
+    function saveTeacherState() {
+        const state = {
+            activeView: document.querySelector('.view-container[style*="display: block"]') ? document.querySelector('.view-container[style*="display: block"]').id : 'dashboard',
+            kelas: document.getElementById('class-select').value,
+            repetition: document.getElementById('repetition').value,
+            pinyin: document.getElementById('require-pinyin').checked,
+            meaning: document.getElementById('require-meaning').checked,
+            filterGuru: document.getElementById('history-teacher-filter').value,
+            selectedVocabs: selectedVocabs.map(v => v.id),
+            teacherName: document.getElementById('teacher-name-select').value
+        };
+        localStorage.setItem('stroke_app_teacher_state', JSON.stringify(state));
+    }
+
+    function restoreTeacherState() {
+        const saved = localStorage.getItem('stroke_app_teacher_state');
+        if(saved) {
+            try {
+                const state = JSON.parse(saved);
+                if(state.kelas) document.getElementById('class-select').value = state.kelas;
+                if(state.repetition) document.getElementById('repetition').value = state.repetition;
+                if(state.pinyin !== undefined) document.getElementById('require-pinyin').checked = state.pinyin;
+                if(state.meaning !== undefined) document.getElementById('require-meaning').checked = state.meaning;
+                if(state.teacherName) document.getElementById('teacher-name-select').value = state.teacherName;
+                if(state.filterGuru) document.getElementById('history-teacher-filter').value = state.filterGuru;
+                
+                if(state.selectedVocabs && Array.isArray(state.selectedVocabs)) {
+                    state.selectedVocabs.forEach(id => {
+                        const vocab = vocabularyData.find(v => v.id === id);
+                        if(vocab && !selectedVocabs.find(v => v.id === id)) {
+                           selectedVocabs.push(vocab);
+                        }
+                    });
+                    updateSelectedList();
+                }
+                
+                if(state.activeView) {
+                    showView(state.activeView);
+                }
+            } catch(e) {}
+        }
+    }
+
     function showView(viewId) {
        document.getElementById('view-dashboard').style.display = 'none';
        document.getElementById('view-history').style.display = 'none';
@@ -819,7 +871,7 @@
           }
        } catch (err) {
           console.error(err);
-          alert("Gagal memuat riwayat tugas.");
+          alert("Gagal memuat riwayat tugas: " + err.message + "\n" + err.stack);
        }
        hideLoading();
     }
