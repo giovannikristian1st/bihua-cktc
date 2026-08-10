@@ -371,17 +371,25 @@
     // --- NAVIGATION ---
 
     function saveTeacherState() {
-        const state = {
-            activeView: document.querySelector('.view-container[style*="display: block"]') ? document.querySelector('.view-container[style*="display: block"]').id : 'dashboard',
-            kelas: document.getElementById('class-select').value,
-            repetition: document.getElementById('repetition').value,
-            pinyin: document.getElementById('require-pinyin').checked,
-            meaning: document.getElementById('require-meaning').checked,
-            filterGuru: document.getElementById('history-teacher-filter').value,
-            selectedVocabs: selectedVocabs.map(v => v.id),
-            teacherName: document.getElementById('teacher-name-select').value
-        };
-        localStorage.setItem('stroke_app_teacher_state', JSON.stringify(state));
+        try {
+            // Find the visible view
+            let activeView = 'view-dashboard';
+            ['view-dashboard','view-history','view-task-details','view-options'].forEach(vid => {
+                const el = document.getElementById(vid);
+                if (el && el.style.display === 'block') activeView = vid;
+            });
+            const state = {
+                activeView: activeView,
+                kelas: document.getElementById('class-select') ? document.getElementById('class-select').value : '',
+                repetition: document.getElementById('repetition') ? document.getElementById('repetition').value : '1',
+                pinyin: document.getElementById('require-pinyin') ? document.getElementById('require-pinyin').checked : false,
+                meaning: document.getElementById('require-meaning') ? document.getElementById('require-meaning').checked : false,
+                filterGuru: document.getElementById('history-teacher-filter') ? document.getElementById('history-teacher-filter').value : 'ALL',
+                selectedVocabs: JSON.parse(JSON.stringify(selectedVocabs)),
+                teacherName: document.getElementById('teacher-name') ? document.getElementById('teacher-name').value : ''
+            };
+            localStorage.setItem('stroke_app_teacher_state', JSON.stringify(state));
+        } catch(e) { /* silently fail to not break UI */ }
     }
 
     function restoreTeacherState() {
@@ -393,20 +401,18 @@
                 if(state.repetition) document.getElementById('repetition').value = state.repetition;
                 if(state.pinyin !== undefined) document.getElementById('require-pinyin').checked = state.pinyin;
                 if(state.meaning !== undefined) document.getElementById('require-meaning').checked = state.meaning;
-                if(state.teacherName) document.getElementById('teacher-name-select').value = state.teacherName;
+                if(state.teacherName) { const tn = document.getElementById('teacher-name'); if(tn) tn.value = state.teacherName; }
                 if(state.filterGuru) document.getElementById('history-teacher-filter').value = state.filterGuru;
                 
-                if(state.selectedVocabs && Array.isArray(state.selectedVocabs)) {
-                    state.selectedVocabs.forEach(id => {
-                        const vocab = vocabularyData.find(v => v.id === id);
-                        if(vocab && !selectedVocabs.find(v => v.id === id)) {
-                           selectedVocabs.push(vocab);
-                        }
-                    });
-                    updateSelectedList();
+                if(state.selectedVocabs && typeof state.selectedVocabs === 'object') {
+                    try {
+                        selectedVocabs = JSON.parse(JSON.stringify(state.selectedVocabs));
+                        updateCombinedView();
+                        renderBookMatrix();
+                    } catch(e) { /* ignore */ }
                 }
                 
-                if(state.activeView) {
+                if(state.activeView && ['view-dashboard','view-history','view-options'].includes(state.activeView)) {
                     showView(state.activeView);
                 }
             } catch(e) {}
@@ -476,14 +482,25 @@
           }
           
           initDashboard();
+          // Restore teacher state after dashboard is ready
+          setTimeout(restoreTeacherState, 100);
        } catch (err) {
           console.error(err);
           alert("Gagal terhubung ke Server. Pastikan URL benar di Options.");
           DB_TEACHERS = FALLBACK_TEACHERS;
           initDashboard();
+          setTimeout(restoreTeacherState, 100);
        }
        hideLoading();
     };
+
+    // --- Auto-save on change ---
+    ['class-select','repetition','require-pinyin','require-meaning','history-teacher-filter'].forEach(id => {
+       const el = document.getElementById(id);
+       if(el) el.addEventListener('change', saveTeacherState);
+    });
+    const tnEl = document.getElementById('teacher-name');
+    if(tnEl) tnEl.addEventListener('change', saveTeacherState);
 
     // --- DASHBOARD LOGIC ---
     let selectedVocabs = {};
