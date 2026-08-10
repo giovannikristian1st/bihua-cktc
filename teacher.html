@@ -211,6 +211,11 @@
       <h1>Riwayat Tugas</h1>
       <p style="color:var(--text-muted)">Pantau tugas dan hasil pekerjaan murid</p>
     </header>
+    <div style="background-color:#FEF3C7; color:#92400E; padding:15px; border-radius:8px; border-left:4px solid #F59E0B; margin-bottom:20px; font-size:0.95rem;">
+      <strong>⚠️ Info Kapasitas Database:</strong><br>
+      Google Sheets memiliki batas kapasitas data (sekitar 5 juta sel). 
+      Agar aplikasi tetap ringan dan tidak error, sangat disarankan untuk secara rutin <strong>Menghapus Tugas</strong> yang sudah selesai dan tidak diperlukan lagi. Menghapus tugas akan mengosongkan data papan peringkat (leaderboard) secara otomatis.
+    </div>
     <div class="card">
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
           <button class="btn copy-btn" style="width:auto;" onclick="fetchTasks()">&#128260; Refresh Daftar Tugas</button>
@@ -262,14 +267,20 @@
             </tbody>
          </table>
        </div>
-       <h3 style="margin-top:25px; margin-bottom:10px; color:var(--primary);">🏆 Papan Peringkat (Leaderboard)</h3>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px;">
+         <h3 style="color:var(--primary); margin:0;">🏆 Papan Peringkat</h3>
+         <div style="display:flex; gap:10px;">
+             <button id="lb-teacher-toggle-time" style="padding:6px 12px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Waktu Tercepat</button>
+             <button id="lb-teacher-toggle-count" style="padding:6px 12px; background:#E5E7EB; color:#0E1318; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Pengulangan Terbanyak</button>
+         </div>
+       </div>
        <div style="overflow-x:auto;">
          <table class="data-table">
             <thead>
                <tr style="background:#F59E0B; color:white;">
                   <th style="border-radius:8px 0 0 0;">Peringkat</th>
                   <th>Nama Murid</th>
-                  <th style="border-radius:0 8px 0 0;">Total Kesalahan</th>
+                  <th id="lb-teacher-stat-header" style="border-radius:0 8px 0 0;">Waktu / Pengulangan</th>
                </tr>
             </thead>
             <tbody id="task-leaderboard-body">
@@ -934,7 +945,10 @@
              }
           }
           const dateObj = new Date(t.date);
-          const dateStr = dateObj.toLocaleDateString('id-ID');
+          const dd = String(dateObj.getDate()).padStart(2, '0');
+          const mmm = dateObj.toLocaleString('id-ID', { month: 'short' });
+          const yyyy = dateObj.getFullYear();
+          const dateStr = `${dd}/${mmm}/${yyyy}`;
           
           const tr = document.createElement('tr');
           tr.innerHTML = `
@@ -984,7 +998,83 @@
           tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
        }
        
-       // 2. Fetch Leaderboard for this specific Task ID
+           let currentTeacherLbData = [];
+    let currentTeacherLbMode = 'time';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+       const btnTime = document.getElementById('lb-teacher-toggle-time');
+       const btnCount = document.getElementById('lb-teacher-toggle-count');
+       if(btnTime && btnCount) {
+           btnTime.addEventListener('click', () => {
+               currentTeacherLbMode = 'time';
+               btnTime.style.background = 'var(--primary)';
+               btnTime.style.color = 'white';
+               btnCount.style.background = '#E5E7EB';
+               btnCount.style.color = '#0E1318';
+               renderTeacherLeaderboard();
+           });
+           btnCount.addEventListener('click', () => {
+               currentTeacherLbMode = 'count';
+               btnCount.style.background = 'var(--primary)';
+               btnCount.style.color = 'white';
+               btnTime.style.background = '#E5E7EB';
+               btnTime.style.color = '#0E1318';
+               renderTeacherLeaderboard();
+           });
+       }
+    });
+    
+    function formatTeacherDuration(seconds) {
+        if (!seconds) return '-';
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    }
+
+    function renderTeacherLeaderboard() {
+        const lbTbody = document.getElementById('task-leaderboard-body');
+        const header = document.getElementById('lb-teacher-stat-header');
+        lbTbody.innerHTML = '';
+        
+        if (!currentTeacherLbData || currentTeacherLbData.length === 0) {
+            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray;">Belum ada yang masuk papan peringkat untuk tugas ini.</td></tr>';
+            return;
+        }
+        
+        let sortedData = [...currentTeacherLbData];
+        if (currentTeacherLbMode === 'time') {
+            header.textContent = 'Waktu Tercepat';
+            sortedData = sortedData.filter(u => u.fastestTime > 0);
+            sortedData.sort((a, b) => a.fastestTime - b.fastestTime);
+        } else {
+            header.textContent = 'Pengulangan Terbanyak';
+            sortedData.sort((a, b) => b.completions - a.completions);
+        }
+        
+        if (sortedData.length === 0) {
+            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray;">Belum ada data untuk mode ini.</td></tr>';
+            return;
+        }
+        
+        sortedData.slice(0, 10).forEach((user, index) => {
+            const tr = document.createElement('tr');
+            let rank = index + 1;
+            if (rank === 1) rank = '🥇 1';
+            else if (rank === 2) rank = '🥈 2';
+            else if (rank === 3) rank = '🥉 3';
+            
+            let statStr = currentTeacherLbMode === 'time' ? formatTeacherDuration(user.fastestTime) : `${user.completions}x Selesai`;
+            
+            tr.innerHTML = `
+               <td style="text-align:center; font-weight:bold;">${rank}</td>
+               <td>${user.name}</td>
+               <td>${statStr}</td>
+            `;
+            lbTbody.appendChild(tr);
+        });
+    }
+
+    // 2. Fetch Leaderboard for this specific Task ID
        const lbTbody = document.getElementById('task-leaderboard-body');
        lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Memuat Papan Peringkat...</td></tr>';
        try {
@@ -994,21 +1084,9 @@
               body: JSON.stringify({ action: "getLeaderboard", taskId: id, cls: cls })
           });
           const lbD = await lbRes.json();
-          lbTbody.innerHTML = '';
-          if (lbD.status === 'success' && lbD.leaderboard && lbD.leaderboard.length > 0) {
-             lbD.leaderboard.forEach((user, index) => {
-                const tr = document.createElement('tr');
-                let rank = index + 1;
-                if (rank === 1) rank = '🥇 1';
-                else if (rank === 2) rank = '🥈 2';
-                else if (rank === 3) rank = '🥉 3';
-                tr.innerHTML = `
-                   <td style="text-align:center; font-weight:bold;">${rank}</td>
-                   <td>${user.name}</td>
-                   <td>${user.count} Salah</td>
-                `;
-                lbTbody.appendChild(tr);
-             });
+          if (lbD.status === 'success' && lbD.leaderboard) {
+             currentTeacherLbData = lbD.leaderboard;
+             renderTeacherLeaderboard();
           } else {
              lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray;">Belum ada yang masuk papan peringkat untuk tugas ini.</td></tr>';
           }

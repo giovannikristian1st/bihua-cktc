@@ -297,6 +297,10 @@
         
         <div id="leaderboard-section" style="display:none; margin-top: 25px;">
           <h3 style="color: #8B3DFF; margin-bottom: 15px; font-family: sans-serif;">🏆 Papan Peringkat Kelas</h3>
+          <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
+             <button id="lb-toggle-time" style="padding:5px 10px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Tercepat</button>
+             <button id="lb-toggle-count" style="padding:5px 10px; background:#E5E7EB; color:#0E1318; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Pengulangan</button>
+          </div>
           <div id="leaderboard-list" style="max-height: 220px; overflow-y: auto; padding-right: 5px;">
              <!-- items populated by JS -->
           </div>
@@ -314,6 +318,7 @@
     // State
     let assignmentData = null; 
     let studentName = "";
+    let taskStartTime = 0;
     
     let tasks = [];
     let repetitions = 1;
@@ -589,6 +594,7 @@
             currentScreen: !screenFinish.classList.contains('hidden') ? 'finish' : 
                            !screenTyping.classList.contains('hidden') ? 'typing' : 'game',
             currentTaskIndex: currentTaskIndex,
+            taskStartTime: taskStartTime,
             currentRepIndex: currentRepIndex,
             mistakesMap: mistakesMap,
             studentName: studentName,
@@ -610,6 +616,7 @@
                 document.getElementById('display-name').textContent = studentName;
                 
                 currentTaskIndex = progress.currentTaskIndex;
+                taskStartTime = progress.taskStartTime || Date.now();
                 currentRepIndex = progress.currentRepIndex || 0;
                 mistakesMap = progress.mistakesMap || {};
                 currentWordMistakes = progress.currentWordMistakes || 0;
@@ -650,6 +657,7 @@
       screenLogin.classList.add('hidden');
       screenGame.classList.remove('hidden');
       
+      taskStartTime = Date.now();
       saveStudentProgress();
       setTimeout(loadWord, 100);
     });
@@ -938,7 +946,8 @@
             repetitions: repetitions
          },
          mistakes: mistakesMap,
-         status: "Selesai"
+         status: "Selesai",
+         duration: (Date.now() - taskStartTime) / 1000
       };
 
       if(gasUrl.includes("SILAKAN_GANTI")) {
