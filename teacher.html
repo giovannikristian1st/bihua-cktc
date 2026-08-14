@@ -2190,18 +2190,33 @@
              </td>
              <td>
                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-width: 290px;">
-                    <button class="btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="viewTaskResults('${t.id}', '${cls}', '${babStr.join(', ')}', '${taskType}')">
+                    <button class="btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;"
+                       data-task-id="${t.id}" data-cls="${cls.replace(/"/g,'&quot;')}" data-bab="${babStr.join(', ').replace(/"/g,'&quot;')}" data-type="${taskType}">
                        📊 Lihat Hasil
                     </button>
-                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:var(--primary); border-color:var(--primary); white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="copyHistoryTaskLink('${t.id}', this)" title="Salin Link Tugas">
+                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:var(--primary); border-color:var(--primary); white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;"
+                       data-copy-id="${t.id}">
                        📋 Salin Link
                     </button>
-                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:#EF4444; border-color:#FCA5A5; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="deleteTask('${t.id}')" title="Hapus Tugas">
+                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:#EF4444; border-color:#FCA5A5; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;"
+                       data-delete-id="${t.id}">
                        🗑️ Hapus
                     </button>
                  </div>
               </td>
           `;
+
+          // Attach click handlers safely (avoids special char issues in onclick attributes)
+          tr.querySelector('[data-task-id]').addEventListener('click', function() {
+             viewTaskResults(this.dataset.taskId, this.dataset.cls, this.dataset.bab, this.dataset.type);
+          });
+          tr.querySelector('[data-copy-id]').addEventListener('click', function() {
+             copyHistoryTaskLink(this.dataset.copyId, this);
+          });
+          tr.querySelector('[data-delete-id]').addEventListener('click', function() {
+             deleteTask(this.dataset.deleteId);
+          });
+
           tbody.appendChild(tr);
        });
     }
