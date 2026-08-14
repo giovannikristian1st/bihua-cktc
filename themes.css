@@ -1,406 +1,649 @@
-
 /* 
-   BRUSH MASTER DYNAMIC THEMES
-   16 Styles implementation
+   BRUSH MASTER DYNAMIC THEMES & STYLING SYSTEM
+   Harmonized 18 Rich Atmospheric Styles + Tianzige + Multimedia Elements
 */
 
-/* 1. NORMAL (Default) */
+/* 1. NORMAL (Default Clean SCK Style) */
 .theme-normal {
-    --bg-body: #F9FAFB;
+    --bg-body: #F4F6F9;
     --bg-card: #FFFFFF;
-    --text-main: #0E1318;
-    --text-muted: #5E6A75;
+    --text-main: #1E293B;
+    --text-muted: #64748B;
     --primary: #8B3DFF;
     --primary-dark: #00C4CC;
-    --primary-gradient: linear-gradient(135deg, var(--primary-dark), var(--primary));
-    --border-color: #E5E7EB;
-    --card-shadow: 0 8px 30px rgba(0,0,0,0.08);
-    --btn-shadow: 0 4px 12px rgba(139,61,255,0.2);
+    --primary-gradient: linear-gradient(135deg, #8B3DFF, #00C4CC);
+    --border-color: #E2E8F0;
+    --card-shadow: 0 10px 25px -5px rgba(139, 61, 255, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    --btn-shadow: 0 4px 14px rgba(139, 61, 255, 0.25);
     --border-radius: 16px;
-    --btn-radius: 8px;
-    --font-family: 'Times New Roman', Times, 'Kaiti', 'KaiTi', STKaiti, serif;
+    --btn-radius: 10px;
+    --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --brush-color: #8B3DFF;
+    --highlight-color: #00C4CC;
+    --grid-color: rgba(226, 232, 240, 0.9);
+    --grid-center-color: rgba(139, 61, 255, 0.25);
+    background-image: radial-gradient(#CBD5E1 1.2px, transparent 1.2px);
+    background-size: 24px 24px;
 }
+.theme-normal .student-name-display::before { content: "📝 "; }
 
-/* 2. CYBERPUNK */
+/* 2. CYBERPUNK (High-Tech Neon) */
 .theme-cyberpunk {
-    --bg-body: #0B0C10;
-    --bg-card: #1F2833;
-    --text-main: #66FCF1;
-    --text-muted: #C5C6C7;
-    --primary: #F3E600;
-    --primary-dark: #FF003C;
-    --primary-gradient: linear-gradient(135deg, var(--primary-dark), var(--primary));
-    --border-color: #45A29E;
-    --card-shadow: 0 0 15px rgba(102, 252, 241, 0.3);
-    --btn-shadow: 0 0 20px rgba(243, 230, 0, 0.5);
-    --border-radius: 0px;
-    --btn-radius: 0px;
-    --font-family: 'Courier New', Courier, monospace;
+    --bg-body: #050811;
+    --bg-card: #0D1322;
+    --text-main: #00F0FF;
+    --text-muted: #70829B;
+    --primary: #FFE600;
+    --primary-dark: #FF0055;
+    --primary-gradient: linear-gradient(135deg, #FF0055, #FFE600);
+    --border-color: #00F0FF;
+    --card-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.05);
+    --btn-shadow: 0 0 15px rgba(255, 230, 0, 0.4);
+    --border-radius: 4px;
+    --btn-radius: 2px;
+    --font-family: 'Consolas', 'Courier New', monospace;
+    --brush-color: #00F0FF;
+    --highlight-color: #FFE600;
+    --grid-color: rgba(0, 240, 255, 0.15);
+    --grid-center-color: rgba(255, 0, 85, 0.3);
+    background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 85, 0.07) 1px, transparent 1px);
+    background-size: 32px 32px;
+}
+.theme-cyberpunk .student-name-display::before { content: "🦾 "; }
+.theme-cyberpunk .login-card, .theme-cyberpunk .finish-card, .theme-cyberpunk .typing-card, .theme-cyberpunk #writer-target {
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
 }
 
-/* 3. MINIMALIST */
+/* 3. MINIMALIST (Zen Monochrome) */
 .theme-minimalist {
-    --bg-body: #FFFFFF;
+    --bg-body: #FAFAFA;
     --bg-card: #FFFFFF;
-    --text-main: #000000;
-    --text-muted: #666666;
-    --primary: #000000;
-    --primary-dark: #333333;
-    --primary-gradient: #000000;
-    --border-color: #DDDDDD;
-    --card-shadow: none;
+    --text-main: #111111;
+    --text-muted: #737373;
+    --primary: #171717;
+    --primary-dark: #404040;
+    --primary-gradient: linear-gradient(135deg, #171717, #404040);
+    --border-color: #E5E5E5;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     --btn-shadow: none;
-    --border-radius: 0px;
-    --btn-radius: 0px;
-    --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --border-radius: 8px;
+    --btn-radius: 6px;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --brush-color: #171717;
+    --highlight-color: #525252;
+    --grid-color: rgba(0, 0, 0, 0.08);
+    --grid-center-color: rgba(0, 0, 0, 0.15);
+    background-image: linear-gradient(135deg, #fafafa 25%, #f5f5f5 25%, #f5f5f5 50%, #fafafa 50%, #fafafa 75%, #f5f5f5 75%, #f5f5f5 100%);
+    background-size: 40px 40px;
 }
+.theme-minimalist .student-name-display::before { content: "✨ "; }
 
-/* 4. NEO-BRUTALISM */
+/* 4. NEO-BRUTALISM (Bold Pop Art) */
 .theme-neobrutalism {
-    --bg-body: #FFF8E7;
+    --bg-body: #FFFDF0;
     --bg-card: #FFFFFF;
     --text-main: #000000;
-    --text-muted: #333333;
-    --primary: #FF4911;
-    --primary-dark: #000000;
-    --primary-gradient: #FF4911;
+    --text-muted: #4B5563;
+    --primary: #FF3366;
+    --primary-dark: #FFD200;
+    --primary-gradient: linear-gradient(135deg, #FF3366, #FF6B35);
     --border-color: #000000;
     --card-shadow: 6px 6px 0px #000000;
     --btn-shadow: 4px 4px 0px #000000;
-    --border-radius: 4px;
-    --btn-radius: 4px;
-    --font-family: 'Courier New', Courier, monospace;
+    --border-radius: 8px;
+    --btn-radius: 6px;
+    --font-family: 'Space Grotesk', system-ui, sans-serif;
+    --brush-color: #FF3366;
+    --highlight-color: #00D26A;
+    --grid-color: rgba(0, 0, 0, 0.15);
+    --grid-center-color: rgba(255, 51, 102, 0.4);
+    background-image: repeating-linear-gradient(45deg, #f0f0e0 0, #f0f0e0 2px, transparent 2px, transparent 10px);
 }
-.theme-neobrutalism .login-card, .theme-neobrutalism .finish-card, .theme-neobrutalism .typing-card, .theme-neobrutalism .btn, .theme-neobrutalism select, .theme-neobrutalism input {
+.theme-neobrutalism .login-card, .theme-neobrutalism .finish-card, .theme-neobrutalism .typing-card, .theme-neobrutalism .btn, .theme-neobrutalism select, .theme-neobrutalism input, .theme-neobrutalism #writer-target {
     border: 3px solid #000000 !important;
 }
+.theme-neobrutalism .student-name-display::before { content: "🧱 "; }
 
-/* 5. VAPORWAVE */
+/* 5. VAPORWAVE (80s Aesthetic Dream) */
 .theme-vaporwave {
-    --bg-body: linear-gradient(180deg, #FF71CE 0%, #01CDFE 100%);
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --text-main: #B967FF;
-    --text-muted: #FF71CE;
-    --primary: #05FFA1;
-    --primary-dark: #B967FF;
-    --primary-gradient: linear-gradient(90deg, #B967FF, #05FFA1);
-    --border-color: #FFB5E8;
-    --card-shadow: 0 10px 20px rgba(185, 103, 255, 0.4);
-    --btn-shadow: 0 4px 15px rgba(5, 255, 161, 0.6);
-    --border-radius: 0px;
-    --btn-radius: 0px;
-    --font-family: 'Arial', sans-serif;
+    --bg-body: linear-gradient(180deg, #3A1C71 0%, #D76D77 50%, #FFAF7B 100%);
+    --bg-card: rgba(255, 255, 255, 0.88);
+    --text-main: #4A0E4E;
+    --text-muted: #8E2DE2;
+    --primary: #FF007F;
+    --primary-dark: #00F0FF;
+    --primary-gradient: linear-gradient(90deg, #FF007F, #7928CA, #00F0FF);
+    --border-color: #FF71CE;
+    --card-shadow: 0 12px 35px rgba(215, 109, 119, 0.35);
+    --btn-shadow: 0 4px 20px rgba(255, 0, 127, 0.4);
+    --border-radius: 18px;
+    --btn-radius: 12px;
+    --font-family: 'Segoe UI', sans-serif;
+    --brush-color: #FF007F;
+    --highlight-color: #00F0FF;
+    --grid-color: rgba(255, 113, 206, 0.25);
+    --grid-center-color: rgba(0, 240, 255, 0.4);
 }
+.theme-vaporwave .student-name-display::before { content: "🌴 "; }
 
-/* 6. GLASSMORPHISM */
+/* 6. GLASSMORPHISM (Frosted Aurora) */
 .theme-glassmorphism {
-    --bg-body: linear-gradient(135deg, #1A1A2E, #16213E);
-    --bg-card: rgba(255, 255, 255, 0.1);
-    --text-main: #FFFFFF;
-    --text-muted: #CCCCCC;
-    --primary: #E94560;
-    --primary-dark: #0F3460;
-    --primary-gradient: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
-    --border-color: rgba(255, 255, 255, 0.2);
-    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    --btn-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    --bg-body: #0F172A;
+    --bg-card: rgba(30, 41, 59, 0.65);
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --primary: #38BDF8;
+    --primary-dark: #818CF8;
+    --primary-gradient: linear-gradient(135deg, #38BDF8, #818CF8, #C084FC);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --card-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.4);
+    --btn-shadow: 0 8px 25px rgba(56, 189, 248, 0.35);
     --border-radius: 20px;
     --btn-radius: 12px;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family: 'Segoe UI', system-ui, sans-serif;
+    --brush-color: #38BDF8;
+    --highlight-color: #C084FC;
+    --grid-color: rgba(255, 255, 255, 0.1);
+    --grid-center-color: rgba(56, 189, 248, 0.35);
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(192, 132, 252, 0.2) 0%, transparent 45%);
 }
 .theme-glassmorphism .login-card, .theme-glassmorphism .finish-card, .theme-glassmorphism .typing-card, .theme-glassmorphism .header {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
+.theme-glassmorphism .student-name-display::before { content: "🔮 "; }
 
-/* 7. RETROFUTURISM */
+/* 7. RETROFUTURISM (Atomic Space Age) */
 .theme-retrofuturism {
-    --bg-body: #2C3E50;
-    --bg-card: #E74C3C;
-    --text-main: #ECF0F1;
-    --text-muted: #F39C12;
-    --primary: #F1C40F;
-    --primary-dark: #D35400;
-    --primary-gradient: linear-gradient(135deg, #D35400, #F1C40F);
-    --border-color: #C0392B;
-    --card-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    --btn-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
-    --border-radius: 30px;
-    --btn-radius: 20px;
-    --font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    --bg-body: #1E293B;
+    --bg-card: #2B394E;
+    --text-main: #F8FAFC;
+    --text-muted: #FCD34D;
+    --primary: #F59E0B;
+    --primary-dark: #EF4444;
+    --primary-gradient: linear-gradient(135deg, #EF4444, #F59E0B);
+    --border-color: #F59E0B;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    --btn-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+    --border-radius: 22px;
+    --btn-radius: 14px;
+    --font-family: 'Trebuchet MS', system-ui, sans-serif;
+    --brush-color: #F59E0B;
+    --highlight-color: #10B981;
+    --grid-color: rgba(245, 158, 11, 0.2);
+    --grid-center-color: rgba(239, 68, 68, 0.35);
+    background-image: repeating-radial-gradient(circle at center, transparent 0, transparent 15px, rgba(245, 158, 11, 0.06) 15px, rgba(245, 158, 11, 0.06) 30px);
 }
+.theme-retrofuturism .student-name-display::before { content: "🚀 "; }
 
-/* 8. RETRO PIXEL */
+/* 8. RETRO PIXEL (8-Bit Arcade) */
 .theme-pixel {
-    --bg-body: #000000;
-    --bg-card: #0000AA;
-    --text-main: #FFFFFF;
-    --text-muted: #AAAAAA;
-    --primary: #FF0000;
-    --primary-dark: #AA0000;
-    --primary-gradient: #FF0000;
-    --border-color: #FFFFFF;
-    --card-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5);
-    --btn-shadow: inset -4px -4px 0px 0px rgba(170,0,0,1);
+    --bg-body: #0F172A;
+    --bg-card: #1E293B;
+    --text-main: #4ADE80;
+    --text-muted: #94A3B8;
+    --primary: #22C55E;
+    --primary-dark: #16A34A;
+    --primary-gradient: linear-gradient(180deg, #4ADE80, #16A34A);
+    --border-color: #4ADE80;
+    --card-shadow: 4px 4px 0px #000000;
+    --btn-shadow: 3px 3px 0px #000000;
     --border-radius: 0px;
     --btn-radius: 0px;
-    --font-family: 'Courier New', Courier, monospace; /* Idealnya press start 2p */
-}
-
-/* 9. DARK GOTHIC FANTASY */
-.theme-gothic {
-    --bg-body: #121212;
-    --bg-card: #1E1E1E;
-    --text-main: #E0E0E0;
-    --text-muted: #888888;
-    --primary: #8B0000;
-    --primary-dark: #4A0000;
-    --primary-gradient: linear-gradient(to bottom, #8B0000, #4A0000);
-    --border-color: #333333;
-    --card-shadow: 0 15px 35px rgba(0,0,0,0.8);
-    --btn-shadow: 0 5px 15px rgba(139, 0, 0, 0.5);
-    --border-radius: 5px;
-    --btn-radius: 3px;
-    --font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
-}
-
-/* 10. MODERN ESPORTS CLEAN */
-.theme-esports {
-    --bg-body: #111111;
-    --bg-card: #18181B;
-    --text-main: #FFFFFF;
-    --text-muted: #A1A1AA;
-    --primary: #E11D48;
-    --primary-dark: #9F1239;
-    --primary-gradient: linear-gradient(135deg, #E11D48, #9F1239);
-    --border-color: #27272A;
-    --card-shadow: 0 10px 40px rgba(225, 29, 72, 0.1);
-    --btn-shadow: 0 4px 20px rgba(225, 29, 72, 0.3);
-    --border-radius: 4px;
-    --btn-radius: 2px;
-    --font-family: 'Impact', 'Arial Black', sans-serif;
-}
-.theme-esports .login-card, .theme-esports .finish-card, .theme-esports .typing-card { transform: skewX(-2deg); }
-.theme-esports .login-card > *, .theme-esports .finish-card > *, .theme-esports .typing-card > * { transform: skewX(2deg); }
-
-/* 11. FLAT VECTOR / COZY */
-.theme-flatvector {
-    --bg-body: #FDF6E3;
-    --bg-card: #FFF2D1;
-    --text-main: #5C4A3D;
-    --text-muted: #A69688;
-    --primary: #F28C38;
-    --primary-dark: #C97223;
-    --primary-gradient: #F28C38;
-    --border-color: #E6D0A7;
-    --card-shadow: 0 4px 0px #E6D0A7;
-    --btn-shadow: 0 4px 0px #C97223;
-    --border-radius: 24px;
-    --btn-radius: 20px;
-    --font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
-}
-
-/* 12. SKEUOMORPHIC */
-.theme-skeuomorphic {
-    --bg-body: url('data:image/svg+xml;utf8,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" fill="%23D5D5D5"/><circle cx="5" cy="5" r="1" fill="%23C0C0C0"/></svg>');
-    --bg-card: linear-gradient(to bottom, #EEEEEE, #CCCCCC);
-    --text-main: #333333;
-    --text-muted: #666666;
-    --primary: #4CAF50;
-    --primary-dark: #388E3C;
-    --primary-gradient: linear-gradient(to bottom, #81C784, #388E3C);
-    --border-color: #999999;
-    --card-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 5px 15px rgba(0,0,0,0.3);
-    --btn-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 5px rgba(0,0,0,0.3);
-    --border-radius: 12px;
-    --btn-radius: 6px;
-    --font-family: 'Arial', sans-serif;
-}
-
-/* 13. GRIMDARK */
-.theme-grimdark {
-    --bg-body: #2B2B2B;
-    --bg-card: #3C3C3C;
-    --text-main: #A0A0A0;
-    --text-muted: #666666;
-    --primary: #556B2F;
-    --primary-dark: #3E4E23;
-    --primary-gradient: linear-gradient(to right, #3E4E23, #556B2F);
-    --border-color: #1A1A1A;
-    --card-shadow: 0 5px 15px rgba(0,0,0,0.9);
-    --btn-shadow: 0 2px 8px rgba(0,0,0,0.8);
-    --border-radius: 2px;
-    --btn-radius: 2px;
-    --font-family: 'Courier New', Courier, monospace;
-}
-
-/* 14. ANIME / CEL-SHADED */
-.theme-anime {
-    --bg-body: #87CEEB;
-    --bg-card: #FFFFFF;
-    --text-main: #333333;
-    --text-muted: #777777;
-    --primary: #FF69B4;
-    --primary-dark: #FF1493;
-    --primary-gradient: #FF69B4;
-    --border-color: #333333;
-    --card-shadow: 4px 4px 0px #333333;
-    --btn-shadow: 2px 2px 0px #333333;
-    --border-radius: 16px;
-    --btn-radius: 8px;
-    --font-family: 'Verdana', sans-serif;
-}
-.theme-anime .login-card, .theme-anime .finish-card, .theme-anime .typing-card, .theme-anime .btn, .theme-anime select, .theme-anime input {
-    border: 3px solid #333333 !important;
-}
-
-/* 15. CLEAN CORPORATE */
-.theme-corporate {
-    --bg-body: #F4F7F6;
-    --bg-card: #FFFFFF;
-    --text-main: #333333;
-    --text-muted: #666666;
-    --primary: #0056B3;
-    --primary-dark: #003D82;
-    --primary-gradient: #0056B3;
-    --border-color: #E2E8F0;
-    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --btn-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --border-radius: 4px;
-    --btn-radius: 4px;
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-/* 16. ARCADE / SYNTHWAVE */
-.theme-synthwave {
-    --bg-body: #090014;
-    --bg-card: #1A0033;
-    --text-main: #FFFFFF;
-    --text-muted: #00FFFF;
-    --primary: #FF00FF;
-    --primary-dark: #8A2BE2;
-    --primary-gradient: linear-gradient(180deg, #FF00FF, #00FFFF);
-    --border-color: #00FFFF;
-    --card-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
-    --btn-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
-    --border-radius: 0px;
-    --btn-radius: 0px;
-    --font-family: 'Lucida Console', Monaco, monospace;
-}
-.theme-synthwave .btn {
-    text-transform: uppercase;
-    font-weight: 900;
-}
-
-
-/* --- IMAGES & ICONS PER THEME --- */
-
-/* Normal */
-.theme-normal {
-    background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
-    background-size: 20px 20px;
-}
-.theme-normal .student-name-display::before { content: "📝 "; font-size: 1.5rem; }
-
-/* Cyberpunk */
-.theme-cyberpunk {
-    background-image: 
-        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 0, 85, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px;
-}
-.theme-cyberpunk .student-name-display::before { content: "🦾 "; font-size: 1.5rem; }
-
-/* Minimalist */
-.theme-minimalist {
-    background-image: linear-gradient(135deg, #ffffff 25%, #f9f9f9 25%, #f9f9f9 50%, #ffffff 50%, #ffffff 75%, #f9f9f9 75%, #f9f9f9 100%);
-    background-size: 40px 40px;
-}
-.theme-minimalist .student-name-display::before { content: "✨ "; font-size: 1.5rem; }
-
-/* Neo-Brutalism */
-.theme-neobrutalism {
-    background-image: repeating-linear-gradient(45deg, #e8e8e8 0, #e8e8e8 2px, transparent 2px, transparent 8px);
-}
-.theme-neobrutalism .student-name-display::before { content: "🧱 "; font-size: 1.5rem; }
-
-/* Vaporwave */
-.theme-vaporwave {
-    background-image: linear-gradient(to bottom, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-}
-.theme-vaporwave .student-name-display::before { content: "🌴 "; font-size: 1.5rem; }
-
-/* Glassmorphism */
-.theme-glassmorphism {
-    background-image: radial-gradient(circle at 10% 20%, rgba(0, 150, 255, 0.2) 0%, rgba(0, 255, 255, 0) 50%), radial-gradient(circle at 90% 80%, rgba(255, 0, 150, 0.2) 0%, rgba(255, 0, 255, 0) 50%);
-}
-.theme-glassmorphism .student-name-display::before { content: "🔮 "; font-size: 1.5rem; }
-
-/* Retrofuturism */
-.theme-retrofuturism {
-    background-image: repeating-radial-gradient(circle at center, transparent 0, transparent 10px, rgba(255,107,107,0.1) 10px, rgba(255,107,107,0.1) 20px);
-}
-.theme-retrofuturism .student-name-display::before { content: "🚀 "; font-size: 1.5rem; }
-
-/* Retro Pixel */
-.theme-retropixel {
-    background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000);
-    background-color: #222;
+    --font-family: 'Courier New', monospace;
+    --brush-color: #22C55E;
+    --highlight-color: #FACC15;
+    --grid-color: rgba(74, 222, 128, 0.15);
+    --grid-center-color: rgba(74, 222, 128, 0.35);
+    background-image: linear-gradient(45deg, #090D16 25%, transparent 25%, transparent 75%, #090D16 75%, #090D16), linear-gradient(45deg, #090D16 25%, transparent 25%, transparent 75%, #090D16 75%, #090D16);
+    background-color: #0F172A;
     background-size: 20px 20px;
     background-position: 0 0, 10px 10px;
-    opacity: 0.9;
 }
-.theme-retropixel .student-name-display::before { content: "👾 "; font-size: 1.5rem; }
-
-/* Dark Gothic Fantasy */
-.theme-darkgothic {
-    background-image: radial-gradient(circle, #2a0845 0%, #1a0525 80%);
+.theme-pixel .login-card, .theme-pixel .finish-card, .theme-pixel .typing-card, .theme-pixel .btn, .theme-pixel #writer-target {
+    border: 3px solid var(--border-color);
+    box-shadow: 5px 5px 0px #000000;
 }
-.theme-darkgothic .student-name-display::before { content: "🦇 "; font-size: 1.5rem; }
+.theme-pixel .student-name-display::before { content: "👾 "; }
 
-/* Modern Esports Clean */
+/* 9. DARK GOTHIC (Midnight Crimson) */
+.theme-gothic {
+    --bg-body: #0A0A0C;
+    --bg-card: #151518;
+    --text-main: #F1F5F9;
+    --text-muted: #94A3B8;
+    --primary: #DC2626;
+    --primary-dark: #991B1B;
+    --primary-gradient: linear-gradient(135deg, #DC2626, #7F1D1D);
+    --border-color: #450A0A;
+    --card-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(220, 38, 38, 0.15);
+    --btn-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+    --border-radius: 8px;
+    --btn-radius: 6px;
+    --font-family: 'Georgia', 'Palatino', serif;
+    --brush-color: #DC2626;
+    --highlight-color: #F87171;
+    --grid-color: rgba(220, 38, 38, 0.15);
+    --grid-center-color: rgba(220, 38, 38, 0.35);
+    background-image: radial-gradient(circle, #1F070A 0%, #0A0A0C 75%);
+}
+.theme-gothic .student-name-display::before { content: "🦇 "; }
+
+/* 10. ESPORTS (Valorant/Apex Clean Tech) */
 .theme-esports {
-    background-image: linear-gradient(135deg, #111111 0%, #1a1a24 100%);
+    --bg-body: #0B0E14;
+    --bg-card: #121824;
+    --text-main: #FFFFFF;
+    --text-muted: #94A3B8;
+    --primary: #FF4655;
+    --primary-dark: #0F1923;
+    --primary-gradient: linear-gradient(135deg, #FF4655, #FF7682);
+    --border-color: #FF4655;
+    --card-shadow: 0 10px 30px rgba(255, 70, 85, 0.15);
+    --btn-shadow: 0 4px 15px rgba(255, 70, 85, 0.35);
+    --border-radius: 4px;
+    --btn-radius: 2px;
+    --font-family: system-ui, -apple-system, sans-serif;
+    --brush-color: #FF4655;
+    --highlight-color: #00F0FF;
+    --grid-color: rgba(255, 70, 85, 0.15);
+    --grid-center-color: rgba(0, 240, 255, 0.35);
+    background-image: linear-gradient(135deg, #0B0E14 0%, #151D2C 100%);
 }
-.theme-esports .student-name-display::before { content: "🎮 "; font-size: 1.5rem; }
+.theme-esports .student-name-display::before { content: "🎮 "; }
 
-/* Flat Vector / Cozy */
-.theme-cozy {
-    background-image: radial-gradient(circle at 50% 50%, #fdfbfb 0%, #ebedee 100%);
+/* 11. FLAT VECTOR (Cozy Warm Autumn) */
+.theme-flatvector {
+    --bg-body: #FAF5EE;
+    --bg-card: #FFFFFF;
+    --text-main: #452B1E;
+    --text-muted: #8C6F5E;
+    --primary: #EA580C;
+    --primary-dark: #C2410C;
+    --primary-gradient: linear-gradient(135deg, #F97316, #EA580C);
+    --border-color: #FED7AA;
+    --card-shadow: 0 8px 25px rgba(234, 88, 12, 0.08);
+    --btn-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+    --border-radius: 24px;
+    --btn-radius: 16px;
+    --font-family: system-ui, -apple-system, sans-serif;
+    --brush-color: #EA580C;
+    --highlight-color: #10B981;
+    --grid-color: rgba(234, 88, 12, 0.12);
+    --grid-center-color: rgba(234, 88, 12, 0.28);
+    background-image: radial-gradient(#E8D7C3 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
 }
-.theme-cozy .student-name-display::before { content: "☕ "; font-size: 1.5rem; }
+.theme-flatvector .student-name-display::before { content: "☕ "; }
 
-/* Skeuomorphic */
+/* 12. SKEUOMORPHIC (Crafted Wood & Parchment) */
 .theme-skeuomorphic {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='wood' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Cpath d='M0 10c10 0 10 10 20 10s10-10 20-10v20c-10 0-10 10-20 10S0 30 0 30V10z' fill='rgba(139,69,19,0.05)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23wood)'/%3E%3C/svg%3E");
+    --bg-body: #EFEBE4;
+    --bg-card: #FDFBF7;
+    --text-main: #3E2723;
+    --text-muted: #795548;
+    --primary: #5D4037;
+    --primary-dark: #3E2723;
+    --primary-gradient: linear-gradient(to bottom, #8D6E63, #4E342E);
+    --border-color: #D7CCC8;
+    --card-shadow: 0 8px 20px rgba(62, 39, 35, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --btn-shadow: 0 4px 8px rgba(62, 39, 35, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --border-radius: 12px;
+    --btn-radius: 8px;
+    --font-family: 'Times New Roman', 'Kaiti', serif;
+    --brush-color: #3E2723;
+    --highlight-color: #2E7D32;
+    --grid-color: rgba(93, 64, 55, 0.15);
+    --grid-center-color: rgba(183, 28, 28, 0.3);
+    background-image: radial-gradient(#D7CCC8 1px, transparent 1px);
+    background-size: 16px 16px;
 }
-.theme-skeuomorphic .student-name-display::before { content: "📜 "; font-size: 1.5rem; }
+.theme-skeuomorphic .student-name-display::before { content: "📜 "; }
 
-/* Grimdark */
+/* 13. GRIMDARK (Tactical Obsidian) */
 .theme-grimdark {
-    background-image: repeating-linear-gradient(0deg, #111 0, #111 2px, #000 2px, #000 4px);
+    --bg-body: #111418;
+    --bg-card: #181E24;
+    --text-main: #D1D5DB;
+    --text-muted: #6B7280;
+    --primary: #65A30D;
+    --primary-dark: #4D7C0F;
+    --primary-gradient: linear-gradient(135deg, #65A30D, #3F6212);
+    --border-color: #374151;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    --btn-shadow: 0 4px 12px rgba(101, 163, 13, 0.25);
+    --border-radius: 4px;
+    --btn-radius: 4px;
+    --font-family: 'Courier New', monospace;
+    --brush-color: #84CC16;
+    --highlight-color: #FACC15;
+    --grid-color: rgba(101, 163, 13, 0.15);
+    --grid-center-color: rgba(101, 163, 13, 0.35);
+    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.4) 0px, rgba(0,0,0,0.4) 1px, transparent 1px, transparent 4px);
 }
-.theme-grimdark .student-name-display::before { content: "☢️ "; font-size: 1.5rem; }
+.theme-grimdark .student-name-display::before { content: "☢️ "; }
 
-/* Anime */
+/* 14. ANIME (Cherry Blossom Cel-Shaded) */
 .theme-anime {
-    background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+    --bg-body: #FFF0F5;
+    --bg-card: #FFFFFF;
+    --text-main: #334155;
+    --text-muted: #64748B;
+    --primary: #EC4899;
+    --primary-dark: #DB2777;
+    --primary-gradient: linear-gradient(135deg, #F472B6, #EC4899);
+    --border-color: #334155;
+    --card-shadow: 5px 5px 0px #334155;
+    --btn-shadow: 3px 3px 0px #334155;
+    --border-radius: 18px;
+    --btn-radius: 12px;
+    --font-family: system-ui, -apple-system, sans-serif;
+    --brush-color: #EC4899;
+    --highlight-color: #38BDF8;
+    --grid-color: rgba(236, 72, 153, 0.15);
+    --grid-center-color: rgba(236, 72, 153, 0.35);
+    background-image: radial-gradient(#FBCFE8 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
 }
-.theme-anime .student-name-display::before { content: "🌸 "; font-size: 1.5rem; }
+.theme-anime .login-card, .theme-anime .finish-card, .theme-anime .typing-card, .theme-anime .btn, .theme-anime select, .theme-anime input, .theme-anime #writer-target {
+    border: 3px solid #334155 !important;
+}
+.theme-anime .student-name-display::before { content: "🌸 "; }
 
-/* Clean Corporate */
+/* 15. CLEAN CORPORATE (Sapphire Tech) */
 .theme-corporate {
-    background-image: linear-gradient(to right, #f8f9fa, #e9ecef);
+    --bg-body: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --primary: #0284C7;
+    --primary-dark: #0369A1;
+    --primary-gradient: linear-gradient(135deg, #0284C7, #0369A1);
+    --border-color: #E2E8F0;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --btn-shadow: 0 2px 6px rgba(2, 132, 199, 0.2);
+    --border-radius: 10px;
+    --btn-radius: 8px;
+    --font-family: system-ui, -apple-system, sans-serif;
+    --brush-color: #0284C7;
+    --highlight-color: #10B981;
+    --grid-color: rgba(2, 132, 199, 0.12);
+    --grid-center-color: rgba(2, 132, 199, 0.28);
+    background-image: linear-gradient(to right, #F8FAFC, #EFF6FF);
 }
-.theme-corporate .student-name-display::before { content: "🏢 "; font-size: 1.5rem; }
+.theme-corporate .student-name-display::before { content: "🏢 "; }
 
-/* Arcade */
-.theme-arcade {
+/* 16. SYNTHWAVE (Sunset Outrun) */
+.theme-synthwave {
+    --bg-body: #130024;
+    --bg-card: #20003B;
+    --text-main: #FFE600;
+    --text-muted: #00FFFF;
+    --primary: #FF007F;
+    --primary-dark: #7928CA;
+    --primary-gradient: linear-gradient(180deg, #FF007F, #7928CA);
+    --border-color: #00FFFF;
+    --card-shadow: 0 0 25px rgba(255, 0, 127, 0.35);
+    --btn-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    --border-radius: 10px;
+    --btn-radius: 6px;
+    --font-family: 'Courier New', monospace;
+    --brush-color: #FF007F;
+    --highlight-color: #00FFFF;
+    --grid-color: rgba(0, 255, 255, 0.18);
+    --grid-center-color: rgba(255, 0, 127, 0.4);
     background-image: 
-      linear-gradient(rgba(255, 0, 255, 0.2) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(0, 255, 255, 0.2) 2px, transparent 2px);
-    background-size: 40px 40px;
-    background-position: center center;
+        linear-gradient(rgba(255, 0, 127, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.15) 1px, transparent 1px);
+    background-size: 36px 36px;
 }
-.theme-arcade .student-name-display::before { content: "🕹️ "; font-size: 1.5rem; }
+.theme-synthwave .student-name-display::before { content: "🕹️ "; }
 
+/* 17. INK WASH (水墨画 - Traditional Chinese Ink & Rice Paper) */
+.theme-inkbrush {
+    --bg-body: #F7F3E9;
+    --bg-card: #FFFEFA;
+    --text-main: #2C2C2C;
+    --text-muted: #6B655B;
+    --primary: #B91C1C;
+    --primary-dark: #1E293B;
+    --primary-gradient: linear-gradient(135deg, #1E293B, #B91C1C);
+    --border-color: #E2DAC8;
+    --card-shadow: 0 10px 25px rgba(44, 44, 44, 0.08);
+    --btn-shadow: 0 4px 12px rgba(185, 28, 28, 0.25);
+    --border-radius: 12px;
+    --btn-radius: 8px;
+    --font-family: 'Kaiti', 'KaiTi', STKaiti, 'Times New Roman', serif;
+    --brush-color: #1E293B;
+    --highlight-color: #B91C1C;
+    --grid-color: rgba(185, 28, 28, 0.18);
+    --grid-center-color: rgba(185, 28, 28, 0.35);
+    background-image: radial-gradient(#D6CBBA 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+}
+.theme-inkbrush .student-name-display::before { content: "🖌️ "; }
+.theme-inkbrush #writer-target {
+    border: 3px solid #C4A482;
+    box-shadow: inset 0 0 20px rgba(196, 164, 130, 0.15), 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+/* 18. BAMBOO FOREST (竹林 - Peaceful Green Grove) */
+.theme-bamboo {
+    --bg-body: #F0FDF4;
+    --bg-card: #FFFFFF;
+    --text-main: #14532D;
+    --text-muted: #4B7A5D;
+    --primary: #15803D;
+    --primary-dark: #166534;
+    --primary-gradient: linear-gradient(135deg, #22C55E, #15803D);
+    --border-color: #BBF7D0;
+    --card-shadow: 0 10px 25px rgba(21, 128, 61, 0.08);
+    --btn-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);
+    --border-radius: 16px;
+    --btn-radius: 10px;
+    --font-family: 'Segoe UI', system-ui, sans-serif;
+    --brush-color: #15803D;
+    --highlight-color: #0284C7;
+    --grid-color: rgba(21, 128, 61, 0.15);
+    --grid-center-color: rgba(21, 128, 61, 0.35);
+    background-image: radial-gradient(#86EFAC 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+}
+.theme-bamboo .student-name-display::before { content: "🎋 "; }
+
+
+/* ── TIAN ZI GE & MI ZI GE CANVAS OVERLAY ── */
+.tianzige-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.tianzige-grid svg {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ── INTERACTIVE CONTROLS & UTILITIES ── */
+.char-audio-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 61, 255, 0.1);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    margin-left: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+}
+.char-audio-btn:hover {
+    background: var(--primary);
+    color: #FFFFFF;
+    transform: scale(1.1);
+}
+
+.demo-stroke-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    color: var(--primary);
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.demo-stroke-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+.header-action-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+.header-action-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+
+/* ── STAR RATING BADGE ── */
+.star-rating-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 15px 0;
+    font-size: 2rem;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.star-badge-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+
+/* ── CONFETTI CANVAS ── */
+#confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+
+/* ── TEACHER DASHBOARD ENHANCEMENTS ── */
+.search-box-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+.search-box-container input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+.search-box-container input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(139, 61, 255, 0.12);
+}
+.search-box-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+.class-progress-bar {
+    background: #E2E8F0;
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+.class-progress-fill {
+    background: linear-gradient(90deg, #00C4CC, #8B3DFF);
+    height: 100%;
+    transition: width 0.4s ease;
+}
+
+.difficult-char-card {
+    background: #FFF1F2;
+    border: 1px solid #FECDD3;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+.difficult-char-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1px solid #FDA4AF;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #E11D48;
+}
+
+
+/* ── PRINTABLE WORKSHEET (TIAN ZI GE) ── */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #print-worksheet-modal, #print-worksheet-modal * {
+        visibility: visible;
+    }
+    #print-worksheet-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: #FFFFFF !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}

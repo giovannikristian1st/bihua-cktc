@@ -12,7 +12,7 @@
   <script src="meihuadb.js"></script>
   <script src="students.js"></script>
   <script src="config.js"></script>
-  
+  <script src="db.js"></script>
   
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -60,7 +60,6 @@
     .btn:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    
     /* Custom Dropdown */
     .custom-select { position: relative; width: 100%; margin-bottom: 20px; text-align: left; }
     .custom-select-header {
@@ -86,65 +85,64 @@
     .theme-option:hover { filter: brightness(1.1); transform: scale(0.98); }
     .theme-color-dot { width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
-    /* ── Theme Select Screen ── */
-    #screen-theme { overflow-y: auto; display: block; padding-top: 50px; }
-    .theme-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-      margin-bottom: 30px;
-    }
-    .theme-btn {
-      padding: 15px 10px;
-      border: 2px solid var(--border-color);
-      border-radius: var(--border-radius);
-      background: var(--bg-card);
-      color: var(--text-main);
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.2s;
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-    }
-    .theme-btn:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--card-shadow); }
-    .theme-btn.active { border-color: var(--primary); background: var(--primary-gradient); color: white; }
-    
-    .color-preview { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-
     /* ── Game Screen ── */
     #screen-game { justify-content: flex-start; padding: 0; }
     
     .header {
-      width: 100%; padding: 15px 55px 15px 20px; /* added right padding to avoid overlap */
+      width: 100%; padding: 15px 20px;
       background: var(--bg-card);
       display: flex; justify-content: space-between; align-items: center;
       border-bottom: 1px solid var(--border-color);
       flex-shrink: 0;
       box-shadow: var(--card-shadow);
     }
-    .student-name-display { font-weight: bold; color: var(--primary); }
-    .progress-text { color: var(--text-muted); font-size: 0.9rem;}
+    .student-name-display { font-weight: bold; color: var(--primary); font-size: 1.05rem; }
+    .progress-text { color: var(--text-muted); font-size: 0.95rem; font-weight: 600;}
 
     .game-area {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      width: 100%; padding: 20px;
+      width: 100%; padding: 15px 20px;
       overflow-y: auto;
     }
 
-    .char-info { text-align: center; margin-bottom: 20px; }
-    .char-pinyin { font-size: 1.5rem; color: var(--primary-dark); letter-spacing: 2px; font-weight: bold; }
-    .char-meaning { font-size: 1rem; color: var(--text-muted); margin-top: 5px; }
+    .char-info { text-align: center; margin-bottom: 15px; }
+    .char-pinyin { font-size: 1.6rem; color: var(--primary); letter-spacing: 2px; font-weight: bold; }
+    .char-meaning { font-size: 1.05rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
-    .writer-container { margin: 0 auto; text-align: center; position: relative; }
-    #writer-target {
-      position: relative; display: inline-block;
-      width: 400px; height: 400px;
-      background: #FFFFFF; /* Canvas is always white for contrast */
+    .writer-container {
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+      background: #FFFFFF;
       border-radius: var(--border-radius);
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--border-color);
       box-shadow: var(--card-shadow);
+      display: inline-block;
+      overflow: hidden;
+    }
+    .tianzige-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .tianzige-grid svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    #writer-target {
+      position: relative;
+      display: inline-block;
+      width: 400px;
+      height: 400px;
+      background: transparent;
       transform-origin: top center;
+      z-index: 2;
     }
 
     @keyframes shake {
@@ -154,27 +152,20 @@
     }
     .shake-error { animation: shake 0.5s ease-in-out; }
 
-    .rep-dots { display: flex; gap: 8px; justify-content: center; margin-top: 20px; }
+    .rep-dots { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
     .dot {
-      width: 12px; height: 12px; border-radius: 50%;
-      border: 2px solid var(--primary-dark);
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--primary);
+      transition: background-color 0.2s ease, transform 0.2s ease;
     }
-    .dot.filled { background: var(--primary-dark); }
+    .dot.filled { background: var(--primary); transform: scale(1.1); }
 
-    .mistake-counter { margin-top: 15px; color: #ef4444; font-weight: bold; font-size: 0.9rem; }
+    .mistake-counter { margin-top: 10px; color: #ef4444; font-weight: bold; font-size: 0.95rem; }
 
     /* ── Drawing Controls ── */
     .controls {
       display: flex; gap: 15px; justify-content: center;
-      margin-top: 25px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto;
-    }
-    .controls .btn.action {
-      width: 60px; height: 60px; padding: 0;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%;
-    }
-    .controls svg {
-      width: 28px; height: 28px;
+      margin-top: 15px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto;
     }
 
     /* ── Typing Screen ── */
@@ -200,13 +191,15 @@
     /* ── Finish Screen ── */
     .finish-card {
       background: var(--bg-card);
-      padding:40px; border-radius:var(--border-radius);
+      padding:35px 25px; border-radius:var(--border-radius);
       width:100%; max-width:400px;
       text-align:center; border: 1px solid var(--border-color);
       box-shadow: var(--card-shadow);
+      max-height: 90vh;
+      overflow-y: auto;
     }
-    .finish-card h2 { font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 10px; }
-    .status-text { margin: 20px 0; font-size: 1.1rem; color: var(--text-muted); }
+    .finish-card h2 { font-size: 2.2rem; color: var(--primary); margin-bottom: 6px; }
+    .status-text { margin: 15px 0; font-size: 1.05rem; color: var(--text-muted); }
     
     .loader {
       border: 4px solid var(--border-color); border-top: 4px solid var(--primary);
@@ -227,18 +220,24 @@
     }
     .lb-rank { font-weight: bold; width: 30px; color: var(--text-muted); }
     .lb-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
-    .lb-count { font-weight: bold; color: var(--primary-dark); }
-    
-    /* Options Gear */
-    .options-btn {
-       position: absolute; top: 15px; right: 15px;
-       background: transparent; border: none; font-size: 1.5rem; cursor: pointer;
-       z-index: 10; color: var(--primary);
+    .lb-count { font-weight: bold; color: var(--primary); }
+    .lb-class-tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(139, 61, 255, 0.12);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-left: 6px;
     }
   </style>
 
 </head>
 <body class="theme-normal">
+
+  <!-- CONFETTI CANVAS -->
+  <canvas id="confetti-canvas"></canvas>
 
   <!-- LOGIN SCREEN -->
   <div id="screen-login" class="screen">
@@ -249,7 +248,6 @@
       <select id="student-select" class="student-select">
         <option value="">-- Pilih Nama Anda --</option>
       </select>
-      
       
       <div class="custom-select" id="theme-custom-select">
          <div class="custom-select-header" id="theme-select-header">
@@ -262,21 +260,46 @@
       <button id="start-btn" class="btn" disabled>Mulai Mengerjakan</button>
     </div>
   </div>
+
   <!-- GAME SCREEN -->
   <div id="screen-game" class="screen hidden">
     <div class="header">
       <div class="student-name-display" id="display-name"></div>
-      <div class="progress-text" id="progress-text"></div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="header-action-btn" id="btn-sound-toggle" title="Matikan / Nyalakan Suara">🔊</button>
+        <div class="progress-text" id="progress-text"></div>
+      </div>
     </div>
     
     <div class="game-area">
       <div class="char-info">
         <div id="full-word-context" style="font-size: 1.8rem; margin-bottom: 5px; font-weight: bold; color: var(--text-main);"></div>
-        <div class="char-pinyin" id="char-pinyin"></div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+          <div class="char-pinyin" id="char-pinyin"></div>
+          <button class="char-audio-btn" id="btn-audio-speak" title="Dengarkan Pelafalan Mandarin">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </button>
+        </div>
         <div class="char-meaning" id="char-meaning"></div>
+        <div>
+          <button class="demo-stroke-btn" id="btn-demo-stroke" title="Lihat Animasi Urutan Guratan">
+            <span>👁️ Contoh Guratan</span>
+          </button>
+        </div>
       </div>
       
       <div class="writer-container" id="writer-container">
+        <!-- TIAN ZI GE CALLIGRAPHY GRID -->
+        <div class="tianzige-grid" id="tianzige-grid">
+          <svg viewBox="0 0 400 400" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <!-- Tian Zi Ge Center Dashed Cross Lines -->
+            <line x1="0" y1="200" x2="400" y2="200" stroke="#8B3DFF" stroke-width="2.2" stroke-dasharray="8,6" opacity="0.6"/>
+            <line x1="200" y1="0" x2="200" y2="400" stroke="#8B3DFF" stroke-width="2.2" stroke-dasharray="8,6" opacity="0.6"/>
+            <!-- Mi Zi Ge Diagonal Guidelines -->
+            <line x1="0" y1="0" x2="400" y2="400" stroke="#CBD5E1" stroke-width="1.2" stroke-dasharray="5,7" opacity="0.45"/>
+            <line x1="400" y1="0" x2="0" y2="400" stroke="#CBD5E1" stroke-width="1.2" stroke-dasharray="5,7" opacity="0.45"/>
+          </svg>
+        </div>
         <div id="writer-target"></div>
       </div>
       
@@ -286,7 +309,6 @@
     </div>
     
     <div class="controls">
-
       <button class="btn action" id="btn-next" title="Next Stroke" style="display:none;">
         <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
       </button>
@@ -296,24 +318,36 @@
 
   <!-- TYPING SCREEN -->
   <div id="screen-typing" class="screen hidden">
-    <div class="typing-card">
-      <h3>Ketik Pinyin & Arti</h3>
-      <div class="typing-context">
-        <div class="typing-context-char" id="typing-word"></div>
-        <div class="typing-context-pinyin" id="typing-word-pinyin"></div>
-        <div class="typing-context-meaning" id="typing-word-meaning"></div>
+    <div class="typing-card" style="max-width:440px; padding:25px 20px;">
+      <h3 style="margin-bottom:12px; font-size:1.35rem; color:var(--text-main);">Ketik Pinyin & Arti</h3>
+      
+      <div class="typing-context" style="margin-bottom:18px; padding:15px; background:rgba(139,61,255,0.06); border:1.5px solid rgba(139,61,255,0.15); border-radius:var(--border-radius); text-align:center;">
+        <div class="typing-context-char" id="typing-word" style="font-size:2.8rem; font-weight:bold; color:var(--primary); line-height:1.2; margin-bottom:4px;"></div>
+        <div id="typing-ref-pinyin" style="font-size:1.15rem; font-weight:600; color:var(--text-main); font-family:sans-serif; margin-bottom:2px;"></div>
+        <div id="typing-ref-meaning" style="font-size:1rem; color:var(--text-muted); font-family:sans-serif;"></div>
       </div>
-      <div class="typing-group" id="group-pinyin">
-        <label>Pinyin:</label>
-        <input type="text" id="typing-pinyin" placeholder="contoh: shenme" autocomplete="off">
-        <div class="typing-error" id="typing-pinyin-err">Pinyin kurang tepat, coba lagi!</div>
+      
+      <!-- Pinyin & Nada Inputs (Dynamic per character) -->
+      <div class="typing-group" id="group-pinyin" style="margin-bottom:15px; text-align:left;">
+        <label style="display:block; font-weight:bold; font-size:0.9rem; margin-bottom:8px; color:var(--text-main);">
+          🔤 Pinyin & Nada <span style="font-weight:normal; font-size:0.8rem; color:var(--text-muted);">(1-4, 0 = netral)</span>:
+        </label>
+        <div id="pinyin-columns-container" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+          <!-- Dynamically injected columns per character -->
+        </div>
+        <div class="typing-error" id="typing-pinyin-err" style="display:none; color:#ef4444; font-size:0.8rem; margin-top:6px; text-align:center;">Pinyin atau nada belum tepat, coba lagi!</div>
       </div>
-      <div class="typing-group" id="group-meaning">
-        <label>Arti (Bahasa Indonesia):</label>
-        <input type="text" id="typing-meaning" placeholder="contoh: apa" autocomplete="off">
-        <div class="typing-error" id="typing-meaning-err">Arti kurang tepat, coba lagi!</div>
+
+      <!-- Arti Input -->
+      <div class="typing-group" id="group-meaning" style="margin-bottom:20px; text-align:left;">
+        <label style="display:block; font-weight:bold; font-size:0.9rem; margin-bottom:6px; color:var(--text-main);">
+          🇮🇩 Arti (Bahasa Indonesia):
+        </label>
+        <input type="text" id="typing-meaning" placeholder="Contoh: kami / kita" autocomplete="off" style="width:100%; padding:10px 12px; border:1.5px solid var(--border-color); border-radius:var(--btn-radius); background:var(--bg-body); color:var(--text-main); font-size:0.95rem; outline:none;">
+        <div class="typing-error" id="typing-meaning-err" style="display:none; color:#ef4444; font-size:0.8rem; margin-top:6px; text-align:center;">Arti belum tepat, coba lagi!</div>
       </div>
-      <button class="btn" id="typing-submit">Lanjut</button>
+
+      <button class="btn" id="typing-submit" style="width:100%; padding:12px; font-size:1rem; font-weight:bold;">Lanjut ➔</button>
     </div>
   </div>
 
@@ -322,7 +356,10 @@
     <div class="finish-card">
       <div id="finish-content">
         <h2>Selesai!</h2>
-        <p>Kamu telah menyelesaikan semua tugas.</p>
+        <div class="star-rating-container" id="star-rating-container"></div>
+        <div class="star-badge-text" id="star-badge-text"></div>
+        <p style="color:var(--text-muted);">Kamu telah menyelesaikan semua tugas.</p>
+        
         <div class="status-text" id="submit-status">
           <div class="loader"></div>
           <p style="margin-top:10px;">Mengirim data ke guru...</p>
@@ -334,11 +371,19 @@
           <button class="btn" id="btn-close" style="background:#ef4444;">🚪 Selesai</button>
         </div>
         
-        <div id="leaderboard-section" style="display:none; margin-top: 25px;">
-          <h3 style="color: #8B3DFF; margin-bottom: 15px; font-family: sans-serif;">🏆 Papan Peringkat Kelas</h3>
-          <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
-             <button id="lb-toggle-time" style="padding:5px 10px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Tercepat</button>
-             <button id="lb-toggle-count" style="padding:5px 10px; background:#E5E7EB; color:#0E1318; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Pengulangan</button>
+        <div id="leaderboard-section" style="display:none; margin-top: 22px;">
+          <h3 style="color: var(--primary); margin-bottom: 12px; font-family: sans-serif;">🏆 Papan Peringkat</h3>
+          
+          <!-- Scope Toggle: Kelas vs Angkatan -->
+          <div style="display:flex; justify-content:center; gap:8px; margin-bottom:10px;">
+             <button id="lb-scope-class" style="padding:6px 14px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem; transition:all 0.2s;">🏫 Kelas Saya</button>
+             <button id="lb-scope-grade" style="padding:6px 14px; background:#E5E7EB; color:#0E1318; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem; transition:all 0.2s;">🌍 Satu Angkatan</button>
+          </div>
+
+          <!-- Mode Toggle: Tercepat vs Pengulangan -->
+          <div style="display:flex; justify-content:center; gap:8px; margin-bottom:15px;">
+             <button id="lb-toggle-time" style="padding:5px 12px; background:rgba(139, 61, 255, 0.15); color:var(--primary); border:1px solid var(--primary); border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.8rem;">⚡ Tercepat</button>
+             <button id="lb-toggle-count" style="padding:5px 12px; background:#F1F5F9; color:#64748B; border:1px solid var(--border-color, #E2E8F0); border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.8rem;">🔁 Pengulangan</button>
           </div>
           <div id="leaderboard-list" style="max-height: 220px; overflow-y: auto; padding-right: 5px;">
              <!-- items populated by JS -->
@@ -347,8 +392,8 @@
       </div>
       
       <div id="thank-you-msg" style="display:none; margin-top: 10px; padding: 20px 0;">
-        <h1 style="font-size: 6rem; color: #8B3DFF; margin: 0; line-height: 1;">感恩</h1>
-        <p style="font-size: 1.8rem; color: #5E6A75; margin-top: 10px; font-weight: bold;">gǎn ēn</p>
+        <h1 style="font-size: 5rem; color: var(--primary); margin: 0; line-height: 1;">感恩</h1>
+        <p style="font-size: 1.8rem; color: var(--text-muted); margin-top: 10px; font-weight: bold;">gǎn ēn</p>
       </div>
     </div>
   </div>
@@ -365,11 +410,12 @@
     let currentRepIndex = 0;
     
     let drawnChars = new Set();
-    
-    let mistakesMap = {}; // { '一': 2 }
+    let mistakesMap = {};
     let currentWordMistakes = 0;
+    let isDemonstrating = false;
     
     let writer = null;
+    let soundEnabled = true;
 
     // Elements
     const screenLogin = document.getElementById('screen-login');
@@ -381,28 +427,153 @@
     const startBtn = document.getElementById('start-btn');
     const loginInfo = document.getElementById('login-info');
 
-    // --- THEMES CONFIG ---
+    // --- SOUND ENGINE (Web Audio API) ---
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function getAudioContext() {
+       if (!audioCtx && AudioContextClass) {
+          audioCtx = new AudioContextClass();
+       }
+       if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+       }
+       return audioCtx;
+    }
+
+    function playSound(type) {
+       if (!soundEnabled) return;
+       try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          
+          if (type === 'stroke_correct') {
+             const osc = ctx.createOscillator();
+             const gain = ctx.createGain();
+             osc.type = 'sine';
+             osc.frequency.setValueAtTime(587.33, now); // D5
+             osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+             gain.gain.setValueAtTime(0.18, now);
+             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+             osc.connect(gain);
+             gain.connect(ctx.destination);
+             osc.start(now);
+             osc.stop(now + 0.15);
+          } else if (type === 'stroke_mistake') {
+             const osc = ctx.createOscillator();
+             const gain = ctx.createGain();
+             osc.type = 'triangle';
+             osc.frequency.setValueAtTime(160, now);
+             osc.frequency.exponentialRampToValueAtTime(80, now + 0.18);
+             gain.gain.setValueAtTime(0.22, now);
+             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+             osc.connect(gain);
+             gain.connect(ctx.destination);
+             osc.start(now);
+             osc.stop(now + 0.2);
+          } else if (type === 'rep_complete') {
+             [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                gain.gain.setValueAtTime(0.18, now + i * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.28);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + i * 0.08);
+                osc.stop(now + i * 0.08 + 0.3);
+             });
+          } else if (type === 'victory') {
+             const notes = [
+                { f: 523.25, t: 0 },
+                { f: 659.25, t: 0.12 },
+                { f: 783.99, t: 0.24 },
+                { f: 1046.50, t: 0.36 },
+                { f: 880, t: 0.55 },
+                { f: 1046.50, t: 0.75 }
+             ];
+             notes.forEach(n => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(n.f, now + n.t);
+                gain.gain.setValueAtTime(0.22, now + n.t);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + 0.38);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + n.t);
+                osc.stop(now + n.t + 0.4);
+             });
+          }
+       } catch(e) {
+          console.warn('Audio SFX error:', e);
+       }
+    }
+
+    // --- MANDARIN SPEECH SYNTHESIS (TTS) ---
+    function speakMandarin(text) {
+       if (!('speechSynthesis' in window)) return;
+       window.speechSynthesis.cancel();
+       const u = new SpeechSynthesisUtterance(text);
+       u.lang = 'zh-CN';
+       u.rate = 0.85;
+       window.speechSynthesis.speak(u);
+    }
+
+    // Sound toggle listener
+    document.getElementById('btn-sound-toggle').addEventListener('click', (e) => {
+       soundEnabled = !soundEnabled;
+       e.target.textContent = soundEnabled ? '🔊' : '🔇';
+       e.target.title = soundEnabled ? 'Suara Aktif' : 'Suara Dimatikan';
+    });
+
+    // Audio pronounce button listener
+    document.getElementById('btn-audio-speak').addEventListener('click', () => {
+       if (tasks[currentTaskIndex]) {
+          speakMandarin(tasks[currentTaskIndex].char || tasks[currentTaskIndex].word);
+       }
+    });
+
+    // Demo stroke animation button listener
+    document.getElementById('btn-demo-stroke').addEventListener('click', () => {
+       if (writer && !isDemonstrating) {
+          isDemonstrating = true;
+          writer.animateCharacter({
+             onComplete: () => {
+                isDemonstrating = false;
+                setTimeout(() => {
+                   if (writer) writer.quiz();
+                }, 400);
+             }
+          });
+       }
+    });
+
+    // --- THEMES CONFIG (18 Rich Themes) ---
     const THEMES = [
       { id: 'theme-normal', name: 'Normal', color: '#8B3DFF' },
-      { id: 'theme-cyberpunk', name: 'Cyberpunk', color: '#F3E600' },
-      { id: 'theme-minimalist', name: 'Minimalist', color: '#000000' },
-      { id: 'theme-neobrutalism', name: 'Neo-Brutalism', color: '#FF4911' },
-      { id: 'theme-vaporwave', name: 'Vaporwave', color: '#05FFA1' },
-      { id: 'theme-glassmorphism', name: 'Glassmorphism', color: '#E94560' },
-      { id: 'theme-retrofuturism', name: 'Retrofuturism', color: '#F1C40F' },
-      { id: 'theme-pixel', name: 'Retro Pixel', color: '#FF0000' },
-      { id: 'theme-gothic', name: 'Dark Gothic', color: '#8B0000' },
-      { id: 'theme-esports', name: 'Esports Clean', color: '#E11D48' },
-      { id: 'theme-flatvector', name: 'Flat Cozy', color: '#F28C38' },
-      { id: 'theme-skeuomorphic', name: 'Skeuomorphic', color: '#4CAF50' },
-      { id: 'theme-grimdark', name: 'Grimdark', color: '#556B2F' },
-      { id: 'theme-anime', name: 'Anime Cel', color: '#FF69B4' },
-      { id: 'theme-corporate', name: 'Corporate', color: '#0056B3' },
-      { id: 'theme-synthwave', name: 'Synthwave', color: '#FF00FF' }
+      { id: 'theme-cyberpunk', name: 'Cyberpunk', color: '#00F0FF' },
+      { id: 'theme-minimalist', name: 'Minimalist', color: '#171717' },
+      { id: 'theme-neobrutalism', name: 'Neo-Brutalism', color: '#FF3366' },
+      { id: 'theme-vaporwave', name: 'Vaporwave', color: '#FF007F' },
+      { id: 'theme-glassmorphism', name: 'Glassmorphism', color: '#38BDF8' },
+      { id: 'theme-retrofuturism', name: 'Retrofuturism', color: '#F59E0B' },
+      { id: 'theme-pixel', name: 'Retro Pixel', color: '#22C55E' },
+      { id: 'theme-gothic', name: 'Dark Gothic', color: '#DC2626' },
+      { id: 'theme-esports', name: 'Esports Clean', color: '#FF4655' },
+      { id: 'theme-flatvector', name: 'Flat Cozy', color: '#EA580C' },
+      { id: 'theme-skeuomorphic', name: 'Skeuomorphic', color: '#5D4037' },
+      { id: 'theme-grimdark', name: 'Grimdark', color: '#65A30D' },
+      { id: 'theme-anime', name: 'Anime Cel', color: '#EC4899' },
+      { id: 'theme-corporate', name: 'Corporate', color: '#0284C7' },
+      { id: 'theme-synthwave', name: 'Synthwave', color: '#FF007F' },
+      { id: 'theme-inkbrush', name: 'Ink Wash (水墨画)', color: '#B91C1C' },
+      { id: 'theme-bamboo', name: 'Bamboo Forest (竹林)', color: '#15803D' }
     ];
     let selectedTheme = 'theme-normal';
     document.body.className = selectedTheme;
-
 
     let gasUrl = APP_CONFIG.GOOGLE_APPS_SCRIPT_URL;
 
@@ -415,31 +586,24 @@
     }
 
     // Parse URL Params
-    window.onload = () => {
+    window.onload = async () => {
       const params = new URLSearchParams(window.location.search);
       const dataParam = params.get('data');
       const idParam = params.get('id');
-      const gParam = params.get('g');
-      
-      if (gParam) {
-          gasUrl = `https://script.google.com/macros/s/${gParam}/exec`;
-      }
       
       if(idParam) {
          loginInfo.textContent = "Memuat tugas...";
-         fetch(`${gasUrl}?action=getLink&id=${idParam}`)
-           .then(res => res.json())
-           .then(resData => {
-              if (resData.status === 'success' && resData.payload) {
-                 processAssignmentData(resData.payload, true);
-              } else {
-                 throw new Error(resData.message || "Link tugas tidak ditemukan.");
-              }
-           })
-           .catch(err => {
-              loginInfo.textContent = "Error: " + err.message;
-              console.error(err);
-           });
+         try {
+            const task = await DB.getTask(idParam);
+            if (task && task.payload) {
+               processAssignmentData(task.payload, true, idParam);
+            } else {
+               throw new Error("Link tugas tidak ditemukan di database.");
+            }
+         } catch (err) {
+            loginInfo.textContent = "Error: " + err.message;
+            console.error(err);
+         }
       } else if (dataParam) {
          processAssignmentData(dataParam, false);
       } else {
@@ -447,7 +611,7 @@
       }
     };
     
-    function processAssignmentData(payloadStr, isPlainJson) {
+    function processAssignmentData(payloadStr, isPlainJson, explicitTaskId) {
       try {
         let decoded;
         if (isPlainJson) {
@@ -457,22 +621,21 @@
         }
         assignmentData = JSON.parse(decoded);
        
-       if (!assignmentData.id) {
-           // Create a simple hash from the payload string to act as unique ID for this link
+       if (explicitTaskId) {
+           assignmentData.id = explicitTaskId;
+       } else if (!assignmentData.id) {
            let hash = 0;
            for (let i = 0; i < payloadStr.length; i++) {
                hash = ((hash << 5) - hash) + payloadStr.charCodeAt(i);
-               hash = hash & hash; // Convert to 32bit integer
+               hash = hash & hash;
            }
            assignmentData.id = Math.abs(hash).toString();
        }
 
         repetitions = assignmentData.r || 1;
-        
         assignmentData.tasks = [];
         
         if (assignmentData.w) {
-          // Backward compatibility for old format
           assignmentData.tasks = assignmentData.w.map(c => ({
              char: c,
              word: c,
@@ -481,9 +644,7 @@
              isLastCharInWord: true
           }));
         } else if (assignmentData.v && assignmentData.b && assignmentData.u) {
-          // Format Lama (String V)
           const uData = (typeof _meihuaDB !== 'undefined') ? _meihuaDB[assignmentData.b][assignmentData.u].vocab : [];
-          
           const vParts = assignmentData.v.split('|');
           vParts.forEach(vp => {
             const [vIdx, charIndices] = vp.split(':');
@@ -502,7 +663,6 @@
             }
           });
         } else if (assignmentData.v && typeof assignmentData.v === 'object') {
-          // Format Baru (Nested Object)
           for (const bk in assignmentData.v) {
             for (const ut in assignmentData.v[bk]) {
               const uData = (typeof _meihuaDB !== 'undefined' && _meihuaDB[bk] && _meihuaDB[bk][ut]) ? _meihuaDB[bk][ut].vocab : [];
@@ -528,10 +688,25 @@
           }
         }
         
+        if (assignmentData.cv && Array.isArray(assignmentData.cv)) {
+          assignmentData.cv.forEach(cvItem => {
+            if (!cvItem.char) return;
+            const chars = cvItem.char.split('');
+            chars.forEach((ch, arrIndex) => {
+              assignmentData.tasks.push({
+                char: ch,
+                word: cvItem.char,
+                pinyin: cvItem.pinyin || '',
+                meaning: cvItem.meaning || '',
+                isLastCharInWord: arrIndex === chars.length - 1
+              });
+            });
+          });
+        }
+        
         tasks = assignmentData.tasks;
         if(tasks.length === 0) throw new Error("Kosakata kosong");
 
-        // Populate student list based on class
         if (typeof _studentsDB !== 'undefined' && assignmentData.cls) {
           const classStudents = _studentsDB[assignmentData.cls];
           if (classStudents && classStudents.length > 0) {
@@ -545,7 +720,6 @@
              loginInfo.textContent = "Error: Kelas " + assignmentData.cls + " tidak ditemukan di database siswa.";
           }
         } else if (typeof _studentsDB !== 'undefined') {
-          // Fallback if no class
           for(let cls in _studentsDB) {
              _studentsDB[cls].forEach(name => {
                 let opt = document.createElement('option');
@@ -556,17 +730,34 @@
           }
         }
         
-        loginInfo.innerHTML = `Mengerjakan <b>${tasks.length}</b> huruf (x${repetitions})`;
+        const taskType = assignmentData.type || 'tugas';
+        const typeBadge = taskType === 'remedial' ? '<span style="color:#D97706; font-weight:bold;">🔁 Remedial</span>' : '<span style="color:var(--primary); font-weight:bold;">📝 Tugas</span>';
+        loginInfo.innerHTML = `${typeBadge} • Kelas <b>${assignmentData.cls || ''}</b><br>Mengerjakan <b>${tasks.length}</b> huruf (x${repetitions})`;
       } catch(e) {
         loginInfo.textContent = "Error: Link tugas rusak atau tidak valid.";
         console.error(e);
       }
     }
 
-    studentSelect.addEventListener('change', checkStartBtn);
+    studentSelect.addEventListener('change', async () => {
+      checkStartBtn();
+      const sName = studentSelect.value;
+      if (sName && assignmentData && assignmentData.cls) {
+         try {
+            const savedT = await DB.getStudentTheme(assignmentData.cls, sName);
+            if (savedT) {
+               applyTheme(savedT);
+               const themeObj = THEMES.find(t => t.id === savedT);
+               const themeTextEl = document.getElementById('theme-select-text');
+               if (themeObj && themeTextEl) {
+                  themeTextEl.textContent = themeObj.name;
+                  themeTextEl.style.color = 'var(--primary)';
+               }
+            }
+         } catch(e) {}
+      }
+    });
 
-
-    
     const themeHeader = document.getElementById('theme-select-header');
     const themeList = document.getElementById('theme-select-list');
     const themeText = document.getElementById('theme-select-text');
@@ -577,8 +768,6 @@
       THEMES.forEach(t => {
         const div = document.createElement('div');
         div.className = `theme-option ${t.id}`;
-        
-        // Inline styles to ensure it picks up its own theme variables
         div.style.backgroundColor = 'var(--bg-body)';
         div.style.color = 'var(--primary)';
         div.style.borderLeft = '4px solid var(--primary)';
@@ -593,55 +782,34 @@
            themeText.style.color = 'var(--primary)';
            themeList.classList.remove('show');
            checkStartBtn();
+           if (studentSelect.value && assignmentData && assignmentData.cls) {
+              DB.saveStudentTheme(assignmentData.cls, studentSelect.value, t.id).catch(() => {});
+           }
         });
         themeList.appendChild(div);
       });
     }
 
-    if(themeHeader) {
-        themeHeader.addEventListener('click', () => {
-           themeList.classList.toggle('show');
-        });
+    function applyTheme(themeId) {
+      document.body.className = themeId;
+      selectedTheme = themeId;
+      try {
+        localStorage.setItem('stroke_app_theme', themeId);
+      } catch(e) {
+        console.warn('localStorage not available', e);
+      }
     }
 
+    themeHeader.addEventListener('click', (e) => {
+       e.stopPropagation();
+       themeList.classList.toggle('show');
+    });
+
     document.addEventListener('click', (e) => {
-       const selectEl = document.getElementById('theme-custom-select');
-       if (selectEl && !selectEl.contains(e.target) && themeList) {
+       if(!document.getElementById('theme-custom-select').contains(e.target)) {
           themeList.classList.remove('show');
        }
     });
-
-
-    document.getElementById('btn-next').addEventListener('click', () => checkTypingAndNext());
-    document.getElementById('btn-next-word').addEventListener('click', () => checkTypingAndNext());
-
-    // Check Start Button
-    function checkStartBtn() {
-       startBtn.disabled = !studentSelect.value || !assignmentData;
-    }
-    
-    studentSelect.addEventListener('change', () => {
-       if (studentSelect.value && assignmentData && assignmentData.id) {
-           const progress = checkRestore(studentSelect.value, assignmentData.id);
-           if (progress) {
-               if (confirm(`Ditemukan progres tersimpan untuk ${studentSelect.value}. Ingin melanjutkannya?`)) {
-                   restoreStudentProgress();
-               }
-           }
-       }
-       checkStartBtn();
-    });
-
-    populateThemeDropdown();
-
-    function applyTheme(themeId) {
-        document.body.className = themeId;
-        try {
-            localStorage.setItem('stroke_app_theme', themeId);
-        } catch(e) {
-            console.warn('localStorage not available', e);
-        }
-    }
 
     let savedTheme = null;
     try {
@@ -659,7 +827,6 @@
            themeTextEl.style.color = 'var(--primary)';
         }
     }
-
 
     function saveStudentProgress() {
         if (!assignmentData.id) return;
@@ -685,7 +852,6 @@
             if (!saved) return false;
             
             const progress = JSON.parse(saved);
-            
             if (progress.studentName === studentName && progress.currentTaskIndex !== undefined) {
                 return progress;
             }
@@ -722,8 +888,6 @@
                 } else if (progress.currentScreen === 'game') {
                     screenLogin.classList.add('hidden');
                     screenGame.classList.remove('hidden');
-                    document.getElementById('total-words').textContent = tasks.length;
-                    
                     drawnChars.clear();
                     currentWordMistakes = 0;
                     loadWord();
@@ -736,10 +900,7 @@
 
     startBtn.addEventListener('click', () => {
       studentName = studentSelect.value;
-      
-      // Init mistake map
       tasks.forEach(t => mistakesMap[t.char] = 0);
-
       document.getElementById('display-name').textContent = studentName;
       
       screenLogin.classList.add('hidden');
@@ -767,31 +928,29 @@
       document.getElementById('progress-text').textContent = `Huruf ${currentTaskIndex + 1} / ${tasks.length}`;
       
       let highlightedWord = "";
-      for(let i=0; i<task.word.length; i++) {
-        if(task.word[i] === task.char) {
-           highlightedWord += `<span style="color:#8B3DFF">${task.word[i]}</span>`;
-        } else {
-           highlightedWord += task.word[i];
+      if (task.word && task.word.length > 1) {
+        for(let i=0; i<task.word.length; i++) {
+          if(task.word[i] === task.char) {
+             highlightedWord += `<span style="color:var(--primary); background:rgba(139,61,255,0.12); padding:2px 6px; border-radius:6px; font-weight:bold;">${task.word[i]}</span>`;
+          } else {
+             highlightedWord += `<span style="opacity:0.45;">${task.word[i]}</span>`;
+          }
         }
+      } else {
+        highlightedWord = `<span style="color:var(--primary); font-weight:bold;">${task.word || task.char}</span>`;
       }
       document.getElementById('full-word-context').innerHTML = highlightedWord;
-      
       document.getElementById('char-pinyin').textContent = formatPinyin(task.pinyin) || "—";
       document.getElementById('char-meaning').textContent = task.meaning || "—";
 
-      // Update dots
       updateDots();
-      
-      // Reset mistake counter for this screen
       currentWordMistakes = 0;
       updateMistakeUI();
 
       // Init or update HanziWriter
       const target = document.getElementById('writer-target');
-      
-      // Use native sizing for HanziWriter so pointer coordinates are accurate
-      const size = Math.min(400, window.innerWidth - 60); // Dikurangi 60px agar aman dari padding/border di layar HP
-      target.style.transform = 'none'; // Ensure no CSS scaling
+      const size = Math.min(400, window.innerWidth - 60);
+      target.style.transform = 'none';
       target.style.width = size + 'px';
       target.style.height = size + 'px';
       
@@ -799,22 +958,27 @@
       container.style.width = size + 'px';
       container.style.height = size + 'px';
 
+      // Read dynamic theme brush color
+      const cs = getComputedStyle(document.body);
+      const brushColor = cs.getPropertyValue('--brush-color').trim() || '#8B3DFF';
+      const highlightColor = cs.getPropertyValue('--highlight-color').trim() || '#00C4CC';
+
       if(!writer) {
         target.innerHTML = '';
         writer = HanziWriter.create('writer-target', task.char, {
           width: size,
           height: size,
-          padding: 10,
+          padding: 15,
           showCharacter: false,
           showOutline: true,
           strokeColor: '#1e293b',
           outlineColor: '#e2e8f0',
-          drawingColor: '#8B3DFF',
-          drawingWidth: 25 * (size / 400), // Scale drawing width proportionally
-          drawingFadeDuration: 400,
+          drawingColor: brushColor,
+          drawingWidth: 26 * (size / 400),
+          drawingFadeDuration: 350,
           highlightOnComplete: true,
-          highlightColor: '#00C4CC',
-          leniency: 3.0, // Dinaikkan menjadi 3.0 (sangat longgar) agar lekukan font bisa diabaikan dengan tarikan lurus
+          highlightColor: highlightColor,
+          leniency: 0.75,
           charDataLoader: function(c, onLoad, onError) {
             if (typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[c]) {
                onLoad(BM_STROKE_DATA[c]);
@@ -844,21 +1008,30 @@
     }
 
     function startQuiz() {
+      if (!writer) return;
       writer.quiz({
+        leniency: 0.75,
         showHintAfterMisses: 3,
+        onCorrectStroke: function() {
+          playSound('stroke_correct');
+        },
         onMistake: function(strokeData) {
+          playSound('stroke_mistake');
           const char = tasks[currentTaskIndex].char;
           mistakesMap[char]++;
           currentWordMistakes++;
           updateMistakeUI();
           
-          const target = document.getElementById('writer-target');
-          target.classList.remove('shake-error');
-          void target.offsetWidth; // trigger reflow
-          target.classList.add('shake-error');
+          const container = document.getElementById('writer-container') || document.getElementById('writer-target');
+          if (container) {
+             container.classList.remove('shake-error');
+             void container.offsetWidth;
+             container.classList.add('shake-error');
+          }
         },
         onComplete: function() {
-          setTimeout(handleRepetition, 600);
+          playSound('rep_complete');
+          setTimeout(handleRepetition, 500);
         }
       });
     }
@@ -877,30 +1050,161 @@
       const el = document.getElementById('mistake-counter');
       if(currentWordMistakes > 0) {
         el.textContent = `Kesalahan: ${currentWordMistakes}`;
-        el.style.opacity = '1';
+        el.style.display = 'block';
       } else {
-        el.style.opacity = '0';
+        el.style.display = 'none';
       }
     }
 
-    function normalizeText(t) {
-      if(!t) return "";
-      let s = t.toLowerCase().replace(/[\s\d]/g, '');
-      const toneMap = {
-          'ā':'a', 'á':'a', 'ǎ':'a', 'à':'a',
-          'ē':'e', 'é':'e', 'ě':'e', 'è':'e',
-          'ī':'i', 'í':'i', 'ǐ':'i', 'ì':'i',
-          'ō':'o', 'ó':'o', 'ǒ':'o', 'ò':'o',
-          'ū':'u', 'ú':'u', 'ǔ':'u', 'ù':'u',
-          'ǖ':'u', 'ǘ':'u', 'ǚ':'u', 'ǜ':'u', 'ü':'u'
-      };
-      s = s.replace(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]/g, m => toneMap[m]);
-      s = s.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()'"?]/g, '');
-      return s;
+    const VALID_PINYIN_SYLLABLES = new Set([
+      'a','ai','an','ang','ao','ba','bai','ban','bang','bao','bei','ben','beng','bi','bian','biao','bie','bin','bing','bo','bu',
+      'ca','cai','can','cang','cao','ce','cen','ceng','cha','chai','chan','chang','chao','che','chen','cheng','chi','chong','chou',
+      'chu','chua','chuai','chuan','chuang','chui','chun','chuo','ci','cong','cou','cu','cuan','cui','cun','cuo',
+      'da','dai','dan','dang','dao','de','dei','den','deng','di','dia','dian','diao','die','ding','diu','dong','dou','du','duan','dui','dun','duo',
+      'e','ei','en','eng','er','fa','fan','fang','fei','fen','feng','fo','fou','fu','ga','gai','gan','gang','gao','ge','gei','gen','geng','gong','gou',
+      'gu','gua','guai','guan','guang','gui','gun','guo','ha','hai','han','hang','hao','he','hei','hen','heng','hm','hong','hou','hu','hua','huai',
+      'huan','huang','hui','hun','huo','ji','jia','jian','jiang','jiao','jie','jin','jing','jiong','jiu','ju','juan','jue','jun',
+      'ka','kai','kan','kang','kao','ke','kei','ken','keng','kong','kou','ku','kua','kuai','kuan','kuang','kui','kun','kuo',
+      'la','lai','lan','lang','lao','le','lei','leng','li','lia','lian','liang','liao','lie','lin','ling','liu','lo','long','lou','lu','luan','lun','luo','lv','lve',
+      'ma','mai','man','mang','mao','me','mei','men','meng','mi','mian','miao','mie','min','ming','miu','mo','mou','mu',
+      'na','nai','nan','nang','nao','ne','nei','nen','neng','ng','ni','nian','niang','niao','nie','nin','ning','niu','nong','nou','nu','nuan','nuo','nv','nve',
+      'o','ou','pa','pai','pan','pang','pao','pei','pen','peng','pi','pian','piao','pie','pin','ping','po','pou','pu',
+      'qi','qia','qian','qiang','qiao','qie','qin','qing','qiong','qiu','qu','quan','que','qun',
+      'ran','rang','rao','re','ren','reng','ri','rong','rou','ru','ruan','rui','run','ruo',
+      'sa','sai','san','sang','sao','se','sen','seng','sha','shai','shan','shang','shao','she','shei','shen','sheng','shi','shou','shu','shua','shuai','shuan','shuang','shui','shun','shuo','si','song','sou','su','suan','sui','sun','suo',
+      'ta','tai','tan','tang','tao','te','tei','teng','ti','tian','tiao','tie','ting','tong','tou','tu','tuan','tui','tun','tuo',
+      'wa','wai','wan','wang','wei','wen','weng','wo','wu','xi','xia','xian','xiang','xiao','xie','xin','xing','xiong','xiu','xu','xuan','xue','xun',
+      'ya','yan','yang','yao','ye','yi','yin','ying','yo','yong','you','yu','yuan','yue','yun',
+      'za','zai','zan','zang','zao','ze','zei','zen','zeng','zha','zhai','zhan','zhang','zhao','zhe','zhei','zhen','zheng','zhi','zhong','zhou','zhu','zhua','zhuai','zhuan','zhuang','zhui','zhun','zhuo','zi','zong','zou','zu','zuan','zui','zun','zuo'
+    ]);
+
+    const TONE_CHAR_MAP = {
+      'ā': ['a', 1], 'á': ['a', 2], 'ǎ': ['a', 3], 'à': ['a', 4],
+      'ē': ['e', 1], 'é': ['e', 2], 'ě': ['e', 3], 'è': ['e', 4],
+      'ī': ['i', 1], 'í': ['i', 2], 'ǐ': ['i', 3], 'ì': ['i', 4],
+      'ō': ['o', 1], 'ó': ['o', 2], 'ǒ': ['o', 3], 'ò': ['o', 4],
+      'ū': ['u', 1], 'ú': ['u', 2], 'ǔ': ['u', 3], 'ù': ['u', 4],
+      'ǖ': ['v', 1], 'ǘ': ['v', 2], 'ǚ': ['v', 3], 'ǜ': ['v', 4],
+      'ü': ['v', 0], 'ń': ['n', 2], 'ň': ['n', 3], 'ǹ': ['n', 4],
+      'm̀': ['m', 4]
+    };
+
+    function decomposeOneSyllable(syl) {
+      let tone = 0;
+      let base = '';
+      for (const ch of (syl || '')) {
+        if (TONE_CHAR_MAP[ch]) {
+          base += TONE_CHAR_MAP[ch][0];
+          tone = TONE_CHAR_MAP[ch][1];
+        } else if (ch === 'ü') {
+          base += 'v';
+        } else {
+          base += ch;
+        }
+      }
+      base = base.toLowerCase().replace(/[^a-z]/g, '');
+      return { base, tone };
     }
-    
-    function checkTextMatch(input, target) {
-        return normalizeText(input) === normalizeText(target);
+
+    function splitPinyinSyllables(chars, pinyinStr) {
+      if (!pinyinStr) return [];
+      const charList = (chars || '').split('');
+      const numChars = charList.length || 1;
+      
+      // 1. If space-separated
+      let parts = pinyinStr.trim().split(/\s+/);
+      if (parts.length === numChars) {
+        return parts.map((p, i) => {
+          const dec = decomposeOneSyllable(p);
+          return { char: charList[i] || '', base: dec.base, tone: dec.tone };
+        });
+      }
+      
+      if (numChars === 1) {
+        const dec = decomposeOneSyllable(pinyinStr);
+        return [{ char: charList[0] || '', base: dec.base, tone: dec.tone }];
+      }
+      
+      // 2. Character-by-character DB lookup
+      let dbSyls = [];
+      let allFound = true;
+      for (const c of charList) {
+        if (typeof _vocabDB !== 'undefined' && _vocabDB[c] && _vocabDB[c].p) {
+          dbSyls.push(_vocabDB[c].p);
+        } else {
+          allFound = false;
+          break;
+        }
+      }
+      if (allFound && dbSyls.length === numChars) {
+        return dbSyls.map((p, i) => {
+          const dec = decomposeOneSyllable(p);
+          return { char: charList[i] || '', base: dec.base, tone: dec.tone };
+        });
+      }
+
+      // 3. Exact Pinyin valid syllable segmentation
+      function parseSegment(str, targetCount) {
+        if (targetCount === 1) {
+          const dec = decomposeOneSyllable(str);
+          if (VALID_PINYIN_SYLLABLES.has(dec.base)) return [str];
+          return null;
+        }
+        for (let len = 1; len <= Math.min(str.length - 1, 6); len++) {
+          const first = str.substring(0, len);
+          const dec = decomposeOneSyllable(first);
+          if (VALID_PINYIN_SYLLABLES.has(dec.base)) {
+            const rest = str.substring(len);
+            const sub = parseSegment(rest, targetCount - 1);
+            if (sub && sub.length === targetCount - 1) {
+              return [first, ...sub];
+            }
+          }
+        }
+        return null;
+      }
+
+      const parsed = parseSegment(pinyinStr, numChars);
+      if (parsed && parsed.length === numChars) {
+        return parsed.map((p, i) => {
+          const dec = decomposeOneSyllable(p);
+          return { char: charList[i] || '', base: dec.base, tone: dec.tone };
+        });
+      }
+      
+      return charList.map((c, i) => {
+        const dec = decomposeOneSyllable(pinyinStr);
+        return { char: c, base: dec.base, tone: dec.tone };
+      });
+    }
+
+    function normalizeMeaningText(str) {
+      if (!str) return '';
+      return str.toLowerCase()
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?\"\'–—\[\]\(\)]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function checkFlexibleMeaning(userInput, targetMeaning) {
+      if (!userInput || !targetMeaning) return false;
+      const userNorm = normalizeMeaningText(userInput);
+      const targetNorm = normalizeMeaningText(targetMeaning);
+      if (!userNorm) return false;
+      if (userNorm === targetNorm) return true;
+      
+      const candidates = targetMeaning.split(/[\/,;\(\)]+/)
+        .map(s => normalizeMeaningText(s))
+        .filter(s => s.length > 0);
+      
+      if (candidates.some(c => c === userNorm)) return true;
+      
+      for (const c of candidates) {
+        if (c.length >= 2 && (c === userNorm || c.split(' ').includes(userNorm) || userNorm.split(' ').includes(c))) {
+          return true;
+        }
+      }
+      return false;
     }
 
     function checkTypingAndNext() {
@@ -912,10 +1216,90 @@
       }
     }
 
+    function calculateStars() {
+      const totalMistakes = Object.values(mistakesMap).reduce((a, b) => a + b, 0);
+      const starContainer = document.getElementById('star-rating-container');
+      const badgeText = document.getElementById('star-badge-text');
+      
+      let stars = '⭐⭐⭐';
+      let title = 'Sempurna! Luar Biasa! 🎉';
+      
+      if (totalMistakes === 0) {
+         stars = '⭐⭐⭐';
+         title = 'Sempurna! Tanpa Kesalahan! 🌟';
+      } else if (totalMistakes <= 3) {
+         stars = '⭐⭐';
+         title = 'Bagus Sekali! Terus Semangat! 👍';
+      } else {
+         stars = '⭐';
+         title = 'Kerja Bagus! Terus Berlatih ya! 💪';
+      }
+      
+      starContainer.textContent = stars;
+      badgeText.textContent = title;
+    }
+
+    // --- CONFETTI ANIMATION ENGINE ---
+    function launchConfetti() {
+       const canvas = document.getElementById('confetti-canvas');
+       if (!canvas) return;
+       const ctx = canvas.getContext('2d');
+       canvas.width = window.innerWidth;
+       canvas.height = window.innerHeight;
+       
+       const colors = ['#8B3DFF', '#00C4CC', '#FF4655', '#FFD200', '#22C55E', '#EC4899', '#38BDF8'];
+       const pieces = [];
+       const pieceCount = 100;
+       
+       for (let i = 0; i < pieceCount; i++) {
+          pieces.push({
+             x: Math.random() * canvas.width,
+             y: Math.random() * canvas.height - canvas.height,
+             size: Math.random() * 10 + 6,
+             color: colors[Math.floor(Math.random() * colors.length)],
+             speedY: Math.random() * 3 + 2,
+             speedX: Math.random() * 2 - 1,
+             rotation: Math.random() * 360,
+             rotationSpeed: Math.random() * 8 - 4
+          });
+       }
+       
+       let animationFrame;
+       let startTime = Date.now();
+       
+       function draw() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          pieces.forEach(p => {
+             ctx.save();
+             ctx.translate(p.x, p.y);
+             ctx.rotate((p.rotation * Math.PI) / 180);
+             ctx.fillStyle = p.color;
+             ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+             ctx.restore();
+             
+             p.y += p.speedY;
+             p.x += p.speedX;
+             p.rotation += p.rotationSpeed;
+          });
+          
+          if (Date.now() - startTime < 4000) {
+             animationFrame = requestAnimationFrame(draw);
+          } else {
+             ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+       }
+       draw();
+    }
+
     function finishGame() {
       screenGame.classList.add('hidden');
       screenFinish.classList.remove('hidden');
       saveStudentProgress();
+      
+      calculateStars();
+      playSound('victory');
+      launchConfetti();
+      
       document.getElementById('finish-content').style.display = 'block';
       document.getElementById('thank-you-msg').style.display = 'none';
       document.getElementById('finish-options').style.display = 'none';
@@ -928,66 +1312,146 @@
       submitData();
     }
 
+    let currentTaskPinyinData = [];
+
     function showTypingModal(task) {
       screenGame.classList.add('hidden');
       screenTyping.classList.remove('hidden');
       
-      document.getElementById('typing-word').textContent = task.fullWord;
-      document.getElementById('typing-word-pinyin').textContent = formatPinyin(task.pinyin);
-      document.getElementById('typing-word-meaning').textContent = task.meaning;
+      const word = task.word || task.char;
+      document.getElementById('typing-word').textContent = word;
+      document.getElementById('typing-ref-pinyin').textContent = task.pinyin || '';
+      document.getElementById('typing-ref-meaning').textContent = task.meaning || '';
       
-      document.getElementById('typing-pinyin').value = "";
-      document.getElementById('typing-meaning').value = "";
+      currentTaskPinyinData = splitPinyinSyllables(word, task.pinyin);
+      
+      const container = document.getElementById('pinyin-columns-container');
+      container.innerHTML = '';
+      
+      currentTaskPinyinData.forEach((item, idx) => {
+        const col = document.createElement('div');
+        col.className = 'pinyin-char-col';
+        col.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:5px; flex:1; min-width:85px; max-width:130px;';
+        col.innerHTML = `
+          <div style="font-size:1.15rem; font-weight:bold; color:var(--primary); background:rgba(139,61,255,0.08); padding:2px 10px; border-radius:6px;">${item.char}</div>
+          <div style="display:flex; gap:4px; width:100%;">
+            <input type="text" class="pinyin-syl-input" data-idx="${idx}" placeholder="pinyin" autocomplete="off" autocapitalize="none" style="flex:2; text-align:center; padding:8px 4px; border:1.5px solid var(--border-color); border-radius:var(--btn-radius); background:var(--bg-body); color:var(--text-main); font-weight:bold; font-size:0.95rem; outline:none;">
+            <input type="text" class="pinyin-tone-input" data-idx="${idx}" placeholder="nada" maxlength="1" autocomplete="off" style="flex:1; text-align:center; padding:8px 2px; border:1.5px solid var(--border-color); border-radius:var(--btn-radius); background:var(--bg-body); color:var(--text-main); font-weight:bold; font-size:0.95rem; outline:none;">
+          </div>
+        `;
+        container.appendChild(col);
+      });
+      
+      const allInputs = container.querySelectorAll('input');
+      allInputs.forEach((inp, i) => {
+        inp.addEventListener('input', () => {
+          inp.style.borderColor = 'var(--border-color)';
+          document.getElementById('typing-pinyin-err').style.display = 'none';
+          if (inp.classList.contains('pinyin-tone-input') && inp.value.length === 1) {
+            if (i + 1 < allInputs.length) {
+              allInputs[i + 1].focus();
+            } else {
+              document.getElementById('typing-meaning').focus();
+            }
+          }
+        });
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            checkTypingSubmit(task);
+          }
+        });
+      });
+      
+      const meaningInput = document.getElementById('typing-meaning');
+      meaningInput.value = '';
+      meaningInput.style.borderColor = 'var(--border-color)';
+      meaningInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          checkTypingSubmit(task);
+        }
+      });
+      meaningInput.addEventListener('input', () => {
+        meaningInput.style.borderColor = 'var(--border-color)';
+        document.getElementById('typing-meaning-err').style.display = 'none';
+      });
+      
       document.getElementById('typing-pinyin-err').style.display = 'none';
       document.getElementById('typing-meaning-err').style.display = 'none';
       
-      const groupPinyin = document.getElementById('group-pinyin');
-      const groupMeaning = document.getElementById('group-meaning');
-      
-      if(assignmentData.tp === 1) {
-        groupPinyin.style.display = 'block';
-      } else {
-        groupPinyin.style.display = 'none';
-      }
-      
-      if(assignmentData.tm === 1) {
-        groupMeaning.style.display = 'block';
-      } else {
-        groupMeaning.style.display = 'none';
-      }
-      
       document.getElementById('typing-submit').onclick = () => {
-         checkTypingSubmit(task);
+        checkTypingSubmit(task);
       };
+      
+      setTimeout(() => {
+        if (allInputs[0]) allInputs[0].focus();
+      }, 100);
     }
 
     function checkTypingSubmit(task) {
-      const pyInput = document.getElementById('typing-pinyin').value;
-      const mnInput = document.getElementById('typing-meaning').value;
+      const container = document.getElementById('pinyin-columns-container');
+      const sylInputs = container.querySelectorAll('.pinyin-syl-input');
+      const toneInputs = container.querySelectorAll('.pinyin-tone-input');
+      const meaningInput = document.getElementById('typing-meaning');
       const pyErr = document.getElementById('typing-pinyin-err');
       const mnErr = document.getElementById('typing-meaning-err');
       
       pyErr.style.display = 'none';
       mnErr.style.display = 'none';
       
-      let pinyinMatch = true;
-      let meaningMatch = true;
+      let pinyinAllValid = true;
       
-      if(assignmentData.tp === 1) {
-        pinyinMatch = checkTextMatch(pyInput, task.pinyin);
+      currentTaskPinyinData.forEach((item, idx) => {
+        const sInp = sylInputs[idx];
+        const tInp = toneInputs[idx];
+        if (!sInp || !tInp) return;
+        
+        const userSyl = sInp.value.trim().toLowerCase().replace(/ü/g, 'v').replace(/u:/g, 'v');
+        const targetSyl = item.base.replace(/ü/g, 'v');
+        
+        const sylMatch = (userSyl === targetSyl) || (targetSyl.includes('v') && userSyl === targetSyl.replace('v', 'u'));
+        
+        const userTone = tInp.value.trim();
+        let toneMatch = false;
+        if (item.tone === 0) {
+          toneMatch = (userTone === '0' || userTone === '5' || userTone === '');
+        } else {
+          toneMatch = (userTone === item.tone.toString());
+        }
+        
+        if (!sylMatch) {
+          sInp.style.borderColor = '#ef4444';
+          pinyinAllValid = false;
+        } else {
+          sInp.style.borderColor = '#10B981';
+        }
+        
+        if (!toneMatch) {
+          tInp.style.borderColor = '#ef4444';
+          pinyinAllValid = false;
+        } else {
+          tInp.style.borderColor = '#10B981';
+        }
+      });
+      
+      if (!pinyinAllValid) {
+        pyErr.style.display = 'block';
       }
       
-      if(assignmentData.tm === 1) {
-        meaningMatch = checkTextMatch(mnInput, task.meaning);
+      const meaningValid = checkFlexibleMeaning(meaningInput.value, task.meaning);
+      if (!meaningValid) {
+        meaningInput.style.borderColor = '#ef4444';
+        mnErr.style.display = 'block';
+      } else {
+        meaningInput.style.borderColor = '#10B981';
       }
       
-      if(!pinyinMatch) pyErr.style.display = 'block';
-      if(!meaningMatch) mnErr.style.display = 'block';
-      
-      if(pinyinMatch && meaningMatch) {
-         screenTyping.classList.add('hidden');
-         screenGame.classList.remove('hidden');
-         nextTask();
+      if (pinyinAllValid && meaningValid) {
+        playSound('correct');
+        screenTyping.classList.add('hidden');
+        screenGame.classList.remove('hidden');
+        nextTask();
+      } else {
+        playSound('mistake');
       }
     }
 
@@ -995,13 +1459,11 @@
        currentTaskIndex++;
        currentRepIndex = 0;
        saveStudentProgress();
-       saveStudentProgress();
        setTimeout(loadWord, 100);
     }
 
     function handleRepetition() {
       currentRepIndex++;
-      saveStudentProgress();
       saveStudentProgress();
       updateDots();
       
@@ -1018,104 +1480,70 @@
       }
     }
 
-    function submitData() {
+    async function submitData() {
       const statusEl = document.getElementById('submit-status');
-      
       const totalMistakes = Object.values(mistakesMap).reduce((a, b) => a + b, 0);
-      const payload = {
-         action: "submit",
-         taskId: assignmentData.id,
-         totalMistakes: totalMistakes,
-         cls: assignmentData.cls || "Tidak diketahui",
-         studentName: studentName,
-         totalWords: tasks.length,
-         assignment: {
-            words: tasks.filter(t => t.isLastCharInWord).map(t => t.fullWord || t.char),
-            repetitions: repetitions
-         },
-         mistakes: mistakesMap,
-         status: "Selesai",
-         duration: (Date.now() - taskStartTime) / 1000
-      };
-
-      if(gasUrl.includes("SILAKAN_GANTI")) {
-        statusEl.innerHTML = `<p style="color:#ef4444;">❌ Pengiriman gagal: URL Google Apps Script belum diatur oleh Guru (di config.js).</p>`;
-        return;
-      }
+      const durationSec = (Date.now() - taskStartTime) / 1000;
       
-      fetch(gasUrl, {
-         method: 'POST',
-         mode: 'no-cors',
-         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-         body: JSON.stringify(payload)
-      }).then(() => {
+      try {
+         await DB.submitAssignment(
+            assignmentData.id,
+            assignmentData.cls || "Tidak diketahui",
+            studentName,
+            totalMistakes,
+            tasks.length,
+            repetitions,
+            durationSec,
+            mistakesMap
+         );
          statusEl.innerHTML = `
-           <div style="color: #10B981; font-size: 3rem; margin-bottom: 10px;">✓</div>
+           <div style="color: #10B981; font-size: 2.5rem; margin-bottom: 5px;">✓</div>
            <p style="color: #10B981; font-weight: bold;">Tugas berhasil dikirim!</p>
          `;
          document.getElementById('finish-options').style.display = 'flex';
-         fetchLeaderboard(); // Ambil di background
-      }).catch(err => {
+         fetchLeaderboard();
+      } catch (err) {
          statusEl.innerHTML = `
-           <div style="color: #ef4444; font-size: 3rem; margin-bottom: 10px;">✗</div>
-           <p style="color: #ef4444; font-weight: bold;">Gagal mengirim data.</p>
-           <p style="font-size: 0.9rem;">Pastikan internet lancar.</p>
+           <div style="color: #ef4444; font-size: 2.5rem; margin-bottom: 5px;">✗</div>
+           <p style="color: #ef4444; font-weight: bold;">Gagal mengirim data: ${err.message}</p>
+           <p style="font-size: 0.9rem;">Pastikan koneksi internet lancar.</p>
          `;
          document.getElementById('finish-options').style.display = 'flex';
-      });
+      }
     }
 
     let currentLeaderboardData = [];
-    let currentLbMode = 'time'; // 'time' or 'count'
+    let currentLbMode = 'time';
+    let currentLbScope = 'class';
     
-    function fetchLeaderboard() {
-       if (!assignmentData.cls) return; 
-       
-       const payload = {
-          action: "getLeaderboard",
-          taskId: assignmentData.id,
-          cls: assignmentData.cls
-       };
-       
-       fetch(gasUrl, {
-         method: 'POST',
-         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-         body: JSON.stringify(payload)
-       })
-       .then(response => response.json())
-       .then(data => {
-          if (data.status === "success" && data.leaderboard) {
-             currentLeaderboardData = data.leaderboard;
-             renderLeaderboard();
-          }
-       })
-       .catch(err => {
+    async function fetchLeaderboard() {
+       if (!assignmentData || !assignmentData.id) return;
+       const list = document.getElementById('leaderboard-list');
+       if (list) list.innerHTML = '<p style="color:gray; font-size:0.9rem; text-align:center; padding:15px 0;">Memuat peringkat...</p>';
+       try {
+          currentLeaderboardData = await DB.getLeaderboard(assignmentData.id, assignmentData.cls, currentLbScope);
+          renderLeaderboard();
+       } catch (err) {
           console.error("Gagal memuat leaderboard", err);
-          const pLoad = document.getElementById('submit-status').querySelector('p:last-child');
-          if(pLoad) pLoad.textContent = "";
-       });
+          if (list) list.innerHTML = '<p style="color:gray; font-size:0.9rem; text-align:center;">Gagal memuat peringkat.</p>';
+       }
     }
     
     function renderLeaderboard() {
-       const pLoad = document.getElementById('submit-status').querySelector('p:last-child');
-       if(pLoad) pLoad.style.display = 'none'; 
-       
        const list = document.getElementById('leaderboard-list');
        if (!list) return;
        list.innerHTML = '';
        
        if(!currentLeaderboardData || currentLeaderboardData.length === 0) {
-          list.innerHTML = '<p style="color:gray; font-size:0.9rem;">Belum ada data di papan peringkat.</p>';
+          list.innerHTML = '<p style="color:gray; font-size:0.9rem; text-align:center; padding:15px 0;">Belum ada data di papan peringkat.</p>';
           return;
        }
        
        let sortedData = [...currentLeaderboardData];
        if (currentLbMode === 'time') {
-           // Sort by fastestTime ascending. Exclude 0 unless everyone is 0.
            sortedData = sortedData.filter(u => (u.fastestTime || 0) > 0);
            sortedData.sort((a, b) => (a.fastestTime || 0) - (b.fastestTime || 0));
        } else {
-           // Sort by completions descending
            sortedData.sort((a, b) => {
                const compA = a.completions !== undefined ? a.completions : (a.count || 0);
                const compB = b.completions !== undefined ? b.completions : (b.count || 0);
@@ -1124,66 +1552,129 @@
        }
        
        if (sortedData.length === 0) {
-           list.innerHTML = '<p style="color:gray; font-size:0.9rem;">Belum ada data untuk mode ini.</p>';
+           list.innerHTML = '<p style="color:gray; font-size:0.9rem; text-align:center; padding:15px 0;">Belum ada data untuk mode ini.</p>';
            return;
        }
+
+       const displayedSlice = sortedData.slice(0, 15);
+
+       // Check if 3 decimals are needed to distinguish close times
+       let useThreeDecimals = false;
+       if (currentLbMode === 'time') {
+          useThreeDecimals = displayedSlice.some((u, i) =>
+             displayedSlice.some((v, j) => i !== j && u.fastestTime.toFixed(2) === v.fastestTime.toFixed(2) && u.fastestTime.toFixed(3) !== v.fastestTime.toFixed(3))
+          );
+       }
        
-       sortedData.slice(0, 10).forEach((user, index) => {
+       let currentRank = 1;
+       let prevStatKey = null;
+
+       displayedSlice.forEach((user, index) => {
           const div = document.createElement('div');
           div.className = 'lb-item';
           if (user.name === studentName) div.classList.add('me');
           
-          let rankStr = index + 1;
-          if(rankStr === 1) rankStr = '🥇';
-          else if(rankStr === 2) rankStr = '🥈';
-          else if(rankStr === 3) rankStr = '🥉';
+          let statKey;
+          let statStr;
+          if (currentLbMode === 'time') {
+             statKey = (user.fastestTime || 0).toFixed(3);
+             statStr = formatDuration(user.fastestTime || 0, useThreeDecimals);
+          } else {
+             const completions = user.completions !== undefined ? user.completions : (user.count || 0);
+             statKey = completions.toString();
+             statStr = `${completions}x Selesai`;
+          }
+
+          let rankToDisplay;
+          if (index === 0) {
+             currentRank = 1;
+             rankToDisplay = 1;
+          } else if (statKey === prevStatKey) {
+             rankToDisplay = currentRank;
+          } else {
+             currentRank = index + 1;
+             rankToDisplay = currentRank;
+          }
+          prevStatKey = statKey;
+
+          let rankStr = rankToDisplay.toString();
+          if (rankToDisplay === 1) rankStr = '🥇';
+          else if (rankToDisplay === 2) rankStr = '🥈';
+          else if (rankToDisplay === 3) rankStr = '🥉';
           
-          let completions = user.completions !== undefined ? user.completions : (user.count || 0);
-          let statStr = currentLbMode === 'time' ? formatDuration(user.fastestTime || 0) : `${completions}x Selesai`;
+          const classBadge = (currentLbScope === 'grade' || (user.cls && user.cls !== assignmentData.cls)) 
+             ? `<span class="lb-class-tag">${user.cls || ''}</span>` : '';
           
           div.innerHTML = `
              <div class="lb-rank">${rankStr}</div>
-             <div class="lb-name">${user.name}</div>
+             <div class="lb-name">${user.name}${classBadge}</div>
              <div class="lb-count">${statStr}</div>
           `;
           list.appendChild(div);
        });
     }
     
-    function formatDuration(seconds) {
-        if (!seconds) return '-';
-        const m = Math.floor(seconds / 60);
-        const s = Math.floor(seconds % 60);
-        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    function formatDuration(seconds, useThreeDecimals = false) {
+        if (!seconds && seconds !== 0) return '-';
+        const secNum = parseFloat(seconds);
+        if (isNaN(secNum) || secNum <= 0) return '-';
+        
+        const m = Math.floor(secNum / 60);
+        const sNum = secNum % 60;
+        const decimals = useThreeDecimals ? 3 : 2;
+        const s = sNum.toFixed(decimals);
+        
+        if (m > 0) {
+            const sStr = sNum < 10 ? '0' + s : s;
+            return `${m}m ${sStr}s`;
+        } else {
+            return `${s}s`;
+        }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+       populateThemeDropdown();
+       
        document.body.addEventListener('click', (e) => {
-           if (e.target.id === 'lb-toggle-time') {
-               currentLbMode = 'time';
+           if (e.target.id === 'lb-scope-class') {
+               currentLbScope = 'class';
                e.target.style.background = 'var(--primary)';
                e.target.style.color = 'white';
-               const other = document.getElementById('lb-toggle-count');
+               const other = document.getElementById('lb-scope-grade');
                if (other) { other.style.background = '#E5E7EB'; other.style.color = '#0E1318'; }
+               fetchLeaderboard();
+           } else if (e.target.id === 'lb-scope-grade') {
+               currentLbScope = 'grade';
+               e.target.style.background = 'var(--primary)';
+               e.target.style.color = 'white';
+               const other = document.getElementById('lb-scope-class');
+               if (other) { other.style.background = '#E5E7EB'; other.style.color = '#0E1318'; }
+               fetchLeaderboard();
+           } else if (e.target.id === 'lb-toggle-time') {
+               currentLbMode = 'time';
+               e.target.style.background = 'rgba(139, 61, 255, 0.15)';
+               e.target.style.color = 'var(--primary)';
+               e.target.style.borderColor = 'var(--primary)';
+               const other = document.getElementById('lb-toggle-count');
+               if (other) { other.style.background = '#F1F5F9'; other.style.color = '#64748B'; other.style.borderColor = 'var(--border-color, #E2E8F0)'; }
                renderLeaderboard();
            } else if (e.target.id === 'lb-toggle-count') {
                currentLbMode = 'count';
-               e.target.style.background = 'var(--primary)';
-               e.target.style.color = 'white';
+               e.target.style.background = 'rgba(139, 61, 255, 0.15)';
+               e.target.style.color = 'var(--primary)';
+               e.target.style.borderColor = 'var(--primary)';
                const other = document.getElementById('lb-toggle-time');
-               if (other) { other.style.background = '#E5E7EB'; other.style.color = '#0E1318'; }
+               if (other) { other.style.background = '#F1F5F9'; other.style.color = '#64748B'; other.style.borderColor = 'var(--border-color, #E2E8F0)'; }
                renderLeaderboard();
            }
        });
     });
 
-    // Event Listeners Opsi Selesai
     document.getElementById('btn-show-leaderboard').addEventListener('click', () => {
        const section = document.getElementById('leaderboard-section');
-       if (section.style.display === 'none') {
-          section.style.display = 'block';
-       } else {
-          section.style.display = 'none';
+       section.style.display = (section.style.display === 'none') ? 'block' : 'none';
+       if (section.style.display === 'block') {
+          fetchLeaderboard();
        }
     });
 
@@ -1208,6 +1699,9 @@
        document.getElementById('thank-you-msg').style.display = 'block';
     });
 
+    function checkStartBtn() {
+       startBtn.disabled = !studentSelect.value || !assignmentData;
+    }
   </script>
 </body>
 </html>

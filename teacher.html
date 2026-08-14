@@ -7,25 +7,67 @@
   
   <script src="meihuadb.js"></script>
   <script src="vocabdb.js"></script>
+  <script src="students.js"></script>
   <script src="config.js"></script>
+  <script src="db.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="themes.css">
+  
+  <!-- Google Fonts for Personalized Teacher Themes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Quicksand:wght@600;700&family=Cinzel+Decorative:wght@700;900&family=Uncial+Antiqua&family=MedievalSharp&family=Comfortaa:wght@600;700&family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&family=Sniglet:wght@800&display=swap" rel="stylesheet">
   
   <style>
+    @font-face {
+      font-family: 'HarryP';
+      src: url('HarryP.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Avengers';
+      src: url('Avengers.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Barbie';
+      src: url('Barbie.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'GameOfThrones';
+      src: url('GameOfThrones.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
     :root {
-      --primary: #8B3DFF;
-      --primary-dark: #00C4CC;
-      --bg: #F9FAFB;
+      --primary: #1B5E20;          /* Tzu Chi Bodhi Deep Green (慈济深绿) */
+      --primary-dark: #0E3D14;     /* Tzu Chi Midnight Jade (墨绿) */
+      --primary-light: #2E7D32;    /* Tzu Chi Lotus Leaf Green (菩提绿) */
+      --accent-gold: #D4AF37;      /* Tzu Chi Warm Gold (慈济金) */
+      --bg: #F6FAF7;               /* Tranquil jade-tinted porcelain background */
       --card: #FFFFFF;
-      --text: #0E1318;
-      --text-muted: #5E6A75;
-      --border: #E5E7EB;
+      --text: #0F2417;
+      --text-muted: #526E5C;
+      --border: #E1ECE4;
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background-color: var(--bg);
       color: var(--text);
-      font-family: 'Times New Roman', Times, 'Kaiti', 'KaiTi', STKaiti, serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       line-height: 1.6;
       padding: 0;
     }
@@ -38,24 +80,24 @@
       align-items: center;
       color: white;
       margin-bottom: 30px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(27, 94, 32, 0.2);
     }
     
-    .nav-title { font-size: 1.5rem; font-weight: bold; }
+    .nav-title { font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
     
-    .nav-links { display: flex; gap: 15px; }
+    .nav-links { display: flex; gap: 12px; }
     .nav-btn {
-       background: rgba(255,255,255,0.2);
+       background: rgba(255,255,255,0.15);
        border: none;
        color: white;
-       padding: 8px 16px;
-       border-radius: 6px;
+       padding: 8px 18px;
+       border-radius: 8px;
        cursor: pointer;
        font-weight: bold;
-       transition: background 0.2s;
+       transition: all 0.2s;
     }
-    .nav-btn:hover { background: rgba(255,255,255,0.3); }
-    .nav-btn.active { background: white; color: var(--primary); }
+    .nav-btn:hover { background: rgba(255,255,255,0.25); }
+    .nav-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     
     .container {
       max-width: 1100px;
@@ -65,38 +107,38 @@
     }
     
     header { text-align: center; margin-bottom: 30px; }
-    h1 { font-size: 2.5rem; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+    h1 { font-size: 2.3rem; background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
     
-    .card { background-color: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); margin-bottom: 24px; }
+    .card { background-color: var(--card); border-radius: 14px; padding: 26px; box-shadow: 0 4px 20px rgba(15, 36, 23, 0.04); border: 1px solid var(--border); margin-bottom: 24px; }
     
     .form-group { margin-bottom: 20px; }
     label { display: block; margin-bottom: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
     select, input[type="text"], input[type="number"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background-color: #FFFFFF; color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s ease; }
-    select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 61, 255, 0.15); }
+    select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15); }
     
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     
-    .vocab-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
-    .vocab-item { background-color: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
-    .vocab-item:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(139, 61, 255, 0.1); }
-    .vocab-item.selected { background-color: rgba(139, 61, 255, 0.05); border-color: var(--primary); }
-    .vocab-char { font-size: 1.5rem; font-weight: bold; }
-    .vocab-pinyin { font-size: 0.8rem; color: var(--text-muted); }
+    .vocab-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+    .vocab-item { background-color: #FFFFFF; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
+    .vocab-item:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(27, 94, 32, 0.12); transform: translateY(-1px); }
+    .vocab-item.selected { background-color: rgba(27, 94, 32, 0.07); border-color: var(--primary); }
+    .vocab-char { font-size: 1.6rem; font-weight: bold; font-family: 'Kaiti', 'KaiTi', STKaiti, serif; color: var(--text); }
+    .vocab-pinyin { font-size: 0.85rem; color: var(--text-muted); }
     
-    input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
     
-    .vocab-split-btn { background: #E5E7EB; color: #0E1318; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin-left: auto; font-weight: bold; }
-    .vocab-split-btn:hover { background: #cbd5e1; }
+    .vocab-split-btn { background: #E1ECE4; color: var(--text); border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: auto; font-weight: bold; }
+    .vocab-split-btn:hover { background: #cedcd1; }
     
-    .char-split-container { display: none; flex-direction: row; gap: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
-    .char-checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 1.1rem; cursor: pointer; }
+    .char-split-container { display: none; flex-direction: row; gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+    .char-checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 1.15rem; cursor: pointer; font-family: 'Kaiti', serif; }
     
-    .btn { display: inline-block; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(139, 61, 255, 0.2); text-align: center; }
-    .btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(139, 61, 255, 0.3); }
+    .btn { display: inline-block; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 14px rgba(27, 94, 32, 0.22); text-align: center; }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(27, 94, 32, 0.32); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .result-box { margin-top: 20px; display: none; }
-    textarea { width: 100%; height: 80px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background-color: #FFFFFF; color: var(--text); font-size: 0.9rem; resize: none; margin-bottom: 10px; }
+    textarea { width: 100%; height: 80px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background-color: #FFFFFF; color: var(--text); font-size: 0.95rem; resize: none; margin-bottom: 10px; }
     
     .copy-btn { background: var(--bg); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
     .copy-btn:hover { background: var(--border); color: var(--text); box-shadow: none; }
@@ -105,40 +147,471 @@
     .matrix-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px dashed var(--border); margin-bottom: 4px; }
     .matrix-row:last-child { border-bottom: none; margin-bottom: 0; }
     .matrix-row-label { font-weight: bold; min-width: 95px; font-size: 1.05rem; color: var(--primary); }
-    .matrix-btn { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: white; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-size: 1rem; }
-    .matrix-btn:hover { background: #f1f5f9; }
+    .matrix-btn { padding: 10px 15px; border: 1px solid var(--border); border-radius: 8px; background: white; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-size: 0.95rem; }
+    .matrix-btn:hover { background: #f1f5f9; border-color: var(--primary); }
     .matrix-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
     .matrix-btn.has-selection { position: relative; border-color: var(--primary); }
     .matrix-btn.has-selection::after { content: ''; position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; background: #10B981; border-radius: 50%; border: 2px solid white; }
     
-    .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
     table.data-table { width: 100%; border-collapse: collapse; text-align: left; }
-    table.data-table th { padding: 12px; background: #E5E7EB; }
-    table.data-table td { padding: 12px; border-bottom: 1px solid var(--border); }
-    table.data-table tr:hover { background: #F9FAFB; }
+    table.data-table thead tr { background: linear-gradient(135deg, var(--primary-dark), var(--primary)) !important; color: #FFFFFF !important; }
+    table.data-table thead th { padding: 12px; background: transparent !important; color: #FFFFFF !important; font-weight: bold; font-size: 0.95rem; }
+    table.data-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.95rem; color: var(--text); }
+    table.data-table tr:hover td { background: rgba(0,0,0,0.025); }
+
+    /* Search Box Input */
+    .search-box-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .search-box-container input[type="text"] {
+      width: 100%;
+      padding: 12px 16px 12px 46px !important;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .search-box-container input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.15);
+    }
+    .search-box-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
+    /* Printable worksheet preview grid */
+    .tianzige-print-box {
+      width: 50px; height: 50px; border: 1px solid #D32F2F; position: relative; display: inline-block; margin-right: 6px; margin-bottom: 6px;
+    }
+    .tianzige-print-box::before {
+      content:''; position: absolute; left: 0; right: 0; top: 25px; border-top: 1px dashed #FFCDD2;
+    }
+    .tianzige-print-box::after {
+      content:''; position: absolute; top: 0; bottom: 0; left: 25px; border-left: 1px dashed #FFCDD2;
+    }
+
+    /* Sticky Task Detail Header & Table Freeze */
+    .sticky-task-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      padding: 10px 0 16px 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
+    }
+    
+    .sticky-table-wrapper {
+      max-height: 55vh;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    
+    .sticky-table-wrapper table.data-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--primary-dark) !important;
+      color: white !important;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .sticky-table-wrapper table.data-table thead.lb-head th {
+      background: #F59E0B !important;
+      color: white !important;
+    }
+
+    /* Task Detail Switch Tabs */
+    .task-detail-tab-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .detail-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .detail-tab-btn:hover {
+      background: #F1F5F9;
+      border-color: var(--primary);
+    }
+    .detail-tab-btn.active {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(27, 94, 32, 0.25);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       PERSONALIZED TEACHER THEMES (COLOR & FONTS)
+       ════════════════════════════════════════════════════════════ */
+    
+    /* ⚡ 1. IVANNA / IVANA - HARRY POTTER & GRYFFINDOR SCARLET MAGIC STYLE */
+    body.theme-teacher-harrypotter {
+      --primary: #740001;          /* Gryffindor Deep Crimson / Scarlet */
+      --primary-dark: #370000;     /* Hogwarts Midnight Maroon */
+      --primary-light: #9B111E;    /* Scarlet Magic */
+      --accent-gold: #EEBA30;      /* Gryffindor Golden Lion (#EEBA30 / #D3A625) */
+      --bg: #FAF5ED;               /* Hogwarts Ancient Library Parchment */
+      --card: #FFFFFF;
+      --text: #2B1810;             /* Spellbook Deep Brown Ink */
+      --text-muted: #6B5B52;
+      --border: #E5D9C8;
+      font-family: 'Cinzel Decorative', 'MedievalSharp', 'Lora', Georgia, serif;
+    }
+    body.theme-teacher-harrypotter h1 {
+      font-family: 'HarryP', 'Cinzel Decorative', serif;
+      font-weight: normal;
+      font-size: 3.4rem;
+      letter-spacing: 3px;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #740001 0%, #9B111E 45%, #EEBA30 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    body.theme-teacher-harrypotter h2,
+    body.theme-teacher-harrypotter h3,
+    body.theme-teacher-harrypotter h4,
+    body.theme-teacher-harrypotter .nav-title {
+      font-family: 'HarryP', 'Cinzel Decorative', serif;
+      font-weight: normal;
+      letter-spacing: 2.5px;
+      font-size: 1.85rem;
+    }
+    body.theme-teacher-harrypotter .nav-bar {
+      background: linear-gradient(135deg, #2A0000 0%, #740001 50%, #9B111E 100%);
+      box-shadow: 0 4px 22px rgba(116, 0, 1, 0.35);
+      border-bottom: 3.5px solid #EEBA30;
+    }
+    body.theme-teacher-harrypotter .btn {
+      font-family: 'HarryP', 'Cinzel Decorative', serif;
+      font-size: 1.45rem;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #370000 0%, #740001 50%, #9B111E 100%);
+      border: 1.5px solid #EEBA30;
+      border-radius: 10px;
+      box-shadow: 0 4px 18px rgba(116, 0, 1, 0.35);
+    }
+    body.theme-teacher-harrypotter .btn:hover {
+      box-shadow: 0 6px 24px rgba(238, 186, 48, 0.5);
+      transform: translateY(-2px);
+    }
+    body.theme-teacher-harrypotter .card {
+      border: 1.5px solid #E5D9C8;
+      border-top: 3.5px solid #740001;
+      box-shadow: 0 4px 20px rgba(116, 0, 1, 0.07);
+      border-radius: 14px;
+    }
+    body.theme-teacher-harrypotter .nav-btn.active {
+      color: #740001;
+      border: 2px solid #EEBA30;
+    }
+
+    /* 💍 2. GIOVANNI / GIO - LORD OF THE RINGS / RADIANT POSTER SUNFIRE GOLD STYLE */
+    body.theme-teacher-lotr {
+      --primary: #D97706;          /* Radiant One Ring Gold */
+      --primary-dark: #78350F;     /* Deep Auburn Bronze */
+      --primary-light: #F59E0B;    /* Sunfire Fellowship Amber */
+      --accent-gold: #FDE047;      /* Bright Golden Inscription */
+      --bg: #FAF6EE;               /* Luminous Middle-earth Map Parchment */
+      --card: #FFFFFF;
+      --text: #2C1810;             /* Ancient Inscribed Ink */
+      --text-muted: #715848;
+      --border: #E8DEC8;
+      font-family: 'Uncial Antiqua', 'MedievalSharp', serif;
+    }
+    body.theme-teacher-lotr h1 {
+      font-family: 'Cinzel Decorative', 'Uncial Antiqua', serif;
+      letter-spacing: 3px;
+      font-weight: 900;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #78350F 0%, #D97706 40%, #F59E0B 75%, #FDE047 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 12px rgba(217, 119, 6, 0.2);
+    }
+    body.theme-teacher-lotr h2,
+    body.theme-teacher-lotr h3,
+    body.theme-teacher-lotr h4,
+    body.theme-teacher-lotr .nav-title {
+      font-family: 'Cinzel Decorative', 'Uncial Antiqua', serif;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+    body.theme-teacher-lotr .nav-bar {
+      background: linear-gradient(135deg, #78350F 0%, #B45309 30%, #D97706 65%, #F59E0B 100%);
+      box-shadow: 0 4px 22px rgba(217, 119, 6, 0.35);
+      border-bottom: 3.5px solid #FDE047;
+    }
+    body.theme-teacher-lotr .btn {
+      font-family: 'Cinzel Decorative', 'Uncial Antiqua', serif;
+      letter-spacing: 1.5px;
+      font-weight: 900;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #78350F 0%, #D97706 50%, #F59E0B 100%);
+      border: 1.5px solid #FEF08A;
+      border-radius: 10px;
+      box-shadow: 0 4px 18px rgba(217, 119, 6, 0.35);
+    }
+    body.theme-teacher-lotr .btn:hover {
+      box-shadow: 0 6px 24px rgba(245, 158, 11, 0.55);
+      transform: translateY(-2px);
+    }
+    body.theme-teacher-lotr .card {
+      border: 1.5px solid #E8DEC8;
+      border-top: 4px solid #D97706;
+      box-shadow: 0 4px 20px rgba(120, 53, 15, 0.08);
+      border-radius: 14px;
+    }
+    body.theme-teacher-lotr .nav-btn.active {
+      color: #78350F;
+      border: 2px solid #FDE047;
+    }
+
+    /* 🐉 3. IMELDA / IMEL - GAME OF THRONES MAJESTIC STYLE */
+    body.theme-teacher-insideout {
+      --primary: #D97706;          /* Joy Golden Amber (#D97706) */
+      --primary-dark: #92400E;     /* Deep Core Memory Amber */
+      --primary-light: #F59E0B;    /* Joy Sparkle Amber */
+      --accent-gold: #FCD34D;
+      --bg: #FEFDF5;               /* Radiant Joy Memory Glow */
+      --card: #FFFFFF;
+      --text: #381B09;             /* Core Memory Deep Espresso */
+      --text-muted: #6B3008;
+      --border: #FDE68A;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-weight: 600;
+    }
+    body.theme-teacher-insideout h1 {
+      font-family: 'GameOfThrones', serif;
+      letter-spacing: 2.5px;
+      font-size: 2.9rem;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #92400E 0%, #D97706 40%, #10B981 75%, #3B82F6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 12px rgba(217, 119, 6, 0.2);
+    }
+    body.theme-teacher-insideout h2,
+    body.theme-teacher-insideout h3,
+    body.theme-teacher-insideout h4,
+    body.theme-teacher-insideout .nav-title {
+      font-family: 'GameOfThrones', serif;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      font-size: 1.6rem;
+    }
+    body.theme-teacher-insideout .nav-bar {
+      background: linear-gradient(135deg, #92400E 0%, #D97706 35%, #10B981 70%, #3B82F6 100%);
+      box-shadow: 0 4px 20px rgba(217, 119, 6, 0.3);
+      border-bottom: 3.5px solid #FCD34D;
+    }
+    body.theme-teacher-insideout .btn {
+      font-family: 'GameOfThrones', serif;
+      letter-spacing: 1.2px;
+      font-size: 1.25rem;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #92400E 0%, #D97706 35%, #10B981 70%, #3B82F6 100%);
+      border: 1.5px solid #FEF08A;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35);
+    }
+    body.theme-teacher-insideout .btn:hover {
+      box-shadow: 0 6px 20px rgba(217, 119, 6, 0.48);
+      transform: translateY(-2px);
+    }
+    body.theme-teacher-insideout .card {
+      border: 1.5px solid #FDE68A;
+      border-top: 4px solid #D97706;
+      box-shadow: 0 4px 20px rgba(146, 64, 14, 0.07);
+      border-radius: 16px;
+    }
+    body.theme-teacher-insideout .nav-btn.active {
+      color: #92400E;
+      border: 2px solid #D97706;
+      font-family: 'GameOfThrones', serif;
+      letter-spacing: 1px;
+    }
+
+    /* 🛡️ 4. ADI / MUL - DISNEY MARVEL / AVENGERS RED & WHITE HEROIC STYLE */
+    body.theme-teacher-marvel {
+      --primary: #ED1D24;          /* Iconic Marvel Heroic Red */
+      --primary-dark: #A3080E;     /* Deep Marvel Comic Maroon */
+      --primary-light: #FF3B3F;    /* Arc Reactor Bright Red */
+      --accent-gold: #FFFFFF;      /* Pure Crisp White */
+      --bg: #F8F9FA;               /* Clean Stark Tech Silver-White */
+      --card: #FFFFFF;
+      --text: #111827;             /* High-Tech Stealth Charcoal */
+      --text-muted: #4B5563;
+      --border: #E5E7EB;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    body.theme-teacher-marvel h1 {
+      font-family: 'Avengers', sans-serif;
+      letter-spacing: 2.5px;
+      font-size: 3.2rem;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #111111 0%, #A3080E 30%, #ED1D24 65%, #FF3B3F 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 14px rgba(237, 29, 36, 0.25);
+    }
+    body.theme-teacher-marvel h2,
+    body.theme-teacher-marvel h3,
+    body.theme-teacher-marvel h4,
+    body.theme-teacher-marvel .nav-title {
+      font-family: 'Avengers', sans-serif;
+      letter-spacing: 2px;
+      font-size: 1.85rem;
+      text-transform: uppercase;
+    }
+    body.theme-teacher-marvel .nav-bar {
+      background: linear-gradient(135deg, #111111 0%, #7F0000 30%, #ED1D24 75%, #FF3B3F 100%);
+      box-shadow: 0 4px 24px rgba(237, 29, 36, 0.4);
+      border-bottom: 3.5px solid #FFFFFF;
+    }
+    body.theme-teacher-marvel .btn {
+      font-family: 'Avengers', sans-serif;
+      letter-spacing: 1.5px;
+      font-size: 1.35rem;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #A3080E 0%, #ED1D24 55%, #FF3B3F 100%);
+      border: 2px solid #FFFFFF;
+      border-radius: 10px;
+      box-shadow: 0 4px 18px rgba(237, 29, 36, 0.4);
+    }
+    body.theme-teacher-marvel .btn:hover {
+      box-shadow: 0 6px 24px rgba(237, 29, 36, 0.6);
+      transform: translateY(-2px);
+    }
+    body.theme-teacher-marvel .card {
+      border: 1.5px solid #E5E7EB;
+      border-top: 4px solid #ED1D24;
+      box-shadow: 0 4px 20px rgba(237, 29, 36, 0.08);
+      border-radius: 14px;
+    }
+    body.theme-teacher-marvel .nav-btn.active {
+      color: #ED1D24;
+      border: 2px solid #FFFFFF;
+      font-family: 'Avengers', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    /* 💖 5. JUMINAH - BARBIE DREAMHOUSE GLAMOUR & SPARKLE PINK STYLE */
+    body.theme-teacher-barbie {
+      --primary: #E0218A;          /* Barbie Signature Hot Pink */
+      --primary-dark: #9D0053;     /* Deep Magenta Rose */
+      --primary-light: #FF66B2;    /* Bubblegum Sparkle Pink */
+      --accent-gold: #FFFFFF;      /* Pure Dreamhouse White */
+      --bg: #FFF5F9;               /* Delicate Dreamhouse Rose Porcelain */
+      --card: #FFFFFF;
+      --text: #3B0724;             /* Deep Plum Berry Ink */
+      --text-muted: #831843;
+      --border: #FBCFE8;
+      font-family: 'Fredoka', 'Quicksand', system-ui, sans-serif;
+    }
+    body.theme-teacher-barbie h1 {
+      font-family: 'Barbie', 'Fredoka', cursive, sans-serif;
+      letter-spacing: 2px;
+      font-size: 3.5rem;
+      background: linear-gradient(135deg, #9D0053 0%, #E0218A 50%, #FF66B2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 14px rgba(224, 33, 138, 0.25);
+    }
+    body.theme-teacher-barbie h2,
+    body.theme-teacher-barbie h3,
+    body.theme-teacher-barbie h4,
+    body.theme-teacher-barbie .nav-title {
+      font-family: 'Barbie', 'Fredoka', cursive, sans-serif;
+      letter-spacing: 1.5px;
+      font-size: 2rem;
+    }
+    body.theme-teacher-barbie .nav-bar {
+      background: linear-gradient(135deg, #9D0053 0%, #E0218A 45%, #FF66B2 100%);
+      box-shadow: 0 4px 24px rgba(224, 33, 138, 0.35);
+      border-bottom: 3.5px solid #FFFFFF;
+    }
+    body.theme-teacher-barbie .btn {
+      font-family: 'Barbie', 'Fredoka', cursive, sans-serif;
+      letter-spacing: 1.5px;
+      font-size: 1.4rem;
+      background: linear-gradient(135deg, #9D0053 0%, #E0218A 50%, #FF66B2 100%);
+      border: 2px solid #FFFFFF;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(224, 33, 138, 0.38);
+    }
+    body.theme-teacher-barbie .btn:hover {
+      box-shadow: 0 6px 24px rgba(224, 33, 138, 0.58);
+      transform: translateY(-2px);
+    }
+    body.theme-teacher-barbie .card {
+      border: 1.5px solid #FBCFE8;
+      border-top: 4px solid #E0218A;
+      box-shadow: 0 4px 20px rgba(224, 33, 138, 0.08);
+      border-radius: 16px;
+    }
+    body.theme-teacher-barbie .nav-btn.active {
+      color: #E0218A;
+      border: 2px solid #FFFFFF;
+      font-family: 'Barbie', 'Fredoka', sans-serif;
+    }
   </style>
 </head>
 <body>
   <div class="nav-bar">
-    <div class="nav-title">Brush Master Admin</div>
-    <div class="nav-links">
+    <div class="nav-title">
+      <span>🖌️ Brush Master Admin</span>
+      <span id="teacher-theme-badge" style="display:none; font-size:0.75rem; padding:3px 10px; border-radius:20px; background:rgba(255,255,255,0.22); font-weight:bold; vertical-align:middle; border:1px solid rgba(255,255,255,0.4); text-transform:none; letter-spacing:normal;"></span>
+    </div>
+    <div class="nav-links" style="display:flex; align-items:center; gap:10px;">
+      <button id="btn-harry-music" class="nav-btn" onclick="toggleHedwigMusic()" style="display:none; background:rgba(238,186,48,0.25); border:1.5px solid #EEBA30; color:#FFE484; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">⚡ 🎵 Hedwig's Theme <span id="music-state-icon">▶</span></button>
+      <button id="btn-gio-music" class="nav-btn" onclick="toggleLotrMusic()" style="display:none; background:rgba(254,240,138,0.25); border:1.5px solid #FDE047; color:#FFF8D6; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">💍 🎵 LOTR Theme <span id="music-state-icon-gio">▶</span></button>
+      <button id="btn-avengers-music" class="nav-btn" onclick="toggleAvengersMusic()" style="display:none; background:rgba(255,255,255,0.25); border:1.5px solid #FFFFFF; color:#FFFFFF; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">🛡️ 🎵 Avengers Theme <span id="music-state-icon-avengers">▶</span></button>
+      <button id="btn-imel-music" class="nav-btn" onclick="toggleImelMusic()" style="display:none; background:rgba(254,240,138,0.25); border:1.5px solid #FDE047; color:#FFF8D6; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">🐉 🎵 GOT Theme (0:22) <span id="music-state-icon-imel">▶</span></button>
+      <button id="btn-barbie-music" class="nav-btn" onclick="toggleBarbieMusic()" style="display:none; background:rgba(255,255,255,0.3); border:1.5px solid #FFFFFF; color:#FFFFFF; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">💖 🎵 Barbie Theme <span id="music-state-icon-barbie">▶</span></button>
       <button class="nav-btn active" id="nav-dashboard">Buat Tugas</button>
       <button class="nav-btn" id="nav-history">Riwayat Tugas</button>
       <button class="nav-btn" id="nav-options">⚙️ Options</button>
     </div>
   </div>
 
-  <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; flex-direction:column;">
+  <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); z-index:9999; justify-content:center; align-items:center; flex-direction:column;">
      <div class="spinner"></div>
-     <p style="margin-top:20px; font-weight:bold; font-size:1.2rem;" id="loading-text">Memuat Data...</p>
+     <p style="margin-top:15px; font-weight:bold; font-size:1.1rem; color:var(--primary);" id="loading-text">Memuat Data...</p>
   </div>
 
+  <!-- DASHBOARD: BUAT TUGAS -->
   <div class="container" id="view-dashboard">
     <header>
       <h1>Portal Guru</h1>
-      <p style="color:var(--text-muted)">Buat tugas menulis Hanzi dengan mudah</p>
+      <p style="color:var(--text-muted)">Buat tugas menulis Hanzi dengan kurikulum Meihua</p>
     </header>
 
     <div class="card">
@@ -163,35 +636,93 @@
         </div>
       </div>
       
-      <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:10px; margin-bottom:25px;">
+      <div class="form-group" style="margin-top: 10px; margin-bottom: 20px;">
+        <label>Jenis Penugasan</label>
+        <div style="display:flex; gap:12px; margin-top:6px; flex-wrap:wrap;">
+           <label id="label-type-tugas" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:var(--primary); text-transform:none; font-size:0.95rem; padding:10px 18px; border:2px solid var(--primary); border-radius:10px; background:rgba(27,94,32,0.08); transition:all 0.2s;">
+              <input type="radio" name="task-type" id="task-type-tugas" value="tugas" checked style="width:18px; height:18px; cursor:pointer;">
+              <span>📝 Tugas Reguler</span>
+           </label>
+           <label id="label-type-remedial" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:var(--text); text-transform:none; font-size:0.95rem; padding:10px 18px; border:2px solid var(--border); border-radius:10px; background:white; transition:all 0.2s;">
+              <input type="radio" name="task-type" id="task-type-remedial" value="remedial" style="width:18px; height:18px; cursor:pointer;">
+              <span>🔁 Remedial (Latihan Tambahan)</span>
+           </label>
+        </div>
+      </div>
+      
+      <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:5px; margin-bottom:15px;">
         <input type="checkbox" id="require-meaning">
         <label for="require-meaning" style="margin-bottom:0; cursor:pointer;">Wajib ketik arti Pinyin (Bahasa Indonesia)</label>
       </div>
     </div>
 
     <div class="card" id="vocab-card" style="display:none;">
-      <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display:inline-block;">Pilih Buku (Meihua)</h3>
+      <!-- TAMBAH KOSAKATA MANUAL (KUSTOM) -->
+      <div style="margin-bottom: 25px; padding: 18px 20px; background: rgba(27,94,32,0.04); border: 1.5px dashed var(--primary); border-radius: 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; flex-wrap:wrap; gap:10px;">
+          <h4 style="margin:0; color: var(--primary); font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2rem;">✍️</span> Tambah Kosakata Manual / Kustom
+          </h4>
+          <span style="font-size:0.8rem; color:var(--text-muted);">Bisa masukkan kata baru di luar materi buku</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) 130px; gap: 10px; align-items: end;">
+          <div>
+            <label style="font-size:0.8rem; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:4px;">1. Hanzi (Karakter):</label>
+            <input type="text" id="manual-char" class="form-control" placeholder="Contoh: 学习 atau 书" style="margin:0; font-weight:bold; font-size:1.05rem;" autocomplete="off">
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:4px;">2. Pinyin & Nada:</label>
+            <input type="text" id="manual-pinyin" class="form-control" placeholder="Contoh: xuéxí / xue2xi2" style="margin:0;" autocomplete="off">
+          </div>
+          <div>
+            <label style="font-size:0.8rem; font-weight:bold; color:var(--text-muted); display:block; margin-bottom:4px;">3. Arti (Indonesia):</label>
+            <input type="text" id="manual-meaning" class="form-control" placeholder="Contoh: belajar" style="margin:0;" autocomplete="off">
+          </div>
+          <div>
+            <button type="button" class="btn" id="btn-add-manual-vocab" style="margin:0; padding:10px 14px; font-size:0.9rem; font-weight:bold; height:42px; display:flex; align-items:center; justify-content:center; gap:4px;">
+              ➕ Tambahkan
+            </button>
+          </div>
+        </div>
+        <div id="manual-vocab-error" style="color:#ef4444; font-size:0.82rem; margin-top:8px; font-weight:bold; display:none;"></div>
+      </div>
+
+      <!-- PENCARIAN CEPAT KOSAKATA -->
+      <div class="search-box-container">
+        <span class="search-box-icon">🔍</span>
+        <input type="text" id="vocab-search-input" placeholder="Cari kosakata cepat (contoh: 爸爸, baba, ayah)...">
+      </div>
+      
+      <div id="search-results-container" style="display:none; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px dashed var(--border);">
+         <h3 style="margin-bottom: 10px; color: var(--primary);">Hasil Pencarian Kosakata</h3>
+         <div class="vocab-list" id="search-results-list"></div>
+      </div>
+
+      <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display:inline-block;">Pilih Buku (Meihua)</h3>
       <div class="matrix-container" id="book-matrix"></div>
       
       <div id="unit-container" style="display:none; margin-top:20px;">
-         <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display:inline-block;">Pilih Bab</h3>
+         <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display:inline-block;">Pilih Bab</h3>
          <div class="matrix-container" id="unit-matrix"></div>
       </div>
       
       <div id="vocab-selection-container" style="display:none; margin-top:20px; padding-top:20px; border-top:1px dashed var(--border);">
-         <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display:inline-block;">Pilih Kosakata</h3>
          <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <label style="margin:0;">Kosakata Bab <span id="current-unit-label"></span></label>
+            <h3 style="margin:0; border-bottom: 2px solid var(--primary); padding-bottom: 6px; display:inline-block;">Kosakata Bab <span id="current-unit-label"></span></h3>
             <div>
-               <button id="select-all-btn" style="background:#00C4CC; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:bold; margin-right:5px;">Pilih Semua</button>
-               <button id="deselect-all-btn" style="background:#E5E7EB; color:#0E1318; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85rem; font-weight:bold;">Hapus Semua</button>
+               <button id="select-all-btn" style="background:var(--accent-green, #236B43); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight:bold; margin-right:5px;">Pilih Semua</button>
+               <button id="deselect-all-btn" style="background:#E2E8F0; color:#0E1318; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight:bold;">Hapus Semua</button>
             </div>
          </div>
          <div class="vocab-list" id="vocab-list"></div>
       </div>
       
       <div id="combined-vocab-container" style="display:none; margin-top:30px; padding-top:20px; border-top:2px solid var(--primary);">
-         <h3 style="margin-bottom: 15px; color: var(--primary);">Total Kosakata Terpilih</h3>
+         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+           <h3 style="color: var(--primary); margin:0;">Total Kosakata Terpilih</h3>
+           <button class="btn copy-btn" style="width:auto; padding:6px 14px; font-size:0.85rem;" onclick="openWorksheetModal()">🖨️ Cetak Lembar Kerja Tian Zi Ge</button>
+         </div>
          <div class="vocab-list" id="combined-vocab-list"></div>
       </div>
     </div>
@@ -201,29 +732,32 @@
     <div class="result-box card" id="result-box">
       <label>Link Tugas (Bagikan ke Siswa):</label>
       <textarea id="link-output" readonly></textarea>
-      <button class="btn copy-btn" id="copy-btn">📋 Salin Link</button>
-      <p id="copy-status" style="color:var(--primary); font-size:0.9rem; font-weight:bold; text-align:center; margin-top:10px; display:none;">Link disalin ke clipboard!</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn copy-btn" id="copy-btn" style="flex:1;">📋 Salin Link</button>
+        <button class="btn copy-btn" style="flex:1;" onclick="openWorksheetModal()">🖨️ Cetak Lembar Kerja</button>
+      </div>
+      <p id="copy-status" style="color:var(--primary); font-size:0.95rem; font-weight:bold; text-align:center; margin-top:10px; display:none;">Link disalin ke clipboard!</p>
     </div>
   </div>
   
+  <!-- HISTORY: RIWAYAT TUGAS -->
   <div class="container" id="view-history" style="display:none;">
      <header>
       <h1>Riwayat Tugas</h1>
-      <p style="color:var(--text-muted)">Pantau tugas dan hasil pekerjaan murid</p>
+      <p style="color:var(--text-muted)">Pantau progres dan hasil pekerjaan murid per tugas</p>
     </header>
-    <div style="background-color:#FEF3C7; color:#92400E; padding:15px; border-radius:8px; border-left:4px solid #F59E0B; margin-bottom:20px; font-size:0.95rem;">
-      <strong>⚠️ Info Kapasitas Database:</strong><br>
-      Google Sheets memiliki batas kapasitas data (sekitar 5 juta sel). 
-      Agar aplikasi tetap ringan dan tidak error, sangat disarankan untuk secara rutin <strong>Menghapus Tugas</strong> yang sudah selesai dan tidak diperlukan lagi. Menghapus tugas akan mengosongkan data papan peringkat (leaderboard) secara otomatis.
+    <div style="background-color:var(--card); color:var(--text); padding:14px 18px; border-radius:10px; border:1px solid var(--border); border-left:4.5px solid var(--primary); margin-bottom:20px; font-size:0.95rem; display:flex; align-items:center; gap:12px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+      <span style="font-size:1.4rem;">⚡</span>
+      <div>
+        <strong style="color:var(--primary);">Database Supabase Cloud Realtime:</strong> Seluruh tugas tersinkronisasi otomatis. Anda dapat membagikan link, memantau pengumpulan siswa, atau menghapus tugas yang sudah selesai.
+      </div>
     </div>
     <div class="card">
-       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <button class="btn copy-btn" style="width:auto;" onclick="fetchTasks()">&#128260; Refresh Daftar Tugas</button>
-          <div>
-            <label style="font-weight:bold; margin-right:10px;">Filter Guru:</label>
-            <select id="history-teacher-filter" class="form-control" style="width:auto; display:inline-block;" onchange="renderHistoryTable()">
-               <option value="ALL">Semua Guru</option>
-            </select>
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <button class="btn copy-btn" style="width:auto;" onclick="fetchTasks()">🔄 Refresh Daftar Tugas</button>
+          <div id="history-active-teacher-badge" style="display:flex; align-items:center; gap:8px; font-size:0.95rem; background:rgba(0,0,0,0.03); padding:8px 18px; border-radius:30px; border:1.5px solid var(--border);">
+            <span style="color:var(--text-muted); font-weight:600;">Riwayat Tugas Guru:</span>
+            <span id="history-active-teacher-name" style="color:var(--primary); font-weight:800; font-size:1rem;">-</span>
           </div>
        </div>
        <div style="overflow-x:auto;">
@@ -233,8 +767,9 @@
                   <th style="border-radius:8px 0 0 0;">Tanggal</th>
                   <th>Guru</th>
                   <th>Kelas</th>
-                  <th>Bab</th>
-                  <th style="border-radius:0 8px 0 0;">Aksi</th>
+                  <th>Bab / Kosakata</th>
+                  <th>Progres Pengumpulan</th>
+                  <th style="border-radius:0 8px 0 0; width:320px; text-align:center;">Aksi</th>
                </tr>
             </thead>
             <tbody id="task-list-body">
@@ -244,53 +779,96 @@
     </div>
   </div>
   
-  <div class="container" id="view-task-details" style="display:none;">
-     <header>
-      <h1>Detail Hasil Tugas</h1>
-      <button class="btn copy-btn" style="width:auto; margin:10px auto;" onclick="showView('view-history')">🔙 Kembali ke Riwayat</button>
-    </header>
-    <div class="card">
-       <h3 id="detail-task-id" style="margin-bottom:10px; color:var(--primary);">ID: -</h3>
-       <p id="detail-task-info" style="margin-bottom:20px; color:var(--text-muted);"></p>
-       <div style="overflow-x:auto;">
-         <table class="data-table">
-            <thead>
-               <tr style="background:var(--primary-dark); color:white;">
-                  <th style="border-radius:8px 0 0 0;">Nama Murid</th>
-                  <th>Waktu</th>
-                  <th>Status</th>
-                  <th>Selesai (Kali)</th>
-                  <th style="border-radius:0 8px 0 0;">Kesalahan</th>
-               </tr>
-            </thead>
-            <tbody id="task-results-body">
-            </tbody>
-         </table>
-       </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px;">
-         <h3 style="color:var(--primary); margin:0;">🏆 Papan Peringkat</h3>
-         <div style="display:flex; gap:10px;">
-             <button id="lb-teacher-toggle-time" style="padding:6px 12px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Waktu Tercepat</button>
-             <button id="lb-teacher-toggle-count" style="padding:6px 12px; background:#E5E7EB; color:#0E1318; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Pengulangan Terbanyak</button>
-         </div>
-       </div>
-       <div style="overflow-x:auto;">
-         <table class="data-table">
-            <thead>
-               <tr style="background:#F59E0B; color:white;">
-                  <th style="border-radius:8px 0 0 0;">Peringkat</th>
-                  <th>Nama Murid</th>
-                  <th id="lb-teacher-stat-header" style="border-radius:0 8px 0 0;">Waktu / Pengulangan</th>
-               </tr>
-            </thead>
-            <tbody id="task-leaderboard-body">
-            </tbody>
-         </table>
-       </div>
+  <!-- TASK DETAILS -->
+  <div class="container" id="view-task-details" style="display:none; padding-top:10px;">
+     <!-- STICKY TOP BAR -->
+     <div class="sticky-task-header">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+           <div>
+              <h1 style="font-size:1.65rem; margin:0; line-height:1.2;">Detail Hasil Tugas</h1>
+              <div style="display:flex; gap:15px; align-items:center; margin-top:5px;">
+                 <span id="detail-task-id" style="font-weight:bold; color:var(--primary); font-size:1.05rem;">ID: -</span>
+                 <span id="detail-task-info" style="color:var(--text-muted); font-size:0.95rem; font-weight:600;"></span>
+              </div>
+           </div>
+           <button class="btn copy-btn" style="width:auto; padding:10px 22px; margin:0; font-weight:bold; font-size:0.95rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); cursor:pointer;" onclick="showView('view-history')">🔙 Kembali ke Riwayat</button>
+        </div>
+     </div>
 
-    </div>
+     <!-- TAB NAVIGATION SWITCHER -->
+     <div class="task-detail-tab-bar">
+        <button id="tab-btn-results" class="detail-tab-btn active" onclick="switchDetailTab('results')">
+           📋 Daftar Pengerjaan Siswa
+        </button>
+        <button id="tab-btn-leaderboard" class="detail-tab-btn" onclick="switchDetailTab('leaderboard')">
+           🏆 Papan Peringkat (Leaderboard)
+        </button>
+     </div>
+
+     <!-- TAB 1: DAFTAR PENGERJAAN SISWA -->
+     <div id="tab-content-results" class="card" style="padding-top:16px;">
+        <!-- ANALISIS HURUF TERSULIT -->
+        <div id="difficult-chars-section" class="difficult-char-card" style="display:none; margin-bottom:20px;">
+           <h4 style="color:#BE123C; margin-bottom:6px;">⚠️ Analisis Huruf Tersulit di Kelas Ini:</h4>
+           <div id="difficult-chars-list"></div>
+        </div>
+
+        <div class="sticky-table-wrapper">
+          <table class="data-table">
+             <thead>
+                <tr>
+                   <th>Nama Murid</th>
+                   <th>Waktu Selesai</th>
+                   <th>Status</th>
+                   <th>Selesai (Kali)</th>
+                   <th>Kesalahan per Huruf</th>
+                </tr>
+             </thead>
+             <tbody id="task-results-body">
+             </tbody>
+          </table>
+        </div>
+     </div>
+
+     <!-- TAB 2: PAPAN PERINGKAT -->
+     <div id="tab-content-leaderboard" class="card" style="display:none; padding-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:12px;">
+           <div>
+              <h3 style="color:var(--primary); margin:0;" id="lb-teacher-title">🏆 Papan Peringkat</h3>
+              <p style="margin:0; font-size:0.85rem; color:var(--text-muted);" id="lb-teacher-subtitle">Tugas Reguler</p>
+           </div>
+           
+           <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <!-- Scope: Kelas vs Satu Angkatan -->
+              <div style="display:flex; gap:4px; background:#F1F5F9; padding:4px; border-radius:8px; border:1px solid var(--border);">
+                 <button id="lb-teacher-scope-class" style="padding:6px 14px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem;">🏫 Kelas Ini</button>
+                 <button id="lb-teacher-scope-grade" style="padding:6px 14px; background:transparent; color:#0E1318; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem;">🌍 Satu Angkatan</button>
+              </div>
+
+              <!-- Mode: Waktu vs Pengulangan -->
+              <div style="display:flex; gap:4px; background:#F1F5F9; padding:4px; border-radius:8px; border:1px solid var(--border);">
+                 <button id="lb-teacher-toggle-time" style="padding:6px 14px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem;">⚡ Tercepat</button>
+                 <button id="lb-teacher-toggle-count" style="padding:6px 14px; background:transparent; color:#0E1318; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem;">🔁 Pengulangan</button>
+              </div>
+           </div>
+        </div>
+        <div class="sticky-table-wrapper" style="max-height:55vh;">
+          <table class="data-table">
+             <thead class="lb-head">
+                <tr>
+                   <th style="width:110px;">Peringkat</th>
+                   <th>Nama Murid</th>
+                   <th id="lb-teacher-stat-header">Waktu / Pengulangan</th>
+                </tr>
+             </thead>
+             <tbody id="task-leaderboard-body">
+             </tbody>
+          </table>
+        </div>
+     </div>
   </div>
 
+  <!-- OPTIONS: KONFIGURASI -->
   <div class="container" id="view-options" style="display:none;">
      <header>
       <h1>Pengaturan</h1>
@@ -328,13 +906,22 @@
        </div>
        <p id="student-upload-status" style="margin-top:10px; color:var(--primary-dark); font-weight:bold;"></p>
     </div>
-    
-    <div class="card">
-       <h2 style="margin-bottom:15px; color:#F59E0B;">⚙️ Pengaturan Server (GAS URL)</h2>
-       <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">Jika Anda menyalin file Google Sheet ke akun Drive lain, masukkan URL App Script yang baru di sini.</p>
-       <button class="btn copy-btn" style="width:auto; margin-bottom:15px;" onclick="showTutorial()">📖 Lihat Tutorial Copy Sheet</button>
-       <input type="text" id="custom-gas-url" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;">
-       <button class="btn" style="width:auto;" onclick="saveCustomGasUrl()">💾 Simpan URL Server</button>
+  </div>
+
+  <!-- WORKSHEET PRINT MODAL -->
+  <div id="worksheet-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:25px; border-radius:14px; width:95%; max-width:850px; max-height:90vh; overflow-y:auto;">
+       <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+          <h2 style="color:var(--primary); margin:0;">🖨️ Lembar Kerja Kaligrafi Tian Zi Ge</h2>
+          <div style="display:flex; gap:10px;">
+             <button class="btn" style="width:auto; padding:8px 18px;" onclick="window.print()">Cetak / Simpan PDF</button>
+             <button class="btn copy-btn" style="width:auto; padding:8px 14px;" onclick="document.getElementById('worksheet-modal').style.display='none'">Tutup</button>
+          </div>
+       </div>
+       
+       <div id="printable-worksheet-content" style="background:#FFFFFF; padding:20px; font-family:'Kaiti', 'KaiTi', STKaiti, serif;">
+          <!-- Generated via JS -->
+       </div>
     </div>
   </div>
 
@@ -343,159 +930,166 @@
     let DB_TEACHERS = {};
     let DB_STUDENTS = {};
     const FALLBACK_TEACHERS = {
-       "Giovanni": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
-       "Ivana": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
-       "Imelda": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
-       "Shinta": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
-       "Juminah": ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"]
+       "DEMO LAO SHI": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Giovanni": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Ivana": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Imelda": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Shinta": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
+       "Juminah": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"]
     };
-    
+
     function getGASUrl() {
        return localStorage.getItem('customGASUrl') || APP_CONFIG.GOOGLE_APPS_SCRIPT_URL;
     }
-    
+
     function showLoading(text) {
        document.getElementById('loading-text').textContent = text;
        document.getElementById('loading-overlay').style.display = 'flex';
     }
+
     function hideLoading() {
        document.getElementById('loading-overlay').style.display = 'none';
     }
-    
-    function showTutorial() {
-       alert("TUTORIAL MENGUBAH DATABASE:\n\n1. Buka file Google Sheet Brush Master Anda, lalu klik File -> Make a Copy (Buat Salinan).\n2. Di Sheet salinan tersebut, klik Extensions (Ekstensi) -> Apps Script.\n3. Di halaman Apps Script, klik tombol biru 'Deploy' di kanan atas -> 'New Deployment'.\n4. Pilih tipe 'Web App'. Ubah 'Who has access' menjadi 'Anyone' (Siapa saja).\n5. Klik Deploy dan berikan otorisasi Google jika diminta.\n6. Copy URL yang muncul (berakhiran /exec).\n7. Paste URL tersebut di Textbox Pengaturan Server ini dan klik Simpan.\n\nSelamat! Sekarang Anda memiliki database mandiri.");
-    }
-
-    // --- NAVIGATION ---
-
-    function saveTeacherState() {
-        try {
-            // Find the visible view
-            let activeView = 'view-dashboard';
-            ['view-dashboard','view-history','view-task-details','view-options'].forEach(vid => {
-                const el = document.getElementById(vid);
-                if (el && el.style.display === 'block') activeView = vid;
-            });
-            const state = {
-                activeView: activeView,
-                kelas: document.getElementById('class-select') ? document.getElementById('class-select').value : '',
-                repetition: document.getElementById('repetition') ? document.getElementById('repetition').value : '1',
-                pinyin: document.getElementById('require-pinyin') ? document.getElementById('require-pinyin').checked : false,
-                meaning: document.getElementById('require-meaning') ? document.getElementById('require-meaning').checked : false,
-                filterGuru: document.getElementById('history-teacher-filter') ? document.getElementById('history-teacher-filter').value : 'ALL',
-                selectedVocabs: JSON.parse(JSON.stringify(selectedVocabs)),
-                teacherName: document.getElementById('teacher-name') ? document.getElementById('teacher-name').value : ''
-            };
-            localStorage.setItem('stroke_app_teacher_state', JSON.stringify(state));
-        } catch(e) { /* silently fail to not break UI */ }
-    }
-
-    function restoreTeacherState() {
-        const saved = localStorage.getItem('stroke_app_teacher_state');
-        if(saved) {
-            try {
-                const state = JSON.parse(saved);
-                const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
-                const safeCheck = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
-                if(state.kelas) safeSet('class-select', state.kelas);
-                if(state.repetition) safeSet('repetition', state.repetition);
-                if(state.pinyin !== undefined) safeCheck('require-pinyin', state.pinyin);
-                if(state.meaning !== undefined) safeCheck('require-meaning', state.meaning);
-                if(state.teacherName) safeSet('teacher-name', state.teacherName);
-                if(state.filterGuru) safeSet('history-teacher-filter', state.filterGuru);
-                
-                if(state.selectedVocabs && typeof state.selectedVocabs === 'object') {
-                    try {
-                        selectedVocabs = JSON.parse(JSON.stringify(state.selectedVocabs));
-                        updateCombinedView();
-                        renderBookMatrix();
-                    } catch(e) { /* ignore */ }
-                }
-                
-                if(state.activeView && ['view-dashboard','view-history','view-options'].includes(state.activeView)) {
-                    showView(state.activeView);
-                }
-            } catch(e) { console.error('restoreTeacherState error:', e); }
-        }
-    }
 
     function showView(viewId) {
-       document.getElementById('view-dashboard').style.display = 'none';
-       document.getElementById('view-history').style.display = 'none';
-       document.getElementById('view-task-details').style.display = 'none';
-       document.getElementById('view-options').style.display = 'none';
-       document.getElementById(viewId).style.display = 'block';
+       ['view-dashboard', 'view-history', 'view-task-details', 'view-options'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = (id === viewId) ? 'block' : 'none';
+       });
+       
+       ['nav-dashboard', 'nav-history', 'nav-options'].forEach(id => {
+          const btn = document.getElementById(id);
+          if (btn) btn.classList.remove('active');
+       });
+       
+       if (viewId === 'view-dashboard') document.getElementById('nav-dashboard').classList.add('active');
+       else if (viewId === 'view-history' || viewId === 'view-task-details') document.getElementById('nav-history').classList.add('active');
+       else if (viewId === 'view-options') document.getElementById('nav-options').classList.add('active');
+       
+       try {
+          localStorage.setItem('stroke_app_teacher_view', viewId);
+       } catch(e) {}
     }
-    
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-       btn.addEventListener('click', (e) => {
-          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-          e.target.classList.add('active');
-          const id = e.target.id;
-          if(id === 'nav-dashboard') showView('view-dashboard');
-          if(id === 'nav-history') {
-             showView('view-history');
-             fetchTasks();
+
+    document.getElementById('nav-dashboard').addEventListener('click', () => showView('view-dashboard'));
+    document.getElementById('nav-history').addEventListener('click', () => { showView('view-history'); fetchTasks(); });
+    document.getElementById('nav-options').addEventListener('click', () => { showView('view-options'); renderTeachersOptions(); });
+
+    // Load initial data (Instant Cache-First + Supabase Background Sync)
+    window.addEventListener('DOMContentLoaded', () => {
+       // 1. Instant load from local cache or fallback for 0ms startup
+       try {
+          const cachedT = localStorage.getItem('stroke_app_cached_teachers');
+          if (cachedT) DB_TEACHERS = JSON.parse(cachedT);
+          else DB_TEACHERS = FALLBACK_TEACHERS;
+       } catch(e) {
+          DB_TEACHERS = FALLBACK_TEACHERS;
+       }
+       
+       try {
+          const cachedS = localStorage.getItem('stroke_app_cached_students');
+          if (cachedS) DB_STUDENTS = JSON.parse(cachedS);
+          else if (typeof _studentsDB !== 'undefined') DB_STUDENTS = _studentsDB;
+       } catch(e) {
+          if (typeof _studentsDB !== 'undefined') DB_STUDENTS = _studentsDB;
+       }
+       
+       // Instant UI setup
+       initDashboard();
+       restoreTeacherState();
+
+       // 2. Supabase Sync (Non-blocking)
+       Promise.all([
+          DB.getTeachers().catch(() => null),
+          DB.getStudents().catch(() => null)
+       ]).then(([supaT, supaS]) => {
+          let updated = false;
+          if (supaT && Object.keys(supaT).length > 0) {
+             DB_TEACHERS = supaT;
+             localStorage.setItem('stroke_app_cached_teachers', JSON.stringify(DB_TEACHERS));
+             updated = true;
           }
-          if(id === 'nav-options') {
-             showView('view-options');
-             document.getElementById('custom-gas-url').value = getGASUrl();
-             try {
-                renderTeachersOptions();
-             } catch(e) {
-                console.error("Error rendering teachers options:", e);
+          if (supaS && Object.keys(supaS).length > 0) {
+             DB_STUDENTS = supaS;
+             localStorage.setItem('stroke_app_cached_students', JSON.stringify(DB_STUDENTS));
+          }
+          if (updated) {
+             const currentT = document.getElementById('teacher-name').value;
+             initDashboard();
+             if (currentT && DB_TEACHERS[currentT]) {
+                document.getElementById('teacher-name').value = currentT;
              }
           }
        });
     });
 
-    // --- INIT ---
-    window.onload = async () => {
-       showLoading("Sinkronisasi Database...");
+    function saveTeacherState() {
        try {
-          const resT = await fetch(`${getGASUrl()}?action=getTeachers`);
-          const dataT = await resT.json();
-          if(dataT.status === 'success') {
-             try { DB_TEACHERS = JSON.parse(dataT.data); } catch(e) {}
+          const state = {
+             teacherName: document.getElementById('teacher-name').value,
+             classSelect: document.getElementById('class-select').value,
+             repetition: document.getElementById('repetition').value,
+             requireMeaning: document.getElementById('require-meaning').checked,
+             selectedVocabs: selectedVocabs,
+             customVocabs: customVocabs,
+             currentBook: currentBook,
+             currentUnit: currentUnit
+          };
+          localStorage.setItem('stroke_app_teacher_state', JSON.stringify(state));
+          if (typeof renderHistoryTable === 'function' && window.allHistoryTasks) {
+             renderHistoryTable();
           }
-          // Validation: must be object, not array, and have keys. Values must be arrays.
-          let isValid = false;
-          if (DB_TEACHERS && typeof DB_TEACHERS === 'object' && !Array.isArray(DB_TEACHERS)) {
-             const keys = Object.keys(DB_TEACHERS);
-             if (keys.length > 0) {
-                 isValid = true;
-                 for (const k of keys) {
-                     if (!Array.isArray(DB_TEACHERS[k])) {
-                         isValid = false; break;
-                     }
-                 }
+       } catch(e) {}
+    }
+
+    function restoreTeacherState() {
+       try {
+          const savedView = localStorage.getItem('stroke_app_teacher_view');
+          if (savedView && savedView !== 'view-task-details') {
+             showView(savedView);
+             if (savedView === 'view-history') fetchTasks();
+             if (savedView === 'view-options') renderTeachersOptions();
+          }
+          
+          const raw = localStorage.getItem('stroke_app_teacher_state');
+          if (!raw) return;
+          const state = JSON.parse(raw);
+          
+          if (state.customVocabs && Array.isArray(state.customVocabs)) {
+             customVocabs = state.customVocabs;
+          }
+          
+          if (state.teacherName && DB_TEACHERS[state.teacherName]) {
+             const ts = document.getElementById('teacher-name');
+             ts.value = state.teacherName;
+             ts.dispatchEvent(new Event('change'));
+             
+             if (state.classSelect) {
+                const cs = document.getElementById('class-select');
+                cs.value = state.classSelect;
+                cs.dispatchEvent(new Event('change'));
              }
           }
-          if (!isValid) {
-             DB_TEACHERS = JSON.parse(JSON.stringify(FALLBACK_TEACHERS));
-          }
+          if (state.repetition) document.getElementById('repetition').value = state.repetition;
+          if (state.requireMeaning !== undefined) document.getElementById('require-meaning').checked = state.requireMeaning;
           
-          const resS = await fetch(`${getGASUrl()}?action=getStudents`);
-          const dataS = await resS.json();
-          if(dataS.status === 'success') {
-             try { DB_STUDENTS = JSON.parse(dataS.data); } catch(e) {}
+          if (state.selectedVocabs && Object.keys(state.selectedVocabs).length > 0) {
+             selectedVocabs = state.selectedVocabs;
+             updateCombinedView();
           }
-          
-          initDashboard();
-          // Restore teacher state after dashboard is ready
-          setTimeout(restoreTeacherState, 100);
-       } catch (err) {
-          console.error(err);
-          alert("Gagal terhubung ke Server. Pastikan URL benar di Options.");
-          DB_TEACHERS = FALLBACK_TEACHERS;
-          initDashboard();
-          setTimeout(restoreTeacherState, 100);
-       }
-       hideLoading();
-    };
+          if (state.currentBook) {
+             currentBook = state.currentBook;
+             renderBookMatrix();
+             renderUnitMatrix(currentBook);
+             if (state.currentUnit) {
+                currentUnit = state.currentUnit;
+                renderVocabSelection(currentBook, currentUnit);
+             }
+          }
+       } catch(e) {}
+    }
 
-    // --- Auto-save on change ---
-    ['class-select','repetition','require-pinyin','require-meaning','history-teacher-filter'].forEach(id => {
+    ['class-select', 'repetition', 'require-meaning'].forEach(id => {
        const el = document.getElementById(id);
        if(el) el.addEventListener('change', saveTeacherState);
     });
@@ -505,14 +1099,375 @@
     // --- DASHBOARD LOGIC ---
     let selectedVocabs = {};
     let currentTeacher = "";
+    let currentBook = '';
+    let currentUnit = '';
     
     const generateBtn = document.getElementById('generate-btn');
     const resultBox = document.getElementById('result-box');
     const linkOutput = document.getElementById('link-output');
-    const copyBtn = document.getElementById('copy-btn');
-    
+    // --- AUDIO SYSTEM (CLEAN NATIVE HTML5 - 100% RELIABLE) ---
+    let hedwigAudio = null;
+    let isHedwigPlaying = false;
+    let lotrAudio = null;
+    let isLotrPlaying = false;
+    let avengersAudio = null;
+    let isAvengersPlaying = false;
+    let imelAudio = null;
+    let isImelPlaying = false;
+    let barbieAudio = null;
+    let isBarbiePlaying = false;
+
+    function stopAllAudios() {
+       if (hedwigAudio) { try { hedwigAudio.pause(); }catch(e){} isHedwigPlaying = false; updateMusicButtonState(); }
+       if (lotrAudio) { try { lotrAudio.pause(); }catch(e){} isLotrPlaying = false; updateLotrMusicButtonState(); }
+       if (avengersAudio) { try { avengersAudio.pause(); }catch(e){} isAvengersPlaying = false; updateAvengersMusicButtonState(); }
+       if (imelAudio) { try { imelAudio.pause(); }catch(e){} isImelPlaying = false; updateImelMusicButtonState(); }
+       if (barbieAudio) { try { barbieAudio.pause(); }catch(e){} isBarbiePlaying = false; updateBarbieMusicButtonState(); }
+    }
+
+    // 1. IVANNA (Harry Potter - Hedwig's Theme)
+    function initHedwigAudio() {
+       if (!hedwigAudio) {
+          hedwigAudio = new Audio('hedwig_theme.mp3');
+          hedwigAudio.loop = true;
+          hedwigAudio.volume = 1.0;
+          hedwigAudio.addEventListener('play', () => { isHedwigPlaying = true; updateMusicButtonState(); });
+          hedwigAudio.addEventListener('pause', () => { isHedwigPlaying = false; updateMusicButtonState(); });
+          hedwigAudio.addEventListener('ended', () => { isHedwigPlaying = false; updateMusicButtonState(); });
+       }
+    }
+    function startHedwigAutoplay() {
+       initHedwigAudio();
+       hedwigAudio.play().then(() => {
+          isHedwigPlaying = true;
+          updateMusicButtonState();
+       }).catch(() => {
+          const unlock = () => {
+             const t = (currentTeacher || document.getElementById('teacher-name')?.value || '').toLowerCase();
+             if (t.includes('ivana') || t.includes('ivanna')) {
+                initHedwigAudio();
+                hedwigAudio.play().then(() => { isHedwigPlaying = true; updateMusicButtonState(); }).catch(()=>{});
+             }
+             document.removeEventListener('click', unlock);
+             document.removeEventListener('touchstart', unlock);
+          };
+          document.addEventListener('click', unlock, { once: true });
+          document.addEventListener('touchstart', unlock, { once: true });
+       });
+    }
+    function toggleHedwigMusic() {
+       initHedwigAudio();
+       if (isHedwigPlaying) {
+          hedwigAudio.pause();
+       } else {
+          stopAllAudios();
+          hedwigAudio.play().catch(e => console.log("Hedwig play note:", e));
+       }
+    }
+    function updateMusicButtonState() {
+       const icon = document.getElementById('music-state-icon');
+       const btn = document.getElementById('btn-harry-music');
+       if (icon) icon.textContent = isHedwigPlaying ? '⏸' : '▶';
+       if (btn) {
+          btn.style.background = isHedwigPlaying ? 'rgba(238,186,48,0.5)' : 'rgba(238,186,48,0.25)';
+          btn.style.boxShadow = isHedwigPlaying ? '0 0 16px rgba(238,186,48,0.85)' : 'none';
+       }
+    }
+
+    // 2. GIOVANNI (Lord of the Rings Theme)
+    function initLotrAudio() {
+       if (!lotrAudio) {
+          lotrAudio = new Audio('lotr_theme.webm');
+          lotrAudio.loop = true;
+          lotrAudio.volume = 1.0;
+          lotrAudio.addEventListener('play', () => { isLotrPlaying = true; updateLotrMusicButtonState(); });
+          lotrAudio.addEventListener('pause', () => { isLotrPlaying = false; updateLotrMusicButtonState(); });
+          lotrAudio.addEventListener('ended', () => { isLotrPlaying = false; updateLotrMusicButtonState(); });
+       }
+    }
+    function startLotrAutoplay() {
+       initLotrAudio();
+       lotrAudio.play().then(() => {
+          isLotrPlaying = true;
+          updateLotrMusicButtonState();
+       }).catch(() => {
+          const unlock = () => {
+             const t = (currentTeacher || document.getElementById('teacher-name')?.value || '').toLowerCase();
+             if (t.includes('giovanni') || t.includes('gio')) {
+                initLotrAudio();
+                lotrAudio.play().then(() => { isLotrPlaying = true; updateLotrMusicButtonState(); }).catch(()=>{});
+             }
+             document.removeEventListener('click', unlock);
+             document.removeEventListener('touchstart', unlock);
+          };
+          document.addEventListener('click', unlock, { once: true });
+          document.addEventListener('touchstart', unlock, { once: true });
+       });
+    }
+    function toggleLotrMusic() {
+       initLotrAudio();
+       if (isLotrPlaying) {
+          lotrAudio.pause();
+       } else {
+          stopAllAudios();
+          lotrAudio.play().catch(e => console.log("LOTR play note:", e));
+       }
+    }
+    function updateLotrMusicButtonState() {
+       const icon = document.getElementById('music-state-icon-gio');
+       const btn = document.getElementById('btn-gio-music');
+       if (icon) icon.textContent = isLotrPlaying ? '⏸' : '▶';
+       if (btn) {
+          btn.style.background = isLotrPlaying ? 'rgba(254,240,138,0.5)' : 'rgba(254,240,138,0.25)';
+          btn.style.boxShadow = isLotrPlaying ? '0 0 16px rgba(245,158,11,0.85)' : 'none';
+       }
+    }
+
+    // 3. ADI / MUL (Avengers Theme)
+    function initAvengersAudio() {
+       if (!avengersAudio) {
+          avengersAudio = new Audio('avengers_theme.webm');
+          avengersAudio.loop = true;
+          avengersAudio.volume = 1.0;
+          avengersAudio.addEventListener('play', () => { isAvengersPlaying = true; updateAvengersMusicButtonState(); });
+          avengersAudio.addEventListener('pause', () => { isAvengersPlaying = false; updateAvengersMusicButtonState(); });
+          avengersAudio.addEventListener('ended', () => { isAvengersPlaying = false; updateAvengersMusicButtonState(); });
+       }
+    }
+    function startAvengersAutoplay() {
+       initAvengersAudio();
+       avengersAudio.play().then(() => {
+          isAvengersPlaying = true;
+          updateAvengersMusicButtonState();
+       }).catch(() => {
+          const unlock = () => {
+             const t = (currentTeacher || document.getElementById('teacher-name')?.value || '').toLowerCase();
+             if (t.includes('adi') || t.includes('mul')) {
+                initAvengersAudio();
+                avengersAudio.play().then(() => { isAvengersPlaying = true; updateAvengersMusicButtonState(); }).catch(()=>{});
+             }
+             document.removeEventListener('click', unlock);
+             document.removeEventListener('touchstart', unlock);
+          };
+          document.addEventListener('click', unlock, { once: true });
+          document.addEventListener('touchstart', unlock, { once: true });
+       });
+    }
+    function toggleAvengersMusic() {
+       initAvengersAudio();
+       if (isAvengersPlaying) {
+          avengersAudio.pause();
+       } else {
+          stopAllAudios();
+          avengersAudio.play().catch(e => console.log("Avengers play note:", e));
+       }
+    }
+    function updateAvengersMusicButtonState() {
+       const icon = document.getElementById('music-state-icon-avengers');
+       const btn = document.getElementById('btn-avengers-music');
+       if (icon) icon.textContent = isAvengersPlaying ? '⏸' : '▶';
+       if (btn) {
+          btn.style.background = isAvengersPlaying ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)';
+          btn.style.boxShadow = isAvengersPlaying ? '0 0 16px rgba(255,255,255,0.85)' : 'none';
+       }
+    }
+
+    // 4. IMELDA (Game of Thrones - Exact Video SJZfCg51xlU - starts at 0:22)
+    function initImelAudio() {
+       if (!imelAudio) {
+          imelAudio = new Audio('imel_theme.mp4');
+          imelAudio.volume = 1.0;
+          imelAudio.addEventListener('play', () => { isImelPlaying = true; updateImelMusicButtonState(); });
+          imelAudio.addEventListener('pause', () => { isImelPlaying = false; updateImelMusicButtonState(); });
+          imelAudio.addEventListener('ended', () => {
+             try {
+                imelAudio.currentTime = 22;
+                imelAudio.play().catch(()=>{});
+             } catch(e) {}
+          });
+       }
+    }
+    function startImelAutoplay() {
+       initImelAudio();
+       const tryPlay = () => {
+          try {
+             if (imelAudio.currentTime < 22) {
+                imelAudio.currentTime = 22;
+             }
+          } catch(e){}
+          imelAudio.play().then(() => {
+             isImelPlaying = true;
+             updateImelMusicButtonState();
+          }).catch(() => {
+             const unlock = () => {
+                const t = (currentTeacher || document.getElementById('teacher-name')?.value || '').toLowerCase();
+                if (t.includes('imelda') || t.includes('imel')) {
+                   initImelAudio();
+                   try {
+                      if (imelAudio.currentTime < 22) imelAudio.currentTime = 22;
+                   } catch(e){}
+                   imelAudio.play().then(() => {
+                      isImelPlaying = true;
+                      updateImelMusicButtonState();
+                   }).catch(()=>{});
+                }
+                document.removeEventListener('click', unlock);
+                document.removeEventListener('touchstart', unlock);
+             };
+             document.addEventListener('click', unlock, { once: true });
+             document.addEventListener('touchstart', unlock, { once: true });
+          });
+       };
+       if (imelAudio.readyState >= 1) {
+          tryPlay();
+       } else {
+          imelAudio.addEventListener('loadedmetadata', tryPlay, { once: true });
+          imelAudio.load();
+       }
+    }
+    function toggleImelMusic() {
+       initImelAudio();
+       if (isImelPlaying) {
+          imelAudio.pause();
+       } else {
+          stopAllAudios();
+          try {
+             if (imelAudio.currentTime < 22) imelAudio.currentTime = 22;
+          } catch(e){}
+          imelAudio.play().catch(e => console.log("GOT play note:", e));
+       }
+    }
+    function updateImelMusicButtonState() {
+       const icon = document.getElementById('music-state-icon-imel');
+       const btn = document.getElementById('btn-imel-music');
+       if (icon) icon.textContent = isImelPlaying ? '⏸' : '▶';
+       if (btn) {
+          btn.style.background = isImelPlaying ? 'rgba(254,240,138,0.5)' : 'rgba(254,240,138,0.25)';
+          btn.style.boxShadow = isImelPlaying ? '0 0 16px rgba(245,158,11,0.85)' : 'none';
+       }
+    }
+
+    // 5. JUMINAH (Barbie Girl)
+    function initBarbieAudio() {
+       if (!barbieAudio) {
+          barbieAudio = new Audio('barbie_theme.webm');
+          barbieAudio.loop = true;
+          barbieAudio.volume = 1.0;
+          barbieAudio.addEventListener('play', () => { isBarbiePlaying = true; updateBarbieMusicButtonState(); });
+          barbieAudio.addEventListener('pause', () => { isBarbiePlaying = false; updateBarbieMusicButtonState(); });
+          barbieAudio.addEventListener('ended', () => { isBarbiePlaying = false; updateBarbieMusicButtonState(); });
+       }
+    }
+    function startBarbieAutoplay() {
+       initBarbieAudio();
+       barbieAudio.play().then(() => {
+          isBarbiePlaying = true;
+          updateBarbieMusicButtonState();
+       }).catch(() => {
+          const unlock = () => {
+             const t = (currentTeacher || document.getElementById('teacher-name')?.value || '').toLowerCase();
+             if (t.includes('juminah')) {
+                initBarbieAudio();
+                barbieAudio.play().then(() => { isBarbiePlaying = true; updateBarbieMusicButtonState(); }).catch(()=>{});
+             }
+             document.removeEventListener('click', unlock);
+             document.removeEventListener('touchstart', unlock);
+          };
+          document.addEventListener('click', unlock, { once: true });
+          document.addEventListener('touchstart', unlock, { once: true });
+       });
+    }
+    function toggleBarbieMusic() {
+       initBarbieAudio();
+       if (isBarbiePlaying) {
+          barbieAudio.pause();
+       } else {
+          stopAllAudios();
+          barbieAudio.play().catch(e => console.log("Barbie play note:", e));
+       }
+    }
+    function updateBarbieMusicButtonState() {
+       const icon = document.getElementById('music-state-icon-barbie');
+       const btn = document.getElementById('btn-barbie-music');
+       if (icon) icon.textContent = isBarbiePlaying ? '⏸' : '▶';
+       if (btn) {
+          btn.style.background = isBarbiePlaying ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)';
+          btn.style.boxShadow = isBarbiePlaying ? '0 0 16px rgba(255,255,255,0.85)' : 'none';
+       }
+    }
+
+    function applyTeacherTheme(teacherName) {
+       document.body.classList.remove('theme-teacher-harrypotter', 'theme-teacher-ivana', 'theme-teacher-rainbow', 'theme-teacher-unicorn', 'theme-teacher-lotr', 'theme-teacher-insideout', 'theme-teacher-starwars', 'theme-teacher-marvel', 'theme-teacher-barbie');
+       stopAllAudios();
+
+       const tLower = (teacherName || '').toLowerCase().trim();
+       let badgeText = '';
+       const harryMusicBtn = document.getElementById('btn-harry-music');
+       const gioMusicBtn = document.getElementById('btn-gio-music');
+       const avengersMusicBtn = document.getElementById('btn-avengers-music');
+       const imelMusicBtn = document.getElementById('btn-imel-music');
+       const barbieMusicBtn = document.getElementById('btn-barbie-music');
+       
+       if (harryMusicBtn) harryMusicBtn.style.display = 'none';
+       if (gioMusicBtn) gioMusicBtn.style.display = 'none';
+       if (avengersMusicBtn) avengersMusicBtn.style.display = 'none';
+       if (imelMusicBtn) imelMusicBtn.style.display = 'none';
+       if (barbieMusicBtn) barbieMusicBtn.style.display = 'none';
+
+       // 1. Harry Potter (Ivanna / Ivana)
+       if (tLower.includes('ivanna') || tLower.includes('ivana')) {
+          document.body.classList.add('theme-teacher-harrypotter');
+          badgeText = '⚡ Gryffindor Magic Theme';
+          if (harryMusicBtn) harryMusicBtn.style.display = 'inline-flex';
+          startHedwigAutoplay();
+       }
+       // 2. Lord of the Rings (Giovanni / Gio)
+       else if (tLower.includes('giovanni') || tLower.includes('gio')) {
+          document.body.classList.add('theme-teacher-lotr');
+          badgeText = '💍 Lord of the Rings Theme';
+          if (gioMusicBtn) gioMusicBtn.style.display = 'inline-flex';
+          startLotrAutoplay();
+       }
+       // 3. Disney Marvel / Avengers (Adi / Mul)
+       else if (tLower.includes('adi') || tLower.includes('mul')) {
+          document.body.classList.add('theme-teacher-marvel');
+          badgeText = '🛡️ Marvel Avengers Theme';
+          if (avengersMusicBtn) avengersMusicBtn.style.display = 'inline-flex';
+          startAvengersAutoplay();
+       }
+       // 4. Game of Thrones for Imelda (GOT Font + Film Symphony Orchestra Theme starting at 0:22)
+       else if (tLower.includes('imelda') || tLower.includes('imel')) {
+          document.body.classList.add('theme-teacher-insideout');
+          badgeText = '🐉 Game of Thrones Theme';
+          if (imelMusicBtn) imelMusicBtn.style.display = 'inline-flex';
+          startImelAutoplay();
+       }
+       // 5. Barbie (Juminah)
+       else if (tLower.includes('juminah')) {
+          document.body.classList.add('theme-teacher-barbie');
+          badgeText = '💖 Barbie Dreamhouse Theme';
+          if (barbieMusicBtn) barbieMusicBtn.style.display = 'inline-flex';
+          startBarbieAutoplay();
+       }
+       // 6. Default / Other teachers
+       else {
+          badgeText = '🌿 Tzu Chi Theme';
+       }
+       
+       const badgeEl = document.getElementById('teacher-theme-badge');
+       if (badgeEl) {
+          if (teacherName) {
+             badgeEl.textContent = badgeText;
+             badgeEl.style.display = 'inline-block';
+          } else {
+             badgeEl.style.display = 'none';
+          }
+       }
+    }
+
     function initDashboard() {
        const ts = document.getElementById('teacher-name');
+       const prevTeacher = ts.value || currentTeacher;
        ts.innerHTML = '<option value="">Pilih Guru...</option>';
        for(const t in DB_TEACHERS) {
           const opt = document.createElement('option');
@@ -520,33 +1475,115 @@
           opt.textContent = t;
           ts.appendChild(opt);
        }
+       if (prevTeacher && DB_TEACHERS[prevTeacher]) {
+          ts.value = prevTeacher;
+          currentTeacher = prevTeacher;
+          updateClassSelect(prevTeacher);
+       } else {
+          applyTeacherTheme(currentTeacher);
+       }
        renderBookMatrix();
+       initQuickSearch();
     }
     
-    document.getElementById('teacher-name').addEventListener('change', (e) => {
-       currentTeacher = e.target.value;
+    function updateClassSelect(teacherName) {
+       applyTeacherTheme(teacherName);
        const cs = document.getElementById('class-select');
+       const prevClass = cs.value;
        cs.innerHTML = '<option value="">Pilih Kelas...</option>';
-       if(!currentTeacher) {
+       if(!teacherName) {
           cs.disabled = true;
           document.getElementById('vocab-card').style.display = 'none';
           updateGenerateBtn();
           return;
        }
        cs.disabled = false;
-       const classes = DB_TEACHERS[currentTeacher] || [];
+       const classes = DB_TEACHERS[teacherName] || [];
        classes.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.trim();
           opt.textContent = c.trim();
           cs.appendChild(opt);
        });
+       if (prevClass && classes.map(c=>c.trim()).includes(prevClass)) {
+          cs.value = prevClass;
+       }
        document.getElementById('vocab-card').style.display = 'block';
        updateGenerateBtn();
+    }
+    
+    document.getElementById('teacher-name').addEventListener('change', (e) => {
+       currentTeacher = e.target.value;
+       updateClassSelect(currentTeacher);
     });
     
     document.getElementById('class-select').addEventListener('change', updateGenerateBtn);
     
+    // --- LIVE VOCABULARY SEARCH ---
+    function initQuickSearch() {
+       const searchInput = document.getElementById('vocab-search-input');
+       const resultsContainer = document.getElementById('search-results-container');
+       const resultsList = document.getElementById('search-results-list');
+       
+       searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.trim().toLowerCase();
+          if (!query) {
+             resultsContainer.style.display = 'none';
+             resultsList.innerHTML = '';
+             return;
+          }
+          
+          resultsList.innerHTML = '';
+          let matchCount = 0;
+          
+          for (const bk in _meihuaDB) {
+             for (const ut in _meihuaDB[bk]) {
+                const vocabArray = _meihuaDB[bk][ut].vocab || [];
+                vocabArray.forEach((v, index) => {
+                   const charMatch = v.char && v.char.includes(query);
+                   const pinyinMatch = v.pinyin && v.pinyin.toLowerCase().includes(query);
+                   const meanMatch = (v.id && v.id.toLowerCase().includes(query)) || (v.en && v.en.toLowerCase().includes(query));
+                   
+                   if (charMatch || pinyinMatch || meanMatch) {
+                      matchCount++;
+                      const isSel = selectedVocabs[bk] && selectedVocabs[bk][ut] && selectedVocabs[bk][ut][index];
+                      
+                      const item = document.createElement('div');
+                      item.className = 'vocab-item' + (isSel ? ' selected' : '');
+                      item.innerHTML = `
+                         <div style="flex-grow:1;">
+                            <div class="vocab-char">${v.char}</div>
+                            <div class="vocab-pinyin">${v.pinyin} - ${v.id || v.en}</div>
+                            <div style="font-size:0.75rem; color:var(--primary); margin-top:2px;">${bk} - ${ut}</div>
+                         </div>
+                      `;
+                      
+                      const cb = document.createElement('input');
+                      cb.type = 'checkbox';
+                      cb.checked = !!isSel;
+                      cb.onclick = (evt) => {
+                         evt.stopPropagation();
+                         toggleVocab(bk, ut, index);
+                         if (cb.checked) item.classList.add('selected');
+                         else item.classList.remove('selected');
+                      };
+                      
+                      item.insertBefore(cb, item.firstChild);
+                      item.onclick = () => cb.click();
+                      resultsList.appendChild(item);
+                   }
+                });
+             }
+          }
+          
+          resultsContainer.style.display = matchCount > 0 ? 'block' : 'none';
+          if (matchCount === 0) {
+             resultsContainer.style.display = 'block';
+             resultsList.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Tidak ditemukan kosakata yang cocok.</p>';
+          }
+       });
+    }
+
     // Matrix Renderers
     function renderBookMatrix() {
        const container = document.getElementById('book-matrix');
@@ -566,7 +1603,7 @@
            
            rowBooks.forEach(b => {
               const btn = document.createElement('button');
-              btn.className = 'matrix-btn book-btn';
+              btn.className = 'matrix-btn book-btn' + (currentBook === b ? ' active' : '');
               btn.textContent = b;
               btn.onclick = () => {
                  document.querySelectorAll('.book-btn').forEach(el => el.classList.remove('active'));
@@ -582,7 +1619,6 @@
        });
     }
     
-    let currentBook = '';
     function renderUnitMatrix(book) {
        currentBook = book;
        document.getElementById('unit-container').style.display = 'block';
@@ -599,7 +1635,7 @@
        
        units.forEach(u => {
           const btn = document.createElement('button');
-          btn.className = 'matrix-btn unit-btn';
+          btn.className = 'matrix-btn unit-btn' + (currentUnit === u ? ' active' : '');
           btn.textContent = u;
           btn.onclick = () => {
              document.querySelectorAll('.unit-btn').forEach(el => el.classList.remove('active'));
@@ -614,7 +1650,6 @@
        container.appendChild(row);
     }
     
-    let currentUnit = '';
     function renderVocabSelection(book, unit) {
        currentUnit = unit;
        document.getElementById('vocab-selection-container').style.display = 'block';
@@ -701,13 +1736,11 @@
           
           checkboxLabel.appendChild(checkbox);
           item.insertBefore(checkboxLabel, item.firstChild);
-          
           item.onclick = () => checkbox.click();
           
           const wrapper = document.createElement('div');
           wrapper.appendChild(item);
           wrapper.appendChild(charSplitContainer);
-          
           list.appendChild(wrapper);
        });
        updateCombinedView();
@@ -715,8 +1748,13 @@
     
     function toggleVocab(book, unit, index) {
        const v = _meihuaDB[book][unit].vocab[index];
+       if (!selectedVocabs[book]) selectedVocabs[book] = {};
+       if (!selectedVocabs[book][unit]) selectedVocabs[book][unit] = {};
+       
        if (selectedVocabs[book][unit][index]) {
           delete selectedVocabs[book][unit][index];
+          if (Object.keys(selectedVocabs[book][unit]).length === 0) delete selectedVocabs[book][unit];
+          if (Object.keys(selectedVocabs[book]).length === 0) delete selectedVocabs[book];
        } else {
           selectedVocabs[book][unit][index] = Array.from({length: v.char.length}, (_, i) => i);
        }
@@ -731,6 +1769,94 @@
        });
        renderVocabSelection(currentBook, currentUnit);
     };
+
+    let customVocabs = [];
+
+    const P_TONES_MAP = {
+      a: ['ā', 'á', 'ǎ', 'à', 'a'],
+      e: ['ē', 'é', 'ě', 'è', 'e'],
+      i: ['ī', 'í', 'ǐ', 'ì', 'i'],
+      o: ['ō', 'ó', 'ǒ', 'ò', 'o'],
+      u: ['ū', 'ú', 'ǔ', 'ù', 'u'],
+      v: ['ǖ', 'ǘ', 'ǚ', 'ǜ', 'ü'],
+      ü: ['ǖ', 'ǘ', 'ǚ', 'ǜ', 'ü']
+    };
+
+    function formatManualPinyin(raw) {
+      if (!raw) return '';
+      let text = raw.trim().replace(/u:/g, 'v');
+      if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(text)) {
+        return text;
+      }
+      return text.replace(/([a-z]+)([0-5])/gi, (match, syl, toneNum) => {
+        let t = parseInt(toneNum);
+        if (t === 0 || t === 5 || t > 5) return syl;
+        let s = syl.toLowerCase();
+        if (s.includes('a')) return s.replace('a', P_TONES_MAP.a[t - 1]);
+        if (s.includes('e')) return s.replace('e', P_TONES_MAP.e[t - 1]);
+        if (s.includes('ou')) return s.replace('o', P_TONES_MAP.o[t - 1]);
+        for (let i = s.length - 1; i >= 0; i--) {
+          const ch = s[i];
+          if (P_TONES_MAP[ch]) {
+            return s.substring(0, i) + P_TONES_MAP[ch][t - 1] + s.substring(i + 1);
+          }
+        }
+        return s;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+       const btnAddManual = document.getElementById('btn-add-manual-vocab');
+       if (btnAddManual) {
+          btnAddManual.addEventListener('click', addManualVocab);
+       }
+       ['manual-char', 'manual-pinyin', 'manual-meaning'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+             el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') addManualVocab();
+             });
+          }
+       });
+    });
+
+    function addManualVocab() {
+       const charInput = document.getElementById('manual-char');
+       const pinyinInput = document.getElementById('manual-pinyin');
+       const meaningInput = document.getElementById('manual-meaning');
+       const errEl = document.getElementById('manual-vocab-error');
+       
+       if (errEl) errEl.style.display = 'none';
+       
+       const ch = (charInput.value || '').trim();
+       let py = (pinyinInput.value || '').trim();
+       const mn = (meaningInput.value || '').trim();
+       
+       if (!ch) {
+          if (errEl) {
+             errEl.textContent = 'Silakan masukkan minimal 1 karakter Hanzi!';
+             errEl.style.display = 'block';
+          }
+          charInput.focus();
+          return;
+       }
+       
+       py = formatManualPinyin(py);
+       
+       customVocabs.push({
+          id: 'cv_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+          char: ch,
+          pinyin: py,
+          meaning: mn
+       });
+       
+       charInput.value = '';
+       pinyinInput.value = '';
+       meaningInput.value = '';
+       charInput.focus();
+       
+       updateCombinedView();
+    }
     
     document.getElementById('deselect-all-btn').onclick = () => {
        if(!currentBook || !currentUnit) return;
@@ -743,6 +1869,7 @@
        cList.innerHTML = '';
        let count = 0;
        
+       // 1. Render Book Vocabs
        for (const b in selectedVocabs) {
           for (const u in selectedVocabs[b]) {
              for (const idx in selectedVocabs[b][u]) {
@@ -770,23 +1897,43 @@
                        if (Object.keys(selectedVocabs[b]).length === 0) delete selectedVocabs[b];
                        
                        updateCombinedView();
-                       // Update main vocab list visually if it's the currently open unit
                        if (typeof currentBook !== 'undefined' && currentBook === b && currentUnit === u) {
-                           renderVocabs();
+                           renderVocabSelection(b, u);
                        }
                    });
-                   
                    cList.appendChild(el);
                 }
              }
           }
        }
        
+       // 2. Render Custom / Manual Vocabs
+       customVocabs.forEach((cv, cvIdx) => {
+          count++;
+          const el = document.createElement('div');
+          el.className = 'vocab-item';
+          el.style.borderColor = '#10B981';
+          el.style.position = 'relative';
+          el.title = 'Klik untuk menghapus kosakata manual ini';
+          el.innerHTML = `
+             <div style="flex-grow:1;">
+                <div class="vocab-char" style="color:#059669;">${cv.char}</div>
+                <div class="vocab-pinyin">${cv.pinyin || '-'}</div>
+             </div>
+             <div style="font-size:0.7rem; color:#059669; text-align:right; font-weight:bold;">${cv.meaning || '-'}<br><span style="background:rgba(16,185,129,0.15); padding:1px 5px; border-radius:4px;">Manual</span></div>
+             <div style="position:absolute; top:-8px; right:-8px; background:red; color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; cursor:pointer;">×</div>
+          `;
+          el.addEventListener('click', () => {
+             customVocabs.splice(cvIdx, 1);
+             updateCombinedView();
+          });
+          cList.appendChild(el);
+       });
+       
        document.getElementById('combined-vocab-container').style.display = count > 0 ? 'block' : 'none';
        updateGenerateBtn();
-       renderBookMatrix(); // update markers
+       renderBookMatrix();
        
-       // Update unit markers if visible
        if(currentBook) {
           document.querySelectorAll('.unit-btn').forEach(btn => {
              const u = btn.textContent;
@@ -797,6 +1944,7 @@
              }
           });
        }
+       saveTeacherState();
     }
     
     function updateGenerateBtn() {
@@ -808,13 +1956,14 @@
           }
           if (hasVocab) break;
        }
-       generateBtn.disabled = !(currentTeacher && cls && hasVocab);
+       generateBtn.disabled = !(currentTeacher && cls && (hasVocab || customVocabs.length > 0));
     }
     
-    generateBtn.addEventListener('click', () => {
+    generateBtn.addEventListener('click', async () => {
       const cls = document.getElementById('class-select').value;
       const rep = document.getElementById('repetition').value;
       const requireMeaning = document.getElementById('require-meaning').checked;
+      const guru = document.getElementById('teacher-name').value;
       
       let vObj = {};
       for (const b in selectedVocabs) {
@@ -831,42 +1980,35 @@
           }
       }
       
-      const payload = { cls: cls, r: rep, v: vObj, tm: requireMeaning ? 1 : 0, guru: document.getElementById('teacher-name').value };
+      const taskType = document.querySelector('input[name="task-type"]:checked')?.value || 'tugas';
+      const shortId = Math.random().toString(36).substring(2, 8);
+      const payloadCustomVocabs = customVocabs.map(c => ({ char: c.char, pinyin: c.pinyin, meaning: c.meaning }));
+      const payload = { id: shortId, cls: cls, r: rep, v: vObj, cv: payloadCustomVocabs, tm: requireMeaning ? 1 : 0, guru: guru, type: taskType };
       const payloadString = JSON.stringify(payload);
       
       let baseUrl = window.location.href.replace('teacher.html', 'student.html');
       const lastSlash = baseUrl.lastIndexOf('/');
       baseUrl = baseUrl.substring(0, lastSlash) + '/student.html';
       
-      const shortId = Math.random().toString(36).substring(2, 8);
-      
       generateBtn.disabled = true;
       generateBtn.textContent = 'Menyimpan Link...';
       
-      fetch(getGASUrl(), {
-         method: 'POST',
-         mode: 'no-cors',
-         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-         body: JSON.stringify({ action: 'saveLink', id: shortId, payload: payloadString })
-      }).then(() => {
-         let gMatch = getGASUrl().match(/\/s\/(.*?)\//);
-         let gParam = gMatch ? "&g=" + gMatch[1] : "";
-         const finalUrl = `${baseUrl}?id=${shortId}${gParam}`;
+      try {
+         await DB.saveTask(shortId, payloadString, guru, cls);
+         const finalUrl = `${baseUrl}?id=${shortId}`;
          
          linkOutput.value = finalUrl;
          resultBox.style.display = 'block';
          
-         // Clear
          selectedVocabs = {};
          updateCombinedView();
          document.getElementById('vocab-selection-container').style.display = 'none';
-         
-      }).catch(err => {
-         alert("Gagal menyimpan link: " + err);
-      }).finally(() => {
+      } catch (err) {
+         alert("Gagal menyimpan link: " + err.message);
+      } finally {
          generateBtn.textContent = 'Buat Link Tugas';
          updateGenerateBtn();
-      });
+      }
     });
 
     copyBtn.addEventListener('click', () => {
@@ -877,64 +2019,156 @@
       setTimeout(() => st.style.display = 'none', 3000);
     });
 
+    // --- WORKSHEET GENERATOR (TIAN ZI GE) ---
+    function openWorksheetModal() {
+       const modal = document.getElementById('worksheet-modal');
+       const content = document.getElementById('printable-worksheet-content');
+       
+       let selectedChars = [];
+       for (const b in selectedVocabs) {
+          for (const u in selectedVocabs[b]) {
+             const uVocabs = (_meihuaDB[b] && _meihuaDB[b][u]) ? _meihuaDB[b][u].vocab : [];
+             for (const idx in selectedVocabs[b][u]) {
+                const v = uVocabs[parseInt(idx)];
+                if (v) {
+                   const charIndices = selectedVocabs[b][u][idx];
+                   charIndices.forEach(cIdx => {
+                      if (v.char[cIdx]) {
+                         selectedChars.push({
+                            char: v.char[cIdx],
+                            word: v.char,
+                            pinyin: v.pinyin,
+                            meaning: v.id || v.en
+                         });
+                      }
+                   });
+                }
+             }
+          }
+       }
+       
+       customVocabs.forEach(cv => {
+          if (!cv.char) return;
+          const chars = cv.char.split('');
+          chars.forEach(ch => {
+             selectedChars.push({
+                char: ch,
+                word: cv.char,
+                pinyin: cv.pinyin || '',
+                meaning: cv.meaning || ''
+             });
+          });
+       });
+       
+       if (selectedChars.length === 0) {
+          alert("Pilih kosakata terlebih dahulu!");
+          return;
+       }
+       
+       let html = `
+          <div style="text-align:center; border-bottom:2px solid #333; padding-bottom:12px; margin-bottom:20px;">
+             <h1 style="margin:0; font-size:1.8rem; color:#1E293B;">Lembar Latihan Menulis Kaligrafi Hanzi</h1>
+             <p style="margin:4px 0 0 0; color:#64748B; font-size:0.95rem;">Nama Siswa: ____________________ &nbsp;&nbsp;&nbsp;&nbsp; Kelas: ________ &nbsp;&nbsp;&nbsp;&nbsp; Tanggal: ____________</p>
+          </div>
+       `;
+       
+       selectedChars.forEach(item => {
+          html += `
+             <div style="display:flex; align-items:center; margin-bottom:16px; page-break-inside:avoid;">
+                <div style="min-width:130px; text-align:center; margin-right:15px; border-right:2px solid #E2E8F0; padding-right:12px;">
+                   <div style="font-size:2rem; font-weight:bold; color:#0E1318;">${item.char}</div>
+                   <div style="font-size:0.85rem; color:var(--primary); font-weight:bold;">${item.pinyin}</div>
+                   <div style="font-size:0.75rem; color:#64748B;">${item.meaning}</div>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; flex-grow:1;">
+                   <div class="tianzige-print-box" style="display:flex; justify-content:center; align-items:center; font-size:2.1rem; color:#94A3B8; font-family:'Kaiti', serif;">${item.char}</div>
+                   <div class="tianzige-print-box" style="display:flex; justify-content:center; align-items:center; font-size:2.1rem; color:#CBD5E1; font-family:'Kaiti', serif;">${item.char}</div>
+                   <div class="tianzige-print-box"></div>
+                   <div class="tianzige-print-box"></div>
+                   <div class="tianzige-print-box"></div>
+                   <div class="tianzige-print-box"></div>
+                   <div class="tianzige-print-box"></div>
+                   <div class="tianzige-print-box"></div>
+                </div>
+             </div>
+          `;
+       });
+       
+       content.innerHTML = html;
+       modal.style.display = 'flex';
+    }
+
     // --- HISTORY LOGIC ---
+    function getActiveTeacherName() {
+       const sel = document.getElementById('teacher-name');
+       return (sel && sel.value ? sel.value : currentTeacher || '').trim();
+    }
+
     async function fetchTasks() {
        showLoading("Memuat Riwayat Tugas...");
        const tbody = document.getElementById('task-list-body');
        tbody.innerHTML = '';
        try {
-          const res = await fetch(`${getGASUrl()}?action=getTasks`);
-          const d = await res.json();
-          if (d.status === 'success' && d.data) {
-             window.allHistoryTasks = d.data.reverse();
-             
-             const filterSelect = document.getElementById('history-teacher-filter');
-             const currentVal = filterSelect.value;
-             filterSelect.innerHTML = '<option value="ALL">Semua Guru</option>';
-             const teacherSet = new Set();
-             
-             window.allHistoryTasks.forEach(t => {
-                try {
-                   const payload = JSON.parse(t.payload);
-                   if (payload.guru) teacherSet.add(payload.guru);
-                } catch(e) {}
-             });
-             
-             for (const t in DB_TEACHERS) {
-                 teacherSet.add(t);
-             }
-             
-             Array.from(teacherSet).sort().forEach(tName => {
-                 const opt = document.createElement('option');
-                 opt.value = tName;
-                 opt.textContent = tName;
-                 filterSelect.appendChild(opt);
-             });
-             if(teacherSet.has(currentVal)) filterSelect.value = currentVal;
-             
-             renderHistoryTable();
-          }
+          const tasks = await DB.getTasks();
+          window.allHistoryTasks = tasks.map(t => ({
+             id: t.id,
+             payload: t.payload,
+             date: t.created_at
+          }));
+          
+          await renderHistoryTable();
        } catch (err) {
           console.error(err);
-          alert("Gagal memuat riwayat tugas: " + err.message + "\n" + err.stack);
+          alert("Gagal memuat riwayat tugas: " + err.message);
        }
        hideLoading();
     }
     
-    function renderHistoryTable() {
+    async function renderHistoryTable() {
        const tbody = document.getElementById('task-list-body');
        tbody.innerHTML = '';
        if (!window.allHistoryTasks) return;
        
-       const filterGuru = document.getElementById('history-teacher-filter').value;
+       const activeTeacher = getActiveTeacherName();
+       const teacherBadge = document.getElementById('history-active-teacher-name');
+       if (teacherBadge) {
+          teacherBadge.textContent = activeTeacher ? `👩‍🏫 ${activeTeacher}` : 'Semua Guru (Belum Dipilih)';
+       }
        
-       window.allHistoryTasks.forEach(t => {
+       // 1. Fetch bulk progress map for accurate submission counts
+       let progressMap = {};
+       try {
+          progressMap = await DB.getAllProgressCount();
+       } catch(e) {
+          console.warn("Gagal memuat progress map", e);
+       }
+       
+       const filteredTasks = window.allHistoryTasks.filter(t => {
+          let payload = {};
+          try { payload = JSON.parse(t.payload); } catch(e) {}
+          const guru = payload.guru || t.teacher_name || '';
+          if (!activeTeacher) return true;
+          return guru.toLowerCase().trim() === activeTeacher.toLowerCase().trim();
+       });
+
+       if (filteredTasks.length === 0) {
+          const emptyTr = document.createElement('tr');
+          emptyTr.innerHTML = `
+             <td colspan="6" style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size:1rem;">
+                <div style="font-size:2rem; margin-bottom:8px;">📭</div>
+                Belum ada riwayat tugas untuk <b>${activeTeacher || 'guru ini'}</b>.<br>
+                <span style="font-size:0.85rem;">Buat tugas baru di tab <b>Buat Tugas</b> untuk memulainya.</span>
+             </td>
+          `;
+          tbody.appendChild(emptyTr);
+          return;
+       }
+       
+       filteredTasks.forEach(t => {
           let payload = {};
           try { payload = JSON.parse(t.payload); } catch(e) {}
           const cls = payload.cls || '-';
-          const guru = payload.guru || '-';
-          
-          if (filterGuru !== 'ALL' && guru !== filterGuru) return;
+          const guru = payload.guru || t.teacher_name || '-';
           
           let babStr = [];
           if(payload.v) {
@@ -944,72 +2178,133 @@
                 }
              }
           }
+          if(payload.cv && Array.isArray(payload.cv) && payload.cv.length > 0) {
+             const cvNames = payload.cv.map(c => c.char).join(', ');
+             babStr.push(`✍️ Manual (${cvNames})`);
+          }
           const dateObj = new Date(t.date);
           const dd = String(dateObj.getDate()).padStart(2, '0');
           const mmm = dateObj.toLocaleString('id-ID', { month: 'short' });
           const yyyy = dateObj.getFullYear();
-          const dateStr = `${dd}/${mmm}/${yyyy}`;
+          const hh = String(dateObj.getHours()).padStart(2, '0');
+          const min = String(dateObj.getMinutes()).padStart(2, '0');
+          const dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
           
+          let totalStudents = 30;
+          if (DB_STUDENTS[cls]) totalStudents = DB_STUDENTS[cls].length;
+          else if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) totalStudents = _studentsDB[cls].length;
+          
+          const count = progressMap[t.id] || 0;
+          const pct = Math.min(100, Math.round((count / totalStudents) * 100));
+          
+          const taskType = payload.type || 'tugas';
+          const typeBadge = taskType === 'remedial'
+             ? `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#FEF3C7; color:#D97706; font-size:0.75rem; font-weight:bold; margin-right:4px;">🔁 Remedial</span>`
+             : `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#EDE9FE; color:var(--primary); font-size:0.75rem; font-weight:bold; margin-right:4px;">📝 Tugas</span>`;
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
              <td>${dateStr}</td>
-             <td>${guru}</td>
-             <td>${cls}</td>
+             <td><b>${guru}</b></td>
+             <td>${typeBadge} <b>${cls}</b></td>
              <td><small>${babStr.join(', ')}</small></td>
              <td>
-                <button class="btn" style="padding:6px 12px; margin-bottom:5px;" onclick="viewTaskResults('${t.id}', '${cls}', '${babStr.join(', ')}')">Lihat Hasil</button>
-                <button class="btn copy-btn" style="padding:6px 12px; color:red; border-color:red;" onclick="deleteTask('${t.id}')">Hapus</button>
+                <div style="font-weight:bold; font-size:0.9rem;">${count} / ${totalStudents} Murid (${pct}%)</div>
+                <div class="class-progress-bar">
+                   <div class="class-progress-fill" style="width:${pct}%;"></div>
+                </div>
              </td>
+             <td>
+                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-width: 290px;">
+                    <button class="btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="viewTaskResults('${t.id}', '${cls}', '${babStr.join(', ')}', '${taskType}')">
+                       📊 Lihat Hasil
+                    </button>
+                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:var(--primary); border-color:var(--primary); white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="copyHistoryTaskLink('${t.id}', this)" title="Salin Link Tugas">
+                       📋 Salin Link
+                    </button>
+                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:#EF4444; border-color:#FCA5A5; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="deleteTask('${t.id}')" title="Hapus Tugas">
+                       🗑️ Hapus
+                    </button>
+                 </div>
+              </td>
           `;
           tbody.appendChild(tr);
        });
     }
-    
-            async function viewTaskResults(id, cls, babInfo) {
-       document.getElementById('detail-task-id').textContent = `ID Tugas: ${id} (Kelas ${cls})`;
-       document.getElementById('detail-task-info').textContent = `Bab: ${babInfo}`;
-       const tbody = document.getElementById('task-results-body');
-       tbody.innerHTML = '<tr><td colspan="5">Memuat data...</td></tr>';
+
+    function copyHistoryTaskLink(taskId, btnEl) {
+       let baseUrl = window.location.href.replace('teacher.html', 'student.html');
+       const lastSlash = baseUrl.lastIndexOf('/');
+       baseUrl = baseUrl.substring(0, lastSlash) + '/student.html';
+       const fullUrl = `${baseUrl}?id=${taskId}`;
        
-       showView('view-task-details');
-       
-       // 1. Fetch Class Task Results (General history)
-       try {
-          const res = await fetch(`${getGASUrl()}?action=getTaskResults&cls=${cls}`);
-          const d = await res.json();
-          tbody.innerHTML = '';
-          if (d.status === 'success' && d.data) {
-             let hasResults = false;
-             d.data.forEach(r => {
-                hasResults = true;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                   <td>${r.name}</td>
-                   <td>${r.time}</td>
-                   <td>${r.status}</td>
-                   <td>${r.count}</td>
-                   <td><small>${r.mistakes}</small></td>
-                `;
-                tbody.appendChild(tr);
-             });
-             if(!hasResults) tbody.innerHTML = '<tr><td colspan="5">Belum ada data pengerjaan.</td></tr>';
-          }
-       } catch (err) {
-          tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
+       if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fullUrl).then(() => {
+             showCopyHistorySuccess(btnEl);
+          }).catch(() => fallbackCopyHistory(fullUrl, btnEl));
+       } else {
+          fallbackCopyHistory(fullUrl, btnEl);
        }
-       
-           let currentTeacherLbData = [];
+    }
+    
+    function showCopyHistorySuccess(btnEl) {
+       if (!btnEl) return;
+       const oldHtml = btnEl.innerHTML;
+       btnEl.innerHTML = '✓ Disalin';
+       btnEl.style.background = '#10B981';
+       btnEl.style.color = 'white';
+       btnEl.style.borderColor = '#10B981';
+       setTimeout(() => {
+          btnEl.innerHTML = oldHtml;
+          btnEl.style.background = '';
+          btnEl.style.color = 'var(--primary)';
+          btnEl.style.borderColor = 'var(--primary)';
+       }, 1500);
+    }
+    
+    function fallbackCopyHistory(text, btnEl) {
+       const ta = document.createElement('textarea');
+       ta.value = text;
+       ta.style.position = 'fixed';
+       ta.style.left = '-9999px';
+       document.body.appendChild(ta);
+       ta.select();
+       document.execCommand('copy');
+       document.body.removeChild(ta);
+       showCopyHistorySuccess(btnEl);
+    }
+    
+    let currentTeacherLbData = [];
     let currentTeacherLbMode = 'time';
+    let currentTeacherLbScope = 'class';
+    let currentActiveTaskId = '';
+    let currentActiveTaskClass = '';
+    
+    async function fetchTeacherLeaderboard() {
+       if (!currentActiveTaskId) return;
+       const lbTbody = document.getElementById('task-leaderboard-body');
+       if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">Memuat data peringkat...</td></tr>';
+       try {
+          currentTeacherLbData = await DB.getLeaderboard(currentActiveTaskId, currentActiveTaskClass, currentTeacherLbScope);
+          renderTeacherLeaderboard();
+       } catch (err) {
+          console.error("Gagal memuat leaderboard guru", err);
+          if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">Gagal memuat data.</td></tr>';
+       }
+    }
     
     document.addEventListener('DOMContentLoaded', () => {
        const btnTime = document.getElementById('lb-teacher-toggle-time');
        const btnCount = document.getElementById('lb-teacher-toggle-count');
+       const btnScopeClass = document.getElementById('lb-teacher-scope-class');
+       const btnScopeGrade = document.getElementById('lb-teacher-scope-grade');
+       
        if(btnTime && btnCount) {
            btnTime.addEventListener('click', () => {
                currentTeacherLbMode = 'time';
                btnTime.style.background = 'var(--primary)';
                btnTime.style.color = 'white';
-               btnCount.style.background = '#E5E7EB';
+               btnCount.style.background = 'transparent';
                btnCount.style.color = '#0E1318';
                renderTeacherLeaderboard();
            });
@@ -1017,98 +2312,293 @@
                currentTeacherLbMode = 'count';
                btnCount.style.background = 'var(--primary)';
                btnCount.style.color = 'white';
-               btnTime.style.background = '#E5E7EB';
+               btnTime.style.background = 'transparent';
                btnTime.style.color = '#0E1318';
                renderTeacherLeaderboard();
            });
        }
+       
+       if (btnScopeClass && btnScopeGrade) {
+           btnScopeClass.addEventListener('click', () => {
+               currentTeacherLbScope = 'class';
+               btnScopeClass.style.background = 'var(--primary)';
+               btnScopeClass.style.color = 'white';
+               btnScopeGrade.style.background = 'transparent';
+               btnScopeGrade.style.color = '#0E1318';
+               fetchTeacherLeaderboard();
+           });
+           btnScopeGrade.addEventListener('click', () => {
+               currentTeacherLbScope = 'grade';
+               btnScopeGrade.style.background = 'var(--primary)';
+               btnScopeGrade.style.color = 'white';
+               btnScopeClass.style.background = 'transparent';
+               btnScopeClass.style.color = '#0E1318';
+               fetchTeacherLeaderboard();
+           });
+       }
     });
     
-    function formatTeacherDuration(seconds) {
-        if (!seconds) return '-';
-        const m = Math.floor(seconds / 60);
-        const s = Math.floor(seconds % 60);
-        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    function formatTeacherDuration(seconds, useThreeDecimals = false) {
+        if (!seconds && seconds !== 0) return '-';
+        const secNum = parseFloat(seconds);
+        if (isNaN(secNum) || secNum <= 0) return '-';
+        
+        const m = Math.floor(secNum / 60);
+        const sNum = secNum % 60;
+        const decimals = useThreeDecimals ? 3 : 2;
+        const s = sNum.toFixed(decimals);
+        
+        if (m > 0) {
+            const sStr = sNum < 10 ? '0' + s : s;
+            return `${m}m ${sStr}s`;
+        } else {
+            return `${s}s`;
+        }
     }
 
     function renderTeacherLeaderboard() {
         const lbTbody = document.getElementById('task-leaderboard-body');
         const header = document.getElementById('lb-teacher-stat-header');
+        if (!lbTbody) return;
         lbTbody.innerHTML = '';
         
         if (!currentTeacherLbData || currentTeacherLbData.length === 0) {
-            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray;">Belum ada yang masuk papan peringkat untuk tugas ini.</td></tr>';
+            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">Belum ada yang masuk papan peringkat untuk kategori ini.</td></tr>';
             return;
         }
         
         let sortedData = [...currentTeacherLbData];
         if (currentTeacherLbMode === 'time') {
-            header.textContent = 'Waktu Tercepat';
-            sortedData = sortedData.filter(u => u.fastestTime > 0);
-            sortedData.sort((a, b) => a.fastestTime - b.fastestTime);
+            if (header) header.textContent = 'Waktu Tercepat';
+            sortedData = sortedData.filter(u => (u.fastestTime || 0) > 0);
+            sortedData.sort((a, b) => (a.fastestTime || 0) - (b.fastestTime || 0));
         } else {
-            header.textContent = 'Pengulangan Terbanyak';
-            sortedData.sort((a, b) => b.completions - a.completions);
+            if (header) header.textContent = 'Pengulangan Terbanyak';
+            sortedData.sort((a, b) => {
+               const compA = a.completions !== undefined ? a.completions : (a.count || 0);
+               const compB = b.completions !== undefined ? b.completions : (b.count || 0);
+               return compB - compA;
+            });
         }
         
         if (sortedData.length === 0) {
-            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray;">Belum ada data untuk mode ini.</td></tr>';
+            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">Belum ada data untuk mode ini.</td></tr>';
             return;
         }
+
+        const displayedSlice = sortedData.slice(0, 25);
+
+        // Check if 3 decimals are needed to distinguish close times
+        let useThreeDecimals = false;
+        if (currentTeacherLbMode === 'time') {
+           useThreeDecimals = displayedSlice.some((u, i) =>
+              displayedSlice.some((v, j) => i !== j && u.fastestTime.toFixed(2) === v.fastestTime.toFixed(2) && u.fastestTime.toFixed(3) !== v.fastestTime.toFixed(3))
+           );
+        }
+
+        let currentRank = 1;
+        let prevStatKey = null;
         
-        sortedData.slice(0, 10).forEach((user, index) => {
+        displayedSlice.forEach((user, index) => {
             const tr = document.createElement('tr');
-            let rank = index + 1;
-            if (rank === 1) rank = '🥇 1';
-            else if (rank === 2) rank = '🥈 2';
-            else if (rank === 3) rank = '🥉 3';
             
-            let statStr = currentTeacherLbMode === 'time' ? formatTeacherDuration(user.fastestTime) : `${user.completions}x Selesai`;
+            let statKey;
+            let statStr;
+            if (currentTeacherLbMode === 'time') {
+               statKey = (user.fastestTime || 0).toFixed(3);
+               statStr = formatTeacherDuration(user.fastestTime || 0, useThreeDecimals);
+            } else {
+               const completions = user.completions !== undefined ? user.completions : (user.count || 0);
+               statKey = completions.toString();
+               statStr = `${completions}x Selesai`;
+            }
+
+            let rankToDisplay;
+            if (index === 0) {
+               currentRank = 1;
+               rankToDisplay = 1;
+            } else if (statKey === prevStatKey) {
+               rankToDisplay = currentRank;
+            } else {
+               currentRank = index + 1;
+               rankToDisplay = currentRank;
+            }
+            prevStatKey = statKey;
+
+            let rankLabel = rankToDisplay.toString();
+            if (rankToDisplay === 1) rankLabel = '🥇 1';
+            else if (rankToDisplay === 2) rankLabel = '🥈 2';
+            else if (rankToDisplay === 3) rankLabel = '🥉 3';
             
+            const classBadge = (currentTeacherLbScope === 'grade' || (user.cls && user.cls !== currentActiveTaskClass))
+               ? `<span style="display:inline-block; padding:1px 6px; border-radius:4px; background:rgba(139,61,255,0.12); color:var(--primary); font-size:0.75rem; font-weight:bold; margin-left:6px;">${user.cls || ''}</span>` : '';
+
             tr.innerHTML = `
-               <td style="text-align:center; font-weight:bold;">${rank}</td>
-               <td>${user.name}</td>
+               <td style="text-align:center; font-weight:bold;">${rankLabel}</td>
+               <td><b>${user.name}</b>${classBadge}</td>
                <td>${statStr}</td>
             `;
             lbTbody.appendChild(tr);
         });
     }
 
-    // 2. Fetch Leaderboard for this specific Task ID
+    function switchDetailTab(tabName) {
+       const tabResults = document.getElementById('tab-content-results');
+       const tabLb = document.getElementById('tab-content-leaderboard');
+       const btnResults = document.getElementById('tab-btn-results');
+       const btnLb = document.getElementById('tab-btn-leaderboard');
+       
+       if (tabName === 'results') {
+          if (tabResults) tabResults.style.display = 'block';
+          if (tabLb) tabLb.style.display = 'none';
+          if (btnResults) btnResults.classList.add('active');
+          if (btnLb) btnLb.classList.remove('active');
+       } else {
+          if (tabResults) tabResults.style.display = 'none';
+          if (tabLb) tabLb.style.display = 'block';
+          if (btnResults) btnResults.classList.remove('active');
+          if (btnLb) btnLb.classList.add('active');
+          fetchTeacherLeaderboard();
+       }
+    }
+
+    async function viewTaskResults(id, cls, babInfo, taskType) {
+       currentActiveTaskId = id;
+       currentActiveTaskClass = cls;
+       currentTeacherLbScope = 'class';
+       const tType = taskType || 'tugas';
+       const typeBadge = tType === 'remedial' ? '🔁 Remedial' : '📝 Tugas Reguler';
+       
+       document.getElementById('detail-task-id').textContent = `ID Tugas: ${id} (${typeBadge} • Kelas ${cls})`;
+       document.getElementById('detail-task-info').textContent = `Bab: ${babInfo}`;
+       
+       const lbSubtitle = document.getElementById('lb-teacher-subtitle');
+       if (lbSubtitle) lbSubtitle.textContent = `${typeBadge} • Bab ${babInfo}`;
+       
+       const btnScopeClass = document.getElementById('lb-teacher-scope-class');
+       const btnScopeGrade = document.getElementById('lb-teacher-scope-grade');
+       if (btnScopeClass && btnScopeGrade) {
+          btnScopeClass.textContent = `🏫 Kelas ${cls}`;
+          btnScopeClass.style.background = 'var(--primary)';
+          btnScopeClass.style.color = 'white';
+          btnScopeGrade.style.background = 'transparent';
+          btnScopeGrade.style.color = '#0E1318';
+       }
+       
+       const tbody = document.getElementById('task-results-body');
+       tbody.innerHTML = '<tr><td colspan="5">Memuat data...</td></tr>';
+       
+       showView('view-task-details');
+       switchDetailTab('results');
+       fetchTeacherLeaderboard();
+       
+       // 1. Fetch Task Results for this specific Task ID
+       try {
+          const subs = await DB.getTaskSubmissions(id, cls);
+          tbody.innerHTML = '';
+          
+          let hasResults = false;
+          let mistakesAggregation = {}; // { '妈妈': 8, '谢': 5 }
+          
+          // Build roster
+          let classStudents = [];
+          if (DB_STUDENTS[cls]) classStudents = DB_STUDENTS[cls];
+          else if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) classStudents = _studentsDB[cls];
+          
+          const subsMap = {};
+          subs.forEach(s => {
+             subsMap[s.student_name] = s;
+          });
+          
+          let displayRows = [];
+          if (classStudents && classStudents.length > 0) {
+             classStudents.forEach(sName => {
+                if (subsMap[sName]) displayRows.push(subsMap[sName]);
+                else displayRows.push({ student_name: sName, status: 'Belum', submitted_at: '', mistakes_detail: '', duration: 0 });
+             });
+          } else {
+             displayRows = subs;
+          }
+          
+          displayRows.forEach(r => {
+             const isComplete = r.status === 'Selesai';
+             if (isComplete) hasResults = true;
+             
+             let dateStr = '-';
+             if (r.submitted_at) {
+                const dObj = new Date(r.submitted_at);
+                const dd = String(dObj.getDate()).padStart(2, '0');
+                const mmm = dObj.toLocaleString('id-ID', { month: 'short' });
+                const yyyy = dObj.getFullYear();
+                const hh = String(dObj.getHours()).padStart(2, '0');
+                const min = String(dObj.getMinutes()).padStart(2, '0');
+                dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
+             }
+             
+             const tr = document.createElement('tr');
+             tr.innerHTML = `
+                <td><b>${r.student_name}</b></td>
+                <td>${dateStr}</td>
+                <td>${isComplete ? '<span style="color:#10B981; font-weight:bold;">✓ Selesai</span>' : '<span style="color:#94A3B8;">Belum</span>'}</td>
+                <td>${isComplete ? (r.repetitions || 1) + 'x' : '-'}</td>
+                <td><small>${isComplete ? (r.mistakes_detail || '-') : '-'}</small></td>
+             `;
+             tbody.appendChild(tr);
+             
+             // Aggregate mistakes for completed submissions
+             if (isComplete && r.mistakes_detail) {
+                const parts = r.mistakes_detail.split('|');
+                parts.forEach(p => {
+                   const [char, mCount] = p.split(':');
+                   if (char && mCount) {
+                      const num = parseInt(mCount.trim()) || 0;
+                      const c = char.trim();
+                      mistakesAggregation[c] = (mistakesAggregation[c] || 0) + num;
+                   }
+                });
+             }
+          });
+          
+          // Render difficult character analytics
+          const diffSection = document.getElementById('difficult-chars-section');
+          const diffList = document.getElementById('difficult-chars-list');
+          const sortedMistakes = Object.entries(mistakesAggregation).filter(([_, count]) => count > 0).sort((a, b) => b[1] - a[1]);
+          
+          if (sortedMistakes.length > 0) {
+             diffSection.style.display = 'block';
+             diffList.innerHTML = sortedMistakes.slice(0, 5).map(([char, count]) => `
+                <span class="difficult-char-badge">🔥 ${char}: ${count} kesalahan</span>
+             `).join('');
+          } else {
+             diffSection.style.display = 'none';
+          }
+          
+          if(!hasResults) tbody.innerHTML = '<tr><td colspan="5">Belum ada murid yang mengumpulkan tugas ini.</td></tr>';
+       } catch (err) {
+          tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
+       }
+       
+       // 2. Fetch Leaderboard for this Task ID
        const lbTbody = document.getElementById('task-leaderboard-body');
        lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Memuat Papan Peringkat...</td></tr>';
        try {
-          // Send as POST just like student.html
-          const lbRes = await fetch(getGASUrl(), {
-              method: 'POST',
-              body: JSON.stringify({ action: "getLeaderboard", taskId: id, cls: cls })
-          });
-          const lbD = await lbRes.json();
-          if (lbD.status === 'success' && lbD.leaderboard) {
-             currentTeacherLbData = lbD.leaderboard;
-             renderTeacherLeaderboard();
-          } else {
-             lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray;">Belum ada yang masuk papan peringkat untuk tugas ini.</td></tr>';
-          }
+          currentTeacherLbData = await DB.getLeaderboard(id, cls);
+          renderTeacherLeaderboard();
        } catch (e) {
-          lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat papan peringkat. Pastikan koneksi lancar.</td></tr>';
+          lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat papan peringkat.</td></tr>';
        }
     }
     
     async function deleteTask(id) {
-       if(!confirm('Yakin ingin menghapus tugas ini? Link tidak akan bisa dibuka lagi.')) return;
-       showLoading("Menghapus...");
+       if(!confirm('Yakin ingin menghapus tugas ini? Link tugas dan data papan peringkat akan dihapus.')) return;
+       showLoading("Menghapus Tugas...");
        try {
-          await fetch(getGASUrl(), {
-             method: 'POST',
-             mode: 'no-cors',
-             body: JSON.stringify({ action: 'deleteLink', id: id })
-          });
-          setTimeout(fetchTasks, 1000);
+          await DB.deleteTask(id);
+          await fetchTasks();
        } catch(err) {
-          hideLoading();
-          alert("Error: " + err);
+          alert("Error: " + err.message);
        }
+       hideLoading();
     }
 
     // --- OPTIONS LOGIC ---
@@ -1136,7 +2626,7 @@
     
     function addTeacherRow() { addTeacherRowUI(); }
     
-    function saveTeachers() {
+    async function saveTeachers() {
        const tbody = document.getElementById('teachers-tbody');
        const rows = tbody.querySelectorAll('tr');
        const newDB = {};
@@ -1148,31 +2638,26 @@
           }
        });
        DB_TEACHERS = newDB;
+       localStorage.setItem('stroke_app_cached_teachers', JSON.stringify(DB_TEACHERS));
        
        showLoading("Menyimpan...");
-       fetch(getGASUrl(), {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ action: 'saveTeachers', payload: JSON.stringify(DB_TEACHERS) })
-       }).then(() => {
-          hideLoading();
-          alert('Konfigurasi Guru disimpan!');
-          initDashboard(); // Refresh dropdown
-       }).catch(e => {
-          hideLoading();
-          alert('Error: ' + e);
-       });
+       try {
+          await DB.saveTeachers(DB_TEACHERS);
+          alert('Konfigurasi Guru disimpan di Database Supabase!');
+          initDashboard();
+       } catch(e) {
+          alert('Error: ' + e.message);
+       }
+       hideLoading();
     }
     
     function downloadStudentsExcel() {
        const wb = XLSX.utils.book_new();
-       // Create 30 sheets
        const classes = ["1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"];
        
        classes.forEach(c => {
           let data = [["No. Absen", "Nama Lengkap"]];
           let students = DB_STUDENTS[c];
-          // fallback to old DB if not loaded
           if (!students && typeof _studentsDB !== 'undefined') students = _studentsDB[c];
           
           if(students) {
@@ -1191,7 +2676,7 @@
        const file = e.target.files[0];
        if(!file) return;
        const reader = new FileReader();
-       reader.onload = function(evt) {
+       reader.onload = async function(evt) {
           const data = evt.target.result;
           const wb = XLSX.read(data, {type: 'binary'});
           const newDB = {};
@@ -1208,54 +2693,20 @@
           });
           
           DB_STUDENTS = newDB;
-          document.getElementById('student-upload-status').textContent = "File Excel berhasil dibaca! Menyimpan ke server...";
+          localStorage.setItem('stroke_app_cached_students', JSON.stringify(DB_STUDENTS));
+          document.getElementById('student-upload-status').textContent = "File Excel berhasil dibaca! Menyimpan ke Supabase...";
           
-          fetch(getGASUrl(), {
-             method: 'POST',
-             mode: 'no-cors',
-             body: JSON.stringify({ action: 'saveStudents', payload: JSON.stringify(DB_STUDENTS) })
-          }).then(() => {
-             document.getElementById('student-upload-status').textContent = "Berhasil disimpan di Server!";
+          try {
+             await DB.saveStudents(DB_STUDENTS);
+             document.getElementById('student-upload-status').textContent = "Berhasil disimpan di Database Supabase!";
              setTimeout(() => document.getElementById('student-upload-status').textContent = "", 3000);
-          }).catch(err => {
-             document.getElementById('student-upload-status').textContent = "Gagal menyimpan ke server.";
-          });
+          } catch(err) {
+             document.getElementById('student-upload-status').textContent = "Gagal menyimpan ke Supabase: " + err.message;
+          }
        };
        reader.readAsBinaryString(file);
     }
-    
-    function saveCustomGasUrl() {
-       const url = document.getElementById('custom-gas-url').value.trim();
-       if(url) {
-          localStorage.setItem('customGASUrl', url);
-       } else {
-          localStorage.removeItem('customGASUrl');
-       }
-       alert("URL Server berhasil disimpan. Halaman akan dimuat ulang.");
-       window.location.reload();
-    }
   </script>
-
-  <!-- Tutorial Modal -->
-  <div id="tutorial-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-    <div style="background:white; padding:20px; border-radius:12px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto;">
-      <h2 style="color:var(--primary); margin-bottom:15px;">Cara Deploy App Script & Excel Sendiri</h2>
-      <ol style="margin-left:20px; line-height:1.6;">
-        <li>Buka <a href="https://docs.google.com/spreadsheets/d/1B6o8Y_qX7J7mD6jUqH2N6jW9jX3b6C2B" target="_blank">Google Sheet Template</a> dan buat salinan ke Google Drive Anda (File -> Buat salinan / Make a copy).</li>
-        <li>Di file salinan Anda, klik menu <b>Ekstensi</b> > <b>Apps Script</b>.</li>
-        <li>Hapus semua kode yang ada, lalu copy paste kode App Script yang diperlukan ke sana. (Pastikan Anda sudah memiliki kodenya).</li>
-        <li>Klik tombol <b>Terapkan</b> (Deploy) di sudut kanan atas > <b>Deployment baru</b>.</li>
-        <li>Pilih jenis <b>Aplikasi Web</b>.</li>
-        <li>Atur "Akses ke aplikasi" menjadi <b>Siapa saja</b> (Anyone).</li>
-        <li>Klik <b>Terapkan</b> dan berikan otorisasi akses (jika diminta, pilih akun Anda > Lanjutan > Buka... tidak aman).</li>
-        <li>Copy "URL Aplikasi Web" yang dihasilkan.</li>
-        <li>Paste URL tersebut ke dalam kolom "URL App Script (Custom)" di halaman Options ini, lalu klik Simpan.</li>
-      </ol>
-      <div style="text-align:right; margin-top:20px;">
-        <button class="btn" style="width:auto; padding:8px 16px;" onclick="document.getElementById('tutorial-modal').style.display='none'">Tutup</button>
-      </div>
-    </div>
-  </div>
 
 </body>
 </html>

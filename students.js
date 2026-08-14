@@ -1,5 +1,19 @@
 // Database Siswa Auto-Generated
 var _studentsDB = {
+  "DEMO": [
+    "KENZO PRATAMA (INDONESIA)",
+    "KENJI TAKAHASHI (JAPAN)",
+    "OLIVER SMITH (USA)",
+    "LUCAS DUBOIS (FRANCE)",
+    "ZHANG WEI (CHINA)"
+  ],
+  "demo": [
+    "KENZO PRATAMA (INDONESIA)",
+    "KENJI TAKAHASHI (JAPAN)",
+    "OLIVER SMITH (USA)",
+    "LUCAS DUBOIS (FRANCE)",
+    "ZHANG WEI (CHINA)"
+  ],
   "1A": [
     "ADELIA EVELYN GUNAWAN",
     "ADRIAN HUANG",
