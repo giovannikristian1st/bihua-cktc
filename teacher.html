@@ -594,7 +594,7 @@
       <button id="btn-harry-music" class="nav-btn" onclick="toggleHedwigMusic()" style="display:none; background:rgba(238,186,48,0.25); border:1.5px solid #EEBA30; color:#FFE484; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">⚡ 🎵 Hedwig's Theme <span id="music-state-icon">▶</span></button>
       <button id="btn-gio-music" class="nav-btn" onclick="toggleLotrMusic()" style="display:none; background:rgba(254,240,138,0.25); border:1.5px solid #FDE047; color:#FFF8D6; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">💍 🎵 LOTR Theme <span id="music-state-icon-gio">▶</span></button>
       <button id="btn-avengers-music" class="nav-btn" onclick="toggleAvengersMusic()" style="display:none; background:rgba(255,255,255,0.25); border:1.5px solid #FFFFFF; color:#FFFFFF; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">🛡️ 🎵 Avengers Theme <span id="music-state-icon-avengers">▶</span></button>
-      <button id="btn-imel-music" class="nav-btn" onclick="toggleImelMusic()" style="display:none; background:rgba(254,240,138,0.25); border:1.5px solid #FDE047; color:#FFF8D6; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">🐉 🎵 GOT Theme (0:22) <span id="music-state-icon-imel">▶</span></button>
+      <button id="btn-imel-music" class="nav-btn" onclick="toggleImelMusic()" style="display:none; background:rgba(254,240,138,0.25); border:1.5px solid #FDE047; color:#FFF8D6; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">🐉 🎵 GOT Theme <span id="music-state-icon-imel">▶</span></button>
       <button id="btn-barbie-music" class="nav-btn" onclick="toggleBarbieMusic()" style="display:none; background:rgba(255,255,255,0.3); border:1.5px solid #FFFFFF; color:#FFFFFF; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">💖 🎵 Barbie Theme <span id="music-state-icon-barbie">▶</span></button>
       <button class="nav-btn active" id="nav-dashboard">Buat Tugas</button>
       <button class="nav-btn" id="nav-history">Riwayat Tugas</button>
@@ -1272,58 +1272,35 @@
        }
     }
 
-    // 4. IMELDA (Game of Thrones - Exact Video SJZfCg51xlU - starts at 0:22)
+    // 4. IMELDA (Game of Thrones Official Main Title Theme - Ov5ljc44Ajs)
     function initImelAudio() {
        if (!imelAudio) {
           imelAudio = new Audio('imel_theme.mp4');
+          imelAudio.loop = true;
           imelAudio.volume = 1.0;
           imelAudio.addEventListener('play', () => { isImelPlaying = true; updateImelMusicButtonState(); });
           imelAudio.addEventListener('pause', () => { isImelPlaying = false; updateImelMusicButtonState(); });
-          imelAudio.addEventListener('ended', () => {
-             try {
-                imelAudio.currentTime = 22;
-                imelAudio.play().catch(()=>{});
-             } catch(e) {}
-          });
+          imelAudio.addEventListener('ended', () => { isImelPlaying = false; updateImelMusicButtonState(); });
        }
     }
     function startImelAutoplay() {
        initImelAudio();
-       const tryPlay = () => {
-          try {
-             if (imelAudio.currentTime < 22) {
-                imelAudio.currentTime = 22;
+       imelAudio.play().then(() => {
+          isImelPlaying = true;
+          updateImelMusicButtonState();
+       }).catch(() => {
+          const unlock = () => {
+             const t = (currentTeacher || document.getElementById('teacher-name')?.value || '').toLowerCase();
+             if (t.includes('imelda') || t.includes('imel')) {
+                initImelAudio();
+                imelAudio.play().then(() => { isImelPlaying = true; updateImelMusicButtonState(); }).catch(()=>{});
              }
-          } catch(e){}
-          imelAudio.play().then(() => {
-             isImelPlaying = true;
-             updateImelMusicButtonState();
-          }).catch(() => {
-             const unlock = () => {
-                const t = (currentTeacher || document.getElementById('teacher-name')?.value || '').toLowerCase();
-                if (t.includes('imelda') || t.includes('imel')) {
-                   initImelAudio();
-                   try {
-                      if (imelAudio.currentTime < 22) imelAudio.currentTime = 22;
-                   } catch(e){}
-                   imelAudio.play().then(() => {
-                      isImelPlaying = true;
-                      updateImelMusicButtonState();
-                   }).catch(()=>{});
-                }
-                document.removeEventListener('click', unlock);
-                document.removeEventListener('touchstart', unlock);
-             };
-             document.addEventListener('click', unlock, { once: true });
-             document.addEventListener('touchstart', unlock, { once: true });
-          });
-       };
-       if (imelAudio.readyState >= 1) {
-          tryPlay();
-       } else {
-          imelAudio.addEventListener('loadedmetadata', tryPlay, { once: true });
-          imelAudio.load();
-       }
+             document.removeEventListener('click', unlock);
+             document.removeEventListener('touchstart', unlock);
+          };
+          document.addEventListener('click', unlock, { once: true });
+          document.addEventListener('touchstart', unlock, { once: true });
+       });
     }
     function toggleImelMusic() {
        initImelAudio();
@@ -1331,9 +1308,6 @@
           imelAudio.pause();
        } else {
           stopAllAudios();
-          try {
-             if (imelAudio.currentTime < 22) imelAudio.currentTime = 22;
-          } catch(e){}
           imelAudio.play().catch(e => console.log("GOT play note:", e));
        }
     }
