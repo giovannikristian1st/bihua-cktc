@@ -962,9 +962,18 @@
           if (btn) btn.classList.remove('active');
        });
        
-       if (viewId === 'view-dashboard') document.getElementById('nav-dashboard').classList.add('active');
-       else if (viewId === 'view-history' || viewId === 'view-task-details') document.getElementById('nav-history').classList.add('active');
-       else if (viewId === 'view-options') document.getElementById('nav-options').classList.add('active');
+       if (viewId === 'view-dashboard') {
+          const b = document.getElementById('nav-dashboard');
+          if (b) b.classList.add('active');
+       } else if (viewId === 'view-history' || viewId === 'view-task-details') {
+          const b = document.getElementById('nav-history');
+          if (b) b.classList.add('active');
+       } else if (viewId === 'view-options') {
+          const b = document.getElementById('nav-options');
+          if (b) b.classList.add('active');
+       }
+       
+       window.scrollTo({ top: 0, behavior: 'instant' });
        
        try {
           localStorage.setItem('stroke_app_teacher_view', viewId);
@@ -1105,6 +1114,7 @@
     const generateBtn = document.getElementById('generate-btn');
     const resultBox = document.getElementById('result-box');
     const linkOutput = document.getElementById('link-output');
+    const copyBtn = document.getElementById('copy-btn');
     // --- AUDIO SYSTEM (CLEAN NATIVE HTML5 - 100% RELIABLE) ---
     let hedwigAudio = null;
     let isHedwigPlaying = false;
@@ -2078,16 +2088,36 @@
        return (sel && sel.value ? sel.value : currentTeacher || '').trim();
     }
 
+    window.allHistoryTasksMap = {};
+
+    function getBabStringFromPayload(payload) {
+       let babStr = [];
+       if (payload && payload.v) {
+          for (const b in payload.v) {
+             for (const u in payload.v[b]) {
+                babStr.push(`${b} ${u}`);
+             }
+          }
+       }
+       if (payload && payload.cv && Array.isArray(payload.cv) && payload.cv.length > 0) {
+          const cvNames = payload.cv.map(c => c.char).join(', ');
+          babStr.push(`✍️ Manual (${cvNames})`);
+       }
+       return babStr.join(', ');
+    }
+
     async function fetchTasks() {
        showLoading("Memuat Riwayat Tugas...");
        const tbody = document.getElementById('task-list-body');
-       tbody.innerHTML = '';
+       if (tbody) tbody.innerHTML = '';
        try {
           const tasks = await DB.getTasks();
-          window.allHistoryTasks = tasks.map(t => ({
+          window.allHistoryTasks = (tasks || []).map(t => ({
              id: t.id,
              payload: t.payload,
-             date: t.created_at
+             date: t.created_at,
+             teacher_name: t.teacher_name,
+             class: t.class
           }));
           
           await renderHistoryTable();
@@ -2100,8 +2130,11 @@
     
     async function renderHistoryTable() {
        const tbody = document.getElementById('task-list-body');
+       if (!tbody) return;
        tbody.innerHTML = '';
        if (!window.allHistoryTasks) return;
+       
+       window.allHistoryTasksMap = {};
        
        const activeTeacher = getActiveTeacherName();
        const teacherBadge = document.getElementById('history-active-teacher-name');
@@ -2119,7 +2152,7 @@
        
        const filteredTasks = window.allHistoryTasks.filter(t => {
           let payload = {};
-          try { payload = JSON.parse(t.payload); } catch(e) {}
+          try { payload = typeof t.payload === 'string' ? JSON.parse(t.payload) : (t.payload || {}); } catch(e) {}
           const guru = payload.guru || t.teacher_name || '';
           if (!activeTeacher) return true;
           return guru.toLowerCase().trim() === activeTeacher.toLowerCase().trim();
@@ -2140,23 +2173,12 @@
        
        filteredTasks.forEach(t => {
           let payload = {};
-          try { payload = JSON.parse(t.payload); } catch(e) {}
-          const cls = payload.cls || '-';
-          const guru = payload.guru || t.teacher_name || '-';
+          try { payload = typeof t.payload === 'string' ? JSON.parse(t.payload) : (t.payload || {}); } catch(e) {}
+          const cls = String(payload.cls || t.class || '-');
+          const guru = String(payload.guru || t.teacher_name || '-');
+          const babInfo = getBabStringFromPayload(payload);
           
-          let babStr = [];
-          if(payload.v) {
-             for(const b in payload.v) {
-                for(const u in payload.v[b]) {
-                   babStr.push(`${b} ${u}`);
-                }
-             }
-          }
-          if(payload.cv && Array.isArray(payload.cv) && payload.cv.length > 0) {
-             const cvNames = payload.cv.map(c => c.char).join(', ');
-             babStr.push(`✍️ Manual (${cvNames})`);
-          }
-          const dateObj = new Date(t.date);
+          const dateObj = new Date(t.date || Date.now());
           const dd = String(dateObj.getDate()).padStart(2, '0');
           const mmm = dateObj.toLocaleString('id-ID', { month: 'short' });
           const yyyy = dateObj.getFullYear();
@@ -2171,17 +2193,28 @@
           const count = progressMap[t.id] || 0;
           const pct = Math.min(100, Math.round((count / totalStudents) * 100));
           
-          const taskType = payload.type || 'tugas';
+          const taskType = String(payload.type || 'tugas');
           const typeBadge = taskType === 'remedial'
              ? `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#FEF3C7; color:#D97706; font-size:0.75rem; font-weight:bold; margin-right:4px;">🔁 Remedial</span>`
              : `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#EDE9FE; color:var(--primary); font-size:0.75rem; font-weight:bold; margin-right:4px;">📝 Tugas</span>`;
+
+          // Store in global lookup for reliable instant access
+          window.allHistoryTasksMap[t.id] = {
+             id: t.id,
+             cls: cls,
+             babInfo: babInfo,
+             taskType: taskType,
+             guru: guru,
+             dateStr: dateStr,
+             payload: payload
+          };
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
              <td>${dateStr}</td>
              <td><b>${guru}</b></td>
              <td>${typeBadge} <b>${cls}</b></td>
-             <td><small>${babStr.join(', ')}</small></td>
+             <td><small>${babInfo || '-'}</small></td>
              <td>
                 <div style="font-weight:bold; font-size:0.9rem;">${count} / ${totalStudents} Murid (${pct}%)</div>
                 <div class="class-progress-bar">
@@ -2190,36 +2223,38 @@
              </td>
              <td>
                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-width: 290px;">
-                    <button class="btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;"
-                       data-task-id="${t.id}" data-cls="${cls.replace(/"/g,'&quot;')}" data-bab="${babStr.join(', ').replace(/"/g,'&quot;')}" data-type="${taskType}">
+                    <button class="btn btn-view-results" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;"
+                       onclick="viewTaskResultsById('${t.id}')">
                        📊 Lihat Hasil
                     </button>
-                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:var(--primary); border-color:var(--primary); white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;"
-                       data-copy-id="${t.id}">
+                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:var(--primary); border-color:var(--primary); white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;"
+                       onclick="copyHistoryTaskLink('${t.id}', this)" title="Salin Link Tugas">
                        📋 Salin Link
                     </button>
-                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:#EF4444; border-color:#FCA5A5; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;"
-                       data-delete-id="${t.id}">
+                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:#EF4444; border-color:#FCA5A5; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;"
+                       onclick="deleteTask('${t.id}')" title="Hapus Tugas">
                        🗑️ Hapus
                     </button>
                  </div>
               </td>
           `;
 
-          // Attach click handlers safely (avoids special char issues in onclick attributes)
-          tr.querySelector('[data-task-id]').addEventListener('click', function() {
-             viewTaskResults(this.dataset.taskId, this.dataset.cls, this.dataset.bab, this.dataset.type);
-          });
-          tr.querySelector('[data-copy-id]').addEventListener('click', function() {
-             copyHistoryTaskLink(this.dataset.copyId, this);
-          });
-          tr.querySelector('[data-delete-id]').addEventListener('click', function() {
-             deleteTask(this.dataset.deleteId);
-          });
-
           tbody.appendChild(tr);
        });
     }
+
+    window.viewTaskResultsById = function(taskId) {
+       const t = (window.allHistoryTasksMap && window.allHistoryTasksMap[taskId]) || (window.allHistoryTasks || []).find(item => item.id === taskId);
+       let cls = '-';
+       let babInfo = '';
+       let taskType = 'tugas';
+       if (t) {
+          cls = t.cls || (t.payload && t.payload.cls) || '-';
+          babInfo = t.babInfo || (t.payload ? getBabStringFromPayload(t.payload) : '');
+          taskType = t.taskType || (t.payload && t.payload.type) || 'tugas';
+       }
+       viewTaskResults(taskId, cls, babInfo, taskType);
+    };
 
     function copyHistoryTaskLink(taskId, btnEl) {
        let baseUrl = window.location.href.replace('teacher.html', 'student.html');
@@ -2248,14 +2283,14 @@
           btnEl.style.background = '';
           btnEl.style.color = 'var(--primary)';
           btnEl.style.borderColor = 'var(--primary)';
-       }, 1500);
+       }, 2000);
     }
     
     function fallbackCopyHistory(text, btnEl) {
        const ta = document.createElement('textarea');
        ta.value = text;
        ta.style.position = 'fixed';
-       ta.style.left = '-9999px';
+       ta.style.opacity = '0';
        document.body.appendChild(ta);
        ta.select();
        document.execCommand('copy');
@@ -2272,7 +2307,7 @@
     async function fetchTeacherLeaderboard() {
        if (!currentActiveTaskId) return;
        const lbTbody = document.getElementById('task-leaderboard-body');
-       if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">Memuat data peringkat...</td></tr>';
+       if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">⏳ Memuat data peringkat...</td></tr>';
        try {
           currentTeacherLbData = await DB.getLeaderboard(currentActiveTaskId, currentActiveTaskClass, currentTeacherLbScope);
           renderTeacherLeaderboard();
@@ -2326,7 +2361,7 @@
            });
        }
     });
-    
+
     function formatTeacherDuration(seconds, useThreeDecimals = false) {
         if (!seconds && seconds !== 0) return '-';
         const secNum = parseFloat(seconds);
@@ -2452,132 +2487,168 @@
     }
 
     async function viewTaskResults(id, cls, babInfo, taskType) {
-       currentActiveTaskId = id;
-       currentActiveTaskClass = cls;
-       currentTeacherLbScope = 'class';
-       const tType = taskType || 'tugas';
-       const typeBadge = tType === 'remedial' ? '🔁 Remedial' : '📝 Tugas Reguler';
-       
-       document.getElementById('detail-task-id').textContent = `ID Tugas: ${id} (${typeBadge} • Kelas ${cls})`;
-       document.getElementById('detail-task-info').textContent = `Bab: ${babInfo}`;
-       
-       const lbSubtitle = document.getElementById('lb-teacher-subtitle');
-       if (lbSubtitle) lbSubtitle.textContent = `${typeBadge} • Bab ${babInfo}`;
-       
-       const btnScopeClass = document.getElementById('lb-teacher-scope-class');
-       const btnScopeGrade = document.getElementById('lb-teacher-scope-grade');
-       if (btnScopeClass && btnScopeGrade) {
-          btnScopeClass.textContent = `🏫 Kelas ${cls}`;
-          btnScopeClass.style.background = 'var(--primary)';
-          btnScopeClass.style.color = 'white';
-          btnScopeGrade.style.background = 'transparent';
-          btnScopeGrade.style.color = '#0E1318';
-       }
-       
-       const tbody = document.getElementById('task-results-body');
-       tbody.innerHTML = '<tr><td colspan="5">Memuat data...</td></tr>';
-       
-       showView('view-task-details');
-       switchDetailTab('results');
-       fetchTeacherLeaderboard();
-       
-       // 1. Fetch Task Results for this specific Task ID
-       try {
-          const subs = await DB.getTaskSubmissions(id, cls);
-          tbody.innerHTML = '';
-          
-          let hasResults = false;
-          let mistakesAggregation = {}; // { '妈妈': 8, '谢': 5 }
-          
-          // Build roster
-          let classStudents = [];
-          if (DB_STUDENTS[cls]) classStudents = DB_STUDENTS[cls];
-          else if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) classStudents = _studentsDB[cls];
-          
-          const subsMap = {};
-          subs.forEach(s => {
-             subsMap[s.student_name] = s;
-          });
-          
-          let displayRows = [];
-          if (classStudents && classStudents.length > 0) {
-             classStudents.forEach(sName => {
-                if (subsMap[sName]) displayRows.push(subsMap[sName]);
-                else displayRows.push({ student_name: sName, status: 'Belum', submitted_at: '', mistakes_detail: '', duration: 0 });
-             });
-          } else {
-             displayRows = subs;
-          }
-          
-          displayRows.forEach(r => {
-             const isComplete = r.status === 'Selesai';
-             if (isComplete) hasResults = true;
-             
-             let dateStr = '-';
-             if (r.submitted_at) {
-                const dObj = new Date(r.submitted_at);
-                const dd = String(dObj.getDate()).padStart(2, '0');
-                const mmm = dObj.toLocaleString('id-ID', { month: 'short' });
-                const yyyy = dObj.getFullYear();
-                const hh = String(dObj.getHours()).padStart(2, '0');
-                const min = String(dObj.getMinutes()).padStart(2, '0');
-                dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
-             }
-             
-             const tr = document.createElement('tr');
-             tr.innerHTML = `
-                <td><b>${r.student_name}</b></td>
-                <td>${dateStr}</td>
-                <td>${isComplete ? '<span style="color:#10B981; font-weight:bold;">✓ Selesai</span>' : '<span style="color:#94A3B8;">Belum</span>'}</td>
-                <td>${isComplete ? (r.repetitions || 1) + 'x' : '-'}</td>
-                <td><small>${isComplete ? (r.mistakes_detail || '-') : '-'}</small></td>
-             `;
-             tbody.appendChild(tr);
-             
-             // Aggregate mistakes for completed submissions
-             if (isComplete && r.mistakes_detail) {
-                const parts = r.mistakes_detail.split('|');
-                parts.forEach(p => {
-                   const [char, mCount] = p.split(':');
-                   if (char && mCount) {
-                      const num = parseInt(mCount.trim()) || 0;
-                      const c = char.trim();
-                      mistakesAggregation[c] = (mistakesAggregation[c] || 0) + num;
-                   }
-                });
-             }
-          });
-          
-          // Render difficult character analytics
-          const diffSection = document.getElementById('difficult-chars-section');
-          const diffList = document.getElementById('difficult-chars-list');
-          const sortedMistakes = Object.entries(mistakesAggregation).filter(([_, count]) => count > 0).sort((a, b) => b[1] - a[1]);
-          
-          if (sortedMistakes.length > 0) {
-             diffSection.style.display = 'block';
-             diffList.innerHTML = sortedMistakes.slice(0, 5).map(([char, count]) => `
-                <span class="difficult-char-badge">🔥 ${char}: ${count} kesalahan</span>
-             `).join('');
-          } else {
-             diffSection.style.display = 'none';
-          }
-          
-          if(!hasResults) tbody.innerHTML = '<tr><td colspan="5">Belum ada murid yang mengumpulkan tugas ini.</td></tr>';
-       } catch (err) {
-          tbody.innerHTML = '<tr><td colspan="5">Gagal memuat data.</td></tr>';
-       }
-       
-       // 2. Fetch Leaderboard for this Task ID
-       const lbTbody = document.getElementById('task-leaderboard-body');
-       lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Memuat Papan Peringkat...</td></tr>';
-       try {
-          currentTeacherLbData = await DB.getLeaderboard(id, cls);
-          renderTeacherLeaderboard();
-       } catch (e) {
-          lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Gagal memuat papan peringkat.</td></tr>';
-       }
+        currentActiveTaskId = id;
+        currentActiveTaskClass = cls;
+        currentTeacherLbScope = 'class';
+        const tType = taskType || 'tugas';
+        const typeBadge = tType === 'remedial' ? '🔁 Remedial' : '📝 Tugas Reguler';
+
+        // 1. Immediately switch view and jump to top of page
+        showView('view-task-details');
+        switchDetailTab('results');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        // 2. Set task header info
+        const idEl = document.getElementById('detail-task-id');
+        if (idEl) idEl.textContent = `ID Tugas: ${id} (${typeBadge} • Kelas ${cls})`;
+        const infoEl = document.getElementById('detail-task-info');
+        if (infoEl) infoEl.textContent = `Bab: ${babInfo || '-'}`;
+
+        const lbSubtitle = document.getElementById('lb-teacher-subtitle');
+        if (lbSubtitle) lbSubtitle.textContent = `${typeBadge} • Bab ${babInfo || '-'}`;
+
+        const btnScopeClass = document.getElementById('lb-teacher-scope-class');
+        const btnScopeGrade = document.getElementById('lb-teacher-scope-grade');
+        if (btnScopeClass && btnScopeGrade) {
+           btnScopeClass.textContent = `🏫 Kelas ${cls}`;
+           btnScopeClass.style.background = 'var(--primary)';
+           btnScopeClass.style.color = 'white';
+           btnScopeGrade.style.background = 'transparent';
+           btnScopeGrade.style.color = '#0E1318';
+        }
+
+        const tbody = document.getElementById('task-results-body');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:25px; color:var(--text-muted); font-size:1rem;">⏳ Memuat data pengerjaan murid...</td></tr>';
+
+        // 3. Fetch submissions & build full class roster
+        try {
+           const subs = await DB.getTaskSubmissions(id);
+           if (tbody) tbody.innerHTML = '';
+
+           let mistakesAggregation = {};
+
+           let classStudents = [];
+           if (cls && cls !== '-') {
+              if (DB_STUDENTS[cls]) classStudents = DB_STUDENTS[cls];
+              else if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) classStudents = _studentsDB[cls];
+           }
+
+           const subsMap = {};
+           (subs || []).forEach(s => {
+              if (s && s.student_name) {
+                 subsMap[s.student_name.trim().toUpperCase()] = s;
+              }
+           });
+
+           const displayRows = [];
+           const addedNames = new Set();
+
+           if (classStudents && classStudents.length > 0) {
+              classStudents.forEach(sName => {
+                 const norm = sName.trim().toUpperCase();
+                 addedNames.add(norm);
+                 if (subsMap[norm]) {
+                    displayRows.push(subsMap[norm]);
+                 } else {
+                    displayRows.push({
+                       student_name: sName,
+                       status: 'Belum',
+                       submitted_at: '',
+                       mistakes_detail: '',
+                       repetitions: '-',
+                       duration: 0
+                    });
+                 }
+              });
+           }
+
+           (subs || []).forEach(s => {
+              if (s && s.student_name) {
+                 const norm = s.student_name.trim().toUpperCase();
+                 if (!addedNames.has(norm)) {
+                    displayRows.push(s);
+                    addedNames.add(norm);
+                 }
+              }
+           });
+
+           if (displayRows.length === 0) {
+              if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">📭 Belum ada murid yang mengumpulkan tugas ini.</td></tr>';
+           } else {
+              displayRows.forEach(r => {
+                 const isComplete = r.status === 'Selesai';
+                 let dateStr = '-';
+                 if (r.submitted_at) {
+                    const dObj = new Date(r.submitted_at);
+                    const dd = String(dObj.getDate()).padStart(2, '0');
+                    const mmm = dObj.toLocaleString('id-ID', { month: 'short' });
+                    const yyyy = dObj.getFullYear();
+                    const hh = String(dObj.getHours()).padStart(2, '0');
+                    const min = String(dObj.getMinutes()).padStart(2, '0');
+                    dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
+                 }
+
+                 const tr = document.createElement('tr');
+                 tr.style.background = isComplete ? 'rgba(16,185,129,0.04)' : '';
+                 const statusBadge = isComplete
+                    ? '<span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#D1FAE5; color:#065F46; font-weight:bold; font-size:0.85rem;">✓ Selesai</span>'
+                    : '<span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#F1F5F9; color:#64748B; font-weight:bold; font-size:0.85rem;">Belum</span>';
+
+                 tr.innerHTML = `
+                    <td><b>${r.student_name}</b></td>
+                    <td>${dateStr}</td>
+                    <td>${statusBadge}</td>
+                    <td>${isComplete ? (r.repetitions || 1) + 'x' : '-'}</td>
+                    <td><small>${isComplete ? (r.mistakes_detail || '-') : '-'}</small></td>
+                 `;
+                 if (tbody) tbody.appendChild(tr);
+
+                 if (isComplete && r.mistakes_detail) {
+                    r.mistakes_detail.split('|').forEach(p => {
+                       const parts = p.split(':');
+                       if (parts.length >= 2) {
+                          const char = parts[0].trim();
+                          const mCount = parseInt(parts[1].trim()) || 0;
+                          if (char && mCount > 0) {
+                             mistakesAggregation[char] = (mistakesAggregation[char] || 0) + mCount;
+                          }
+                       }
+                    });
+                 }
+              });
+           }
+
+           const diffSection = document.getElementById('difficult-chars-section');
+           const diffList = document.getElementById('difficult-chars-list');
+           const sortedMistakes = Object.entries(mistakesAggregation).filter(([_, count]) => count > 0).sort((a, b) => b[1] - a[1]);
+
+           if (diffSection && diffList) {
+              if (sortedMistakes.length > 0) {
+                 diffSection.style.display = 'block';
+                 diffList.innerHTML = sortedMistakes.slice(0, 5).map(([char, count]) => `
+                    <span class="difficult-char-badge">🔥 ${char}: ${count} kesalahan</span>
+                 `).join('');
+              } else {
+                 diffSection.style.display = 'none';
+              }
+           }
+        } catch (err) {
+           console.error('viewTaskResults error:', err);
+           if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:25px; color:#EF4444;">Gagal memuat data: ${err.message}</td></tr>`;
+        }
+
+        // 4. Fetch Leaderboard for this Task ID
+        const lbTbody = document.getElementById('task-leaderboard-body');
+        if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:var(--text-muted);">⏳ Memuat data peringkat...</td></tr>';
+        try {
+           currentTeacherLbData = await DB.getLeaderboard(id, cls, currentTeacherLbScope);
+           renderTeacherLeaderboard();
+        } catch (e) {
+           console.warn('Leaderboard load error:', e);
+           if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:gray;">Gagal memuat papan peringkat.</td></tr>';
+        }
     }
-    
+
     async function deleteTask(id) {
        if(!confirm('Yakin ingin menghapus tugas ini? Link tugas dan data papan peringkat akan dihapus.')) return;
        showLoading("Menghapus Tugas...");
