@@ -978,7 +978,7 @@
           drawingFadeDuration: 350,
           highlightOnComplete: true,
           highlightColor: highlightColor,
-          leniency: 0.75,
+          leniency: 1.2,
           charDataLoader: function(c, onLoad, onError) {
             if (typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[c]) {
                onLoad(BM_STROKE_DATA[c]);
@@ -1010,7 +1010,7 @@
     function startQuiz() {
       if (!writer) return;
       writer.quiz({
-        leniency: 0.75,
+        leniency: 1.2,
         showHintAfterMisses: 3,
         onCorrectStroke: function() {
           playSound('stroke_correct');
