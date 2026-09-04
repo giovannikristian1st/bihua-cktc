@@ -81,7 +81,7 @@
 }
 .theme-minimalist .student-name-display::before { content: "✨ "; }
 
-/* 4. NEO-BRUTALISM (Bold Pop Art) */
+/* 4. POP ART (Bold Comic Pop) */
 .theme-neobrutalism {
     --bg-body: #FFFDF0;
     --bg-card: #FFFFFF;
@@ -105,7 +105,7 @@
 .theme-neobrutalism .login-card, .theme-neobrutalism .finish-card, .theme-neobrutalism .typing-card, .theme-neobrutalism .btn, .theme-neobrutalism select, .theme-neobrutalism input, .theme-neobrutalism #writer-target {
     border: 3px solid #000000 !important;
 }
-.theme-neobrutalism .student-name-display::before { content: "🧱 "; }
+.theme-neobrutalism .student-name-display::before { content: "🎨 "; }
 
 /* 5. VAPORWAVE (80s Aesthetic Dream) */
 .theme-vaporwave {
