@@ -585,16 +585,74 @@
       return py;
     }
 
+    // --- STUDENT ROSTER SYNC ---
+    let currentStudentsDB = {};
+    try {
+      const cachedS = localStorage.getItem('stroke_app_cached_students');
+      if (cachedS) currentStudentsDB = JSON.parse(cachedS);
+    } catch(e) {}
+    if (Object.keys(currentStudentsDB).length === 0 && typeof _studentsDB !== 'undefined') {
+      currentStudentsDB = _studentsDB;
+    }
+
+    function populateStudentSelect() {
+      if (!assignmentData) return;
+      const currentSelected = studentSelect.value;
+      studentSelect.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+      
+      let classStudents = null;
+      if (assignmentData.cls && currentStudentsDB[assignmentData.cls]) {
+        classStudents = currentStudentsDB[assignmentData.cls];
+      } else if (assignmentData.cls && typeof _studentsDB !== 'undefined' && _studentsDB[assignmentData.cls]) {
+        classStudents = _studentsDB[assignmentData.cls];
+      }
+      
+      if (classStudents && classStudents.length > 0) {
+        classStudents.forEach(name => {
+          let opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          if (name === currentSelected) opt.selected = true;
+          studentSelect.appendChild(opt);
+        });
+      } else if (!assignmentData.cls) {
+        const sourceDB = (Object.keys(currentStudentsDB).length > 0) ? currentStudentsDB : (typeof _studentsDB !== 'undefined' ? _studentsDB : {});
+        for (let cls in sourceDB) {
+          sourceDB[cls].forEach(name => {
+            let opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            if (name === currentSelected) opt.selected = true;
+            studentSelect.appendChild(opt);
+          });
+        }
+      } else {
+        loginInfo.textContent = "Error: Kelas " + assignmentData.cls + " tidak ditemukan di database siswa.";
+      }
+      checkStartBtn();
+    }
+
     // Parse URL Params
     window.onload = async () => {
       const params = new URLSearchParams(window.location.search);
       const dataParam = params.get('data');
       const idParam = params.get('id');
       
+      const fetchStudentsPromise = (typeof DB !== 'undefined' && DB.getStudents) 
+        ? DB.getStudents().catch(err => { console.warn("Could not fetch students from Supabase:", err); return null; })
+        : Promise.resolve(null);
+      
       if(idParam) {
          loginInfo.textContent = "Memuat tugas...";
          try {
-            const task = await DB.getTask(idParam);
+            const [task, supaStudents] = await Promise.all([
+               DB.getTask(idParam),
+               fetchStudentsPromise
+            ]);
+            if (supaStudents && Object.keys(supaStudents).length > 0) {
+               currentStudentsDB = supaStudents;
+               try { localStorage.setItem('stroke_app_cached_students', JSON.stringify(supaStudents)); } catch(e){}
+            }
             if (task && task.payload) {
                processAssignmentData(task.payload, true, idParam);
             } else {
@@ -606,6 +664,13 @@
          }
       } else if (dataParam) {
          processAssignmentData(dataParam, false);
+         fetchStudentsPromise.then(supaStudents => {
+            if (supaStudents && Object.keys(supaStudents).length > 0) {
+               currentStudentsDB = supaStudents;
+               try { localStorage.setItem('stroke_app_cached_students', JSON.stringify(supaStudents)); } catch(e){}
+               populateStudentSelect();
+            }
+         });
       } else {
          loginInfo.textContent = "Error: Link tugas tidak valid (Data kosong).";
       }
@@ -707,28 +772,7 @@
         tasks = assignmentData.tasks;
         if(tasks.length === 0) throw new Error("Kosakata kosong");
 
-        if (typeof _studentsDB !== 'undefined' && assignmentData.cls) {
-          const classStudents = _studentsDB[assignmentData.cls];
-          if (classStudents && classStudents.length > 0) {
-             classStudents.forEach(name => {
-                let opt = document.createElement('option');
-                opt.value = name;
-                opt.textContent = name;
-                studentSelect.appendChild(opt);
-             });
-          } else {
-             loginInfo.textContent = "Error: Kelas " + assignmentData.cls + " tidak ditemukan di database siswa.";
-          }
-        } else if (typeof _studentsDB !== 'undefined') {
-          for(let cls in _studentsDB) {
-             _studentsDB[cls].forEach(name => {
-                let opt = document.createElement('option');
-                opt.value = name;
-                opt.textContent = name;
-                studentSelect.appendChild(opt);
-             });
-          }
-        }
+        populateStudentSelect();
         
         const taskType = assignmentData.type || 'tugas';
         const typeBadge = taskType === 'remedial' ? '<span style="color:#D97706; font-weight:bold;">🔁 Remedial</span>' : '<span style="color:var(--primary); font-weight:bold;">📝 Tugas</span>';
