@@ -258,6 +258,9 @@
       </div>
 
       <button id="start-btn" class="btn" disabled>Mulai Mengerjakan</button>
+      <div id="resume-container" style="display:none; margin-top:14px; text-align:center;">
+        <button id="restart-btn" type="button" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer; text-decoration:underline;">🔄 Mulai ulang dari huruf ke-1</button>
+      </div>
     </div>
   </div>
 
@@ -629,7 +632,26 @@
       } else {
         loginInfo.textContent = "Error: Kelas " + assignmentData.cls + " tidak ditemukan di database siswa.";
       }
+      
+      // Auto-select last student if previously used on this device
+      if (!currentSelected && assignmentData && assignmentData.id) {
+        try {
+          const lastStudent = localStorage.getItem('stroke_app_last_student_' + assignmentData.id);
+          if (lastStudent) {
+            for (let i = 0; i < studentSelect.options.length; i++) {
+              if (studentSelect.options[i].value === lastStudent) {
+                studentSelect.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        } catch(e) {}
+      }
+      
       checkStartBtn();
+      if (studentSelect.value && !currentSelected) {
+        studentSelect.dispatchEvent(new Event('change'));
+      }
     }
 
     // Parse URL Params
@@ -786,6 +808,11 @@
     studentSelect.addEventListener('change', async () => {
       checkStartBtn();
       const sName = studentSelect.value;
+      if (sName && assignmentData && assignmentData.id) {
+         try {
+            localStorage.setItem('stroke_app_last_student_' + assignmentData.id, sName);
+         } catch(e) {}
+      }
       if (sName && assignmentData && assignmentData.cls) {
          try {
             const savedT = await DB.getStudentTheme(assignmentData.cls, sName);
@@ -872,8 +899,13 @@
         }
     }
 
+    function getProgressKey(id, name) {
+        if (!id) return null;
+        return 'stroke_app_student_progress_' + id + (name ? ('_' + encodeURIComponent(name)) : '');
+    }
+
     function saveStudentProgress() {
-        if (!assignmentData.id) return;
+        if (!assignmentData.id || !studentName) return;
         const progress = {
             currentScreen: !screenFinish.classList.contains('hidden') ? 'finish' : 
                            !screenTyping.classList.contains('hidden') ? 'typing' : 'game',
@@ -882,25 +914,39 @@
             currentRepIndex: currentRepIndex,
             mistakesMap: mistakesMap,
             studentName: studentName,
-            currentWordMistakes: currentWordMistakes
+            currentWordMistakes: currentWordMistakes,
+            timestamp: Date.now()
         };
         try {
+            localStorage.setItem(getProgressKey(assignmentData.id, studentName), JSON.stringify(progress));
             localStorage.setItem('stroke_app_student_progress_' + assignmentData.id, JSON.stringify(progress));
+            localStorage.setItem('stroke_app_last_student_' + assignmentData.id, studentName);
         } catch(e) { console.warn(e); }
     }
 
-    function checkRestore(studentName, id) {
-        if (!id) return false;
+    function checkRestore(sName, id) {
+        if (!id || !sName) return null;
         try {
-            const saved = localStorage.getItem('stroke_app_student_progress_' + id);
-            if (!saved) return false;
+            let saved = localStorage.getItem(getProgressKey(id, sName));
+            if (!saved) {
+                saved = localStorage.getItem('stroke_app_student_progress_' + id);
+            }
+            if (!saved) return null;
             
             const progress = JSON.parse(saved);
-            if (progress.studentName === studentName && progress.currentTaskIndex !== undefined) {
+            if (progress && progress.studentName === sName && progress.currentTaskIndex !== undefined) {
                 return progress;
             }
         } catch(e) { console.warn(e); }
-        return false;
+        return null;
+    }
+
+    function clearStudentProgress(sName, id) {
+        if (!id) return;
+        try {
+            if (sName) localStorage.removeItem(getProgressKey(id, sName));
+            localStorage.removeItem('stroke_app_student_progress_' + id);
+        } catch(e) {}
     }
 
     function restoreStudentProgress() {
@@ -919,6 +965,12 @@
                 mistakesMap = progress.mistakesMap || {};
                 currentWordMistakes = progress.currentWordMistakes || 0;
                 
+                // Repopulate drawnChars for previously completed tasks
+                drawnChars.clear();
+                for (let i = 0; i < currentTaskIndex; i++) {
+                   if (tasks[i]) drawnChars.add(tasks[i].char);
+                }
+                
                 if (progress.currentScreen === 'finish') {
                     screenLogin.classList.add('hidden');
                     screenFinish.classList.remove('hidden');
@@ -932,8 +984,6 @@
                 } else if (progress.currentScreen === 'game') {
                     screenLogin.classList.add('hidden');
                     screenGame.classList.remove('hidden');
-                    drawnChars.clear();
-                    currentWordMistakes = 0;
                     loadWord();
                     return true;
                 }
@@ -942,9 +992,14 @@
         return false;
     }
 
-    startBtn.addEventListener('click', () => {
+    function startFreshGame() {
       studentName = studentSelect.value;
+      currentTaskIndex = 0;
+      currentRepIndex = 0;
+      mistakesMap = {};
       tasks.forEach(t => mistakesMap[t.char] = 0);
+      drawnChars.clear();
+      currentWordMistakes = 0;
       document.getElementById('display-name').textContent = studentName;
       
       screenLogin.classList.add('hidden');
@@ -953,7 +1008,34 @@
       taskStartTime = Date.now();
       saveStudentProgress();
       setTimeout(loadWord, 100);
+    }
+
+    startBtn.addEventListener('click', () => {
+      studentName = studentSelect.value;
+      if (!studentName) return;
+      
+      const progress = checkRestore(studentName, assignmentData.id);
+      if (progress && (progress.currentTaskIndex > 0 || progress.currentRepIndex > 0 || progress.currentScreen === 'finish' || progress.currentScreen === 'typing')) {
+         const restored = restoreStudentProgress();
+         if (restored) return;
+      }
+      
+      startFreshGame();
     });
+
+    const restartBtn = document.getElementById('restart-btn');
+    if (restartBtn) {
+      restartBtn.addEventListener('click', (e) => {
+         e.preventDefault();
+         const sName = studentSelect.value;
+         if (!sName) return;
+         if (confirm(`Apakah kamu ingin mengulang dari awal untuk ${sName}? Progres sebelumnya akan di-reset.`)) {
+            clearStudentProgress(sName, assignmentData.id);
+            checkStartBtn();
+            startFreshGame();
+         }
+      });
+    }
 
     function loadWord() {
       if(currentTaskIndex >= tasks.length) {
@@ -1773,7 +1855,44 @@
     });
 
     function checkStartBtn() {
-       startBtn.disabled = !studentSelect.value || !assignmentData;
+       const sName = studentSelect.value;
+       const restartContainer = document.getElementById('resume-container');
+       
+       if (!sName || !assignmentData) {
+          startBtn.disabled = true;
+          startBtn.textContent = 'Mulai Mengerjakan';
+          if (restartContainer) restartContainer.style.display = 'none';
+          return;
+       }
+       
+       startBtn.disabled = false;
+       const progress = checkRestore(sName, assignmentData.id);
+       
+       if (progress) {
+          if (progress.currentScreen === 'finish') {
+             startBtn.innerHTML = '🏆 Lihat Hasil & Peringkat';
+             if (restartContainer) {
+                restartContainer.style.display = 'block';
+                const rBtn = document.getElementById('restart-btn');
+                if (rBtn) rBtn.textContent = '🔄 Kerjakan Ulang dari Awal';
+             }
+          } else if (progress.currentTaskIndex > 0 || progress.currentRepIndex > 0 || progress.currentScreen === 'typing') {
+             const taskNum = Math.min((progress.currentTaskIndex || 0) + 1, (tasks && tasks.length) ? tasks.length : 1);
+             const currentChar = (tasks && tasks[progress.currentTaskIndex] && tasks[progress.currentTaskIndex].char) ? ` (${tasks[progress.currentTaskIndex].char})` : '';
+             startBtn.innerHTML = `▶ Lanjutkan Tugas (Huruf ${taskNum}/${(tasks && tasks.length) ? tasks.length : 1}${currentChar})`;
+             if (restartContainer) {
+                restartContainer.style.display = 'block';
+                const rBtn = document.getElementById('restart-btn');
+                if (rBtn) rBtn.textContent = '🔄 Mulai Ulang dari Huruf ke-1';
+             }
+          } else {
+             startBtn.textContent = 'Mulai Mengerjakan';
+             if (restartContainer) restartContainer.style.display = 'none';
+          }
+       } else {
+          startBtn.textContent = 'Mulai Mengerjakan';
+          if (restartContainer) restartContainer.style.display = 'none';
+       }
     }
   </script>
 </body>
