@@ -245,6 +245,10 @@
       <h2>Mulai Tugas</h2>
       <p style="margin-bottom: 15px; color: #5E6A75;" id="login-info">Memuat data tugas...</p>
       
+      <select id="class-select-student" class="student-select" style="display:none; margin-bottom:12px;">
+        <option value="">-- 1. Pilih Kelas --</option>
+      </select>
+
       <select id="student-select" class="student-select">
         <option value="">-- Pilih Nama Anda --</option>
       </select>
@@ -405,6 +409,8 @@
     // State
     let assignmentData = null; 
     let studentName = "";
+    let selectedStudentClass = "";
+    let taskClasses = [];
     let taskStartTime = 0;
     
     let tasks = [];
@@ -420,15 +426,29 @@
     let writer = null;
     let soundEnabled = true;
 
+    let currentLeaderboardData = [];
+    let currentLbMode = 'time';
+    let currentLbScope = 'class';
+
     // Elements
     const screenLogin = document.getElementById('screen-login');
     const screenGame = document.getElementById('screen-game');
     const screenTyping = document.getElementById('screen-typing');
     const screenFinish = document.getElementById('screen-finish');
     
+    const classSelectStudent = document.getElementById('class-select-student');
     const studentSelect = document.getElementById('student-select');
     const startBtn = document.getElementById('start-btn');
     const loginInfo = document.getElementById('login-info');
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
     // --- SOUND ENGINE (Web Audio API) ---
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -598,45 +618,158 @@
       currentStudentsDB = _studentsDB;
     }
 
-    function populateStudentSelect() {
-      if (!assignmentData) return;
-      const currentSelected = studentSelect.value;
-      studentSelect.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
-      
-      let classStudents = null;
-      if (assignmentData.cls && currentStudentsDB[assignmentData.cls]) {
-        classStudents = currentStudentsDB[assignmentData.cls];
-      } else if (assignmentData.cls && typeof _studentsDB !== 'undefined' && _studentsDB[assignmentData.cls]) {
-        classStudents = _studentsDB[assignmentData.cls];
+    function getTaskClassesList(data) {
+      if (!data) return [];
+      if (data.type === 'remedial' && data.rs && typeof data.rs === 'object') {
+        const rsClasses = Object.keys(data.rs).filter(c => Array.isArray(data.rs[c]) && data.rs[c].length > 0);
+        if (rsClasses.length > 0) return rsClasses;
       }
-      
-      if (classStudents && classStudents.length > 0) {
-        classStudents.forEach(name => {
-          let opt = document.createElement('option');
-          opt.value = name;
-          opt.textContent = name;
-          if (name === currentSelected) opt.selected = true;
-          studentSelect.appendChild(opt);
-        });
-      } else if (!assignmentData.cls) {
-        const sourceDB = (Object.keys(currentStudentsDB).length > 0) ? currentStudentsDB : (typeof _studentsDB !== 'undefined' ? _studentsDB : {});
-        for (let cls in sourceDB) {
-          sourceDB[cls].forEach(name => {
-            let opt = document.createElement('option');
-            opt.value = name;
-            opt.textContent = name;
-            if (name === currentSelected) opt.selected = true;
-            studentSelect.appendChild(opt);
+      if (Array.isArray(data.classes) && data.classes.length > 0) {
+        return data.classes.map(c => String(c).trim()).filter(c => c && c !== '-');
+      }
+      if (data.cls) {
+        return String(data.cls).split(',').map(c => c.trim()).filter(c => c && c !== '-');
+      }
+      return [];
+    }
+
+    function getAllowedStudentsForClass(cls) {
+      if (!cls) return [];
+      if (assignmentData && assignmentData.type === 'remedial' && assignmentData.rs && typeof assignmentData.rs === 'object') {
+        const list = assignmentData.rs[cls];
+        return Array.isArray(list) ? list : [];
+      }
+      if (currentStudentsDB && currentStudentsDB[cls]) return currentStudentsDB[cls];
+      if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) return _studentsDB[cls];
+      return [];
+    }
+
+    function updateStudentLeaderboardButtons() {
+      const btnClass = document.getElementById('lb-scope-class');
+      const btnGrade = document.getElementById('lb-scope-grade');
+      const activeCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || (assignmentData && assignmentData.cls) || '';
+
+      if (btnClass) {
+        btnClass.textContent = activeCls ? `🏫 Kelas ${activeCls}` : '🏫 Kelas Saya';
+      }
+      if (btnGrade) {
+        btnGrade.textContent = (taskClasses.length > 1)
+          ? `🏆 Semua Kelas (${taskClasses.length})`
+          : '🌍 Satu Angkatan';
+      }
+
+      const isCombinedActive = (currentLbScope === 'grade' || currentLbScope === 'task');
+      if (btnClass && btnGrade) {
+        if (isCombinedActive) {
+          btnGrade.style.background = 'var(--primary)';
+          btnGrade.style.color = 'white';
+          btnClass.style.background = '#E5E7EB';
+          btnClass.style.color = '#0E1318';
+        } else {
+          btnClass.style.background = 'var(--primary)';
+          btnClass.style.color = 'white';
+          btnGrade.style.background = '#E5E7EB';
+          btnGrade.style.color = '#0E1318';
+        }
+      }
+    }
+
+    function populateStudentSelect(options = {}) {
+      if (!assignmentData) return;
+      const skipAutoRestoreStudent = !!options.skipAutoRestoreStudent;
+      const isMultiClass = taskClasses.length > 1;
+
+      const prevSelectedClass = selectedStudentClass || (classSelectStudent ? classSelectStudent.value : '');
+      const prevSelectedStudent = skipAutoRestoreStudent ? '' : studentSelect.value;
+
+      // 1. Setup Class Dropdown (only shown when task spans > 1 class)
+      if (classSelectStudent) {
+        if (isMultiClass) {
+          classSelectStudent.style.display = 'block';
+          classSelectStudent.innerHTML = '<option value="">-- 1. Pilih Kelas --</option>';
+          taskClasses.forEach(cls => {
+            const opt = document.createElement('option');
+            opt.value = cls;
+            opt.textContent = `Kelas ${cls}`;
+            classSelectStudent.appendChild(opt);
           });
+
+          let activeCls = prevSelectedClass;
+          if (!activeCls && !skipAutoRestoreStudent && assignmentData.id) {
+            try {
+              const lastCls = localStorage.getItem('stroke_app_last_class_' + assignmentData.id);
+              if (lastCls && taskClasses.includes(lastCls)) activeCls = lastCls;
+            } catch(e) {}
+          }
+          if (activeCls && taskClasses.includes(activeCls)) {
+            classSelectStudent.value = activeCls;
+            selectedStudentClass = activeCls;
+          } else {
+            classSelectStudent.value = '';
+            selectedStudentClass = '';
+          }
+        } else {
+          classSelectStudent.style.display = 'none';
+          selectedStudentClass = taskClasses.length === 1 ? taskClasses[0] : (assignmentData.cls || '');
         }
       } else {
-        loginInfo.textContent = "Error: Kelas " + assignmentData.cls + " tidak ditemukan di database siswa.";
+        selectedStudentClass = taskClasses.length === 1 ? taskClasses[0] : (assignmentData.cls || '');
       }
-      
-      // Auto-select last student if previously used on this device
-      if (!currentSelected && assignmentData && assignmentData.id) {
+
+      // 2. Populate Student Dropdown according to chosen class (or remedial whitelist)
+      studentSelect.innerHTML = '';
+      if (isMultiClass && !selectedStudentClass) {
+        studentSelect.disabled = true;
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '-- Pilih Kelas Terlebih Dahulu --';
+        studentSelect.appendChild(placeholder);
+      } else {
+        studentSelect.disabled = false;
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = isMultiClass ? '-- 2. Pilih Nama Anda --' : '-- Pilih Nama Anda --';
+        studentSelect.appendChild(placeholder);
+
+        let classStudents = null;
+        if (selectedStudentClass) {
+          classStudents = getAllowedStudentsForClass(selectedStudentClass);
+        } else {
+          const sourceDB = (Object.keys(currentStudentsDB).length > 0) ? currentStudentsDB : (typeof _studentsDB !== 'undefined' ? _studentsDB : {});
+          classStudents = [];
+          for (const cls in sourceDB) {
+            if (Array.isArray(sourceDB[cls])) {
+              classStudents = classStudents.concat(sourceDB[cls]);
+            }
+          }
+        }
+
+        if (classStudents && classStudents.length > 0) {
+          classStudents.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            if (name === prevSelectedStudent) opt.selected = true;
+            studentSelect.appendChild(opt);
+          });
+        } else if (selectedStudentClass && !(assignmentData.type === 'remedial' && assignmentData.rs)) {
+          loginInfo.textContent = "Error: Kelas " + selectedStudentClass + " tidak ditemukan di database siswa.";
+        }
+      }
+
+      // 3. Auto-select last student on this device if matching current class
+      if (!prevSelectedStudent && !skipAutoRestoreStudent && assignmentData && assignmentData.id && (!isMultiClass || selectedStudentClass)) {
         try {
-          const lastStudent = localStorage.getItem('stroke_app_last_student_' + assignmentData.id);
+          const classKey = selectedStudentClass
+            ? ('stroke_app_last_student_' + assignmentData.id + '_' + encodeURIComponent(selectedStudentClass))
+            : null;
+          let lastStudent = classKey ? localStorage.getItem(classKey) : null;
+          if (!lastStudent) {
+            const legacyLastCls = localStorage.getItem('stroke_app_last_class_' + assignmentData.id);
+            if (!isMultiClass || !legacyLastCls || legacyLastCls === selectedStudentClass) {
+              lastStudent = localStorage.getItem('stroke_app_last_student_' + assignmentData.id);
+            }
+          }
           if (lastStudent) {
             for (let i = 0; i < studentSelect.options.length; i++) {
               if (studentSelect.options[i].value === lastStudent) {
@@ -647,9 +780,10 @@
           }
         } catch(e) {}
       }
-      
+
+      updateStudentLeaderboardButtons();
       checkStartBtn();
-      if (studentSelect.value && !currentSelected) {
+      if (studentSelect.value && !prevSelectedStudent && !skipAutoRestoreStudent) {
         studentSelect.dispatchEvent(new Event('change'));
       }
     }
@@ -794,28 +928,71 @@
         tasks = assignmentData.tasks;
         if(tasks.length === 0) throw new Error("Kosakata kosong");
 
+        taskClasses = getTaskClassesList(assignmentData);
+        currentLbScope = (taskClasses.length > 1) ? 'task' : 'class';
+        selectedStudentClass = '';
+
         populateStudentSelect();
+        updateStudentLeaderboardButtons();
         
         const taskType = assignmentData.type || 'tugas';
-        const typeBadge = taskType === 'remedial' ? '<span style="color:#D97706; font-weight:bold;">🔁 Remedial</span>' : '<span style="color:var(--primary); font-weight:bold;">📝 Tugas</span>';
-        loginInfo.innerHTML = `${typeBadge} • Kelas <b>${assignmentData.cls || ''}</b><br>Mengerjakan <b>${tasks.length}</b> huruf (x${repetitions})`;
+        const rsObj = (assignmentData.rs && typeof assignmentData.rs === 'object') ? assignmentData.rs : null;
+        let totalRemedial = 0;
+        if (taskType === 'remedial' && rsObj) {
+          Object.keys(rsObj).forEach(k => {
+            if (Array.isArray(rsObj[k])) totalRemedial += rsObj[k].length;
+          });
+        }
+        const clsDisplay = taskClasses.length > 0 ? taskClasses.join(', ') : (assignmentData.cls || '');
+        let typeBadge = '';
+        if (taskType === 'remedial') {
+          typeBadge = totalRemedial > 0
+            ? `<span style="color:#D97706; font-weight:bold;">🔁 Remedial Khusus (${totalRemedial} Siswa)</span>`
+            : '<span style="color:#D97706; font-weight:bold;">🔁 Remedial</span>';
+        } else if (taskClasses.length > 1) {
+          typeBadge = `<span style="color:var(--primary); font-weight:bold;">📝 Tugas (${taskClasses.length} Kelas)</span>`;
+        } else {
+          typeBadge = '<span style="color:var(--primary); font-weight:bold;">📝 Tugas</span>';
+        }
+        loginInfo.innerHTML = `${typeBadge}${clsDisplay ? ` • Kelas <b>${escapeHtml(clsDisplay)}</b>` : ''}<br>Mengerjakan <b>${tasks.length}</b> huruf (x${repetitions})`;
       } catch(e) {
         loginInfo.textContent = "Error: Link tugas rusak atau tidak valid.";
         console.error(e);
       }
     }
 
+    if (classSelectStudent) {
+      classSelectStudent.addEventListener('change', () => {
+        selectedStudentClass = classSelectStudent.value || '';
+        if (assignmentData && assignmentData.id) {
+          try {
+            if (selectedStudentClass) {
+              localStorage.setItem('stroke_app_last_class_' + assignmentData.id, selectedStudentClass);
+            } else {
+              localStorage.removeItem('stroke_app_last_class_' + assignmentData.id);
+            }
+          } catch(e) {}
+        }
+        populateStudentSelect({ skipAutoRestoreStudent: true });
+      });
+    }
+
     studentSelect.addEventListener('change', async () => {
       checkStartBtn();
       const sName = studentSelect.value;
+      const activeCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || (assignmentData && assignmentData.cls) || '';
       if (sName && assignmentData && assignmentData.id) {
          try {
             localStorage.setItem('stroke_app_last_student_' + assignmentData.id, sName);
+            if (activeCls) {
+               localStorage.setItem('stroke_app_last_class_' + assignmentData.id, activeCls);
+               localStorage.setItem('stroke_app_last_student_' + assignmentData.id + '_' + encodeURIComponent(activeCls), sName);
+            }
          } catch(e) {}
       }
-      if (sName && assignmentData && assignmentData.cls) {
+      if (sName && activeCls) {
          try {
-            const savedT = await DB.getStudentTheme(assignmentData.cls, sName);
+            const savedT = await DB.getStudentTheme(activeCls, sName);
             if (savedT) {
                applyTheme(savedT);
                const themeObj = THEMES.find(t => t.id === savedT);
@@ -853,8 +1030,9 @@
            themeText.style.color = 'var(--primary)';
            themeList.classList.remove('show');
            checkStartBtn();
-           if (studentSelect.value && assignmentData && assignmentData.cls) {
-              DB.saveStudentTheme(assignmentData.cls, studentSelect.value, t.id).catch(() => {});
+           const activeCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || (assignmentData && assignmentData.cls) || '';
+           if (studentSelect.value && activeCls) {
+              DB.saveStudentTheme(activeCls, studentSelect.value, t.id).catch(() => {});
            }
         });
         themeList.appendChild(div);
@@ -899,13 +1077,16 @@
         }
     }
 
-    function getProgressKey(id, name) {
+    function getProgressKey(id, name, cls) {
         if (!id) return null;
-        return 'stroke_app_student_progress_' + id + (name ? ('_' + encodeURIComponent(name)) : '');
+        const clsPart = cls ? ('_' + encodeURIComponent(cls)) : '';
+        const namePart = name ? ('_' + encodeURIComponent(name)) : '';
+        return 'stroke_app_student_progress_' + id + clsPart + namePart;
     }
 
     function saveStudentProgress() {
-        if (!assignmentData.id || !studentName) return;
+        if (!assignmentData || !assignmentData.id || !studentName) return;
+        const activeCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || assignmentData.cls || '';
         const progress = {
             currentScreen: !screenFinish.classList.contains('hidden') ? 'finish' : 
                            !screenTyping.classList.contains('hidden') ? 'typing' : 'game',
@@ -914,50 +1095,84 @@
             currentRepIndex: currentRepIndex,
             mistakesMap: mistakesMap,
             studentName: studentName,
+            studentClass: activeCls,
             currentWordMistakes: currentWordMistakes,
             timestamp: Date.now()
         };
         try {
-            localStorage.setItem(getProgressKey(assignmentData.id, studentName), JSON.stringify(progress));
+            const scopedKey = getProgressKey(assignmentData.id, studentName, activeCls);
+            if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(progress));
             localStorage.setItem('stroke_app_student_progress_' + assignmentData.id, JSON.stringify(progress));
             localStorage.setItem('stroke_app_last_student_' + assignmentData.id, studentName);
+            if (activeCls) {
+                localStorage.setItem('stroke_app_last_class_' + assignmentData.id, activeCls);
+                localStorage.setItem('stroke_app_last_student_' + assignmentData.id + '_' + encodeURIComponent(activeCls), studentName);
+            }
         } catch(e) { console.warn(e); }
     }
 
-    function checkRestore(sName, id) {
+    function checkRestore(sName, id, cls) {
         if (!id || !sName) return null;
         try {
-            let saved = localStorage.getItem(getProgressKey(id, sName));
+            const activeCls = cls !== undefined ? cls : (selectedStudentClass || '');
+            let saved = null;
+            if (activeCls) {
+                saved = localStorage.getItem(getProgressKey(id, sName, activeCls));
+            }
             if (!saved) {
-                saved = localStorage.getItem('stroke_app_student_progress_' + id);
+                const legacyNamed = localStorage.getItem(getProgressKey(id, sName, ''));
+                if (legacyNamed) {
+                    const pNamed = JSON.parse(legacyNamed);
+                    if (pNamed && (!activeCls || !pNamed.studentClass || pNamed.studentClass === activeCls)) {
+                        saved = legacyNamed;
+                    }
+                }
+            }
+            if (!saved) {
+                const fallbackRaw = localStorage.getItem('stroke_app_student_progress_' + id);
+                if (fallbackRaw) {
+                    const pFallback = JSON.parse(fallbackRaw);
+                    if (pFallback && pFallback.studentName === sName && (!activeCls || !pFallback.studentClass || pFallback.studentClass === activeCls)) {
+                        saved = fallbackRaw;
+                    }
+                }
             }
             if (!saved) return null;
             
             const progress = JSON.parse(saved);
             if (progress && progress.studentName === sName && progress.currentTaskIndex !== undefined) {
+                if (activeCls && progress.studentClass && progress.studentClass !== activeCls) {
+                    return null;
+                }
                 return progress;
             }
         } catch(e) { console.warn(e); }
         return null;
     }
 
-    function clearStudentProgress(sName, id) {
+    function clearStudentProgress(sName, id, cls) {
         if (!id) return;
         try {
-            if (sName) localStorage.removeItem(getProgressKey(id, sName));
+            const activeCls = cls !== undefined ? cls : (selectedStudentClass || '');
+            if (sName && activeCls) localStorage.removeItem(getProgressKey(id, sName, activeCls));
+            if (sName) localStorage.removeItem(getProgressKey(id, sName, ''));
             localStorage.removeItem('stroke_app_student_progress_' + id);
         } catch(e) {}
     }
 
     function restoreStudentProgress() {
-        if (!assignmentData.id) return false;
-        const progress = checkRestore(studentName, assignmentData.id);
+        if (!assignmentData || !assignmentData.id) return false;
+        const progress = checkRestore(studentName, assignmentData.id, selectedStudentClass);
         if (!progress) return false;
         
         try {
             if (progress.studentName && progress.currentTaskIndex !== undefined) {
                 studentName = progress.studentName;
-                document.getElementById('display-name').textContent = studentName;
+                if (progress.studentClass && (!taskClasses.length || taskClasses.includes(progress.studentClass))) {
+                    selectedStudentClass = progress.studentClass;
+                }
+                const displayClsSuffix = (taskClasses.length > 1 && selectedStudentClass) ? ` (${selectedStudentClass})` : '';
+                document.getElementById('display-name').textContent = studentName + displayClsSuffix;
                 
                 currentTaskIndex = progress.currentTaskIndex;
                 taskStartTime = progress.taskStartTime || Date.now();
@@ -975,6 +1190,7 @@
                     screenLogin.classList.add('hidden');
                     screenFinish.classList.remove('hidden');
                     document.getElementById('finish-options').style.display = 'flex';
+                    updateStudentLeaderboardButtons();
                     fetchLeaderboard();
                     return true;
                 } else if (progress.currentScreen === 'typing') {
@@ -994,13 +1210,19 @@
 
     function startFreshGame() {
       studentName = studentSelect.value;
+      if (classSelectStudent && taskClasses.length > 1) {
+        selectedStudentClass = classSelectStudent.value || selectedStudentClass;
+      } else if (taskClasses.length === 1) {
+        selectedStudentClass = taskClasses[0];
+      }
       currentTaskIndex = 0;
       currentRepIndex = 0;
       mistakesMap = {};
       tasks.forEach(t => mistakesMap[t.char] = 0);
       drawnChars.clear();
       currentWordMistakes = 0;
-      document.getElementById('display-name').textContent = studentName;
+      const displayClsSuffix = (taskClasses.length > 1 && selectedStudentClass) ? ` (${selectedStudentClass})` : '';
+      document.getElementById('display-name').textContent = studentName + displayClsSuffix;
       
       screenLogin.classList.add('hidden');
       screenGame.classList.remove('hidden');
@@ -1012,9 +1234,12 @@
 
     startBtn.addEventListener('click', () => {
       studentName = studentSelect.value;
-      if (!studentName) return;
+      if (classSelectStudent && taskClasses.length > 1) {
+        selectedStudentClass = classSelectStudent.value || '';
+      }
+      if (!studentName || (taskClasses.length > 1 && !selectedStudentClass)) return;
       
-      const progress = checkRestore(studentName, assignmentData.id);
+      const progress = checkRestore(studentName, assignmentData.id, selectedStudentClass);
       if (progress && (progress.currentTaskIndex > 0 || progress.currentRepIndex > 0 || progress.currentScreen === 'finish' || progress.currentScreen === 'typing')) {
          const restored = restoreStudentProgress();
          if (restored) return;
@@ -1030,7 +1255,7 @@
          const sName = studentSelect.value;
          if (!sName) return;
          if (confirm(`Apakah kamu ingin mengulang dari awal untuk ${sName}? Progres sebelumnya akan di-reset.`)) {
-            clearStudentProgress(sName, assignmentData.id);
+            clearStudentProgress(sName, assignmentData.id, selectedStudentClass);
             checkStartBtn();
             startFreshGame();
          }
@@ -1639,11 +1864,12 @@
       const statusEl = document.getElementById('submit-status');
       const totalMistakes = Object.values(mistakesMap).reduce((a, b) => a + b, 0);
       const durationSec = (Date.now() - taskStartTime) / 1000;
+      const submitCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || assignmentData.cls || "Tidak diketahui";
       
       try {
          await DB.submitAssignment(
             assignmentData.id,
-            assignmentData.cls || "Tidak diketahui",
+            submitCls,
             studentName,
             totalMistakes,
             tasks.length,
@@ -1656,6 +1882,7 @@
            <p style="color: #10B981; font-weight: bold;">Tugas berhasil dikirim!</p>
          `;
          document.getElementById('finish-options').style.display = 'flex';
+         updateStudentLeaderboardButtons();
          fetchLeaderboard();
       } catch (err) {
          statusEl.innerHTML = `
@@ -1667,16 +1894,14 @@
       }
     }
 
-    let currentLeaderboardData = [];
-    let currentLbMode = 'time';
-    let currentLbScope = 'class';
-    
     async function fetchLeaderboard() {
        if (!assignmentData || !assignmentData.id) return;
        const list = document.getElementById('leaderboard-list');
        if (list) list.innerHTML = '<p style="color:gray; font-size:0.9rem; text-align:center; padding:15px 0;">Memuat peringkat...</p>';
+       const targetCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || assignmentData.cls;
+       updateStudentLeaderboardButtons();
        try {
-          currentLeaderboardData = await DB.getLeaderboard(assignmentData.id, assignmentData.cls, currentLbScope);
+          currentLeaderboardData = await DB.getLeaderboard(assignmentData.id, targetCls, currentLbScope);
           renderLeaderboard();
        } catch (err) {
           console.error("Gagal memuat leaderboard", err);
@@ -1724,10 +1949,13 @@
        let currentRank = 1;
        let prevStatKey = null;
 
+       const activeCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || (assignmentData && assignmentData.cls) || '';
+
        displayedSlice.forEach((user, index) => {
           const div = document.createElement('div');
           div.className = 'lb-item';
-          if (user.name === studentName) div.classList.add('me');
+          const isMe = user.name === studentName && (!user.cls || !activeCls || user.cls === activeCls);
+          if (isMe) div.classList.add('me');
           
           let statKey;
           let statStr;
@@ -1757,12 +1985,13 @@
           else if (rankToDisplay === 2) rankStr = '🥈';
           else if (rankToDisplay === 3) rankStr = '🥉';
           
-          const classBadge = (currentLbScope === 'grade' || (user.cls && user.cls !== assignmentData.cls)) 
-             ? `<span class="lb-class-tag">${user.cls || ''}</span>` : '';
+          const showBadge = (currentLbScope === 'grade' || currentLbScope === 'task' || taskClasses.length > 1 || (user.cls && user.cls !== activeCls));
+          const classBadge = (showBadge && user.cls)
+             ? `<span class="lb-class-tag">${escapeHtml(user.cls)}</span>` : '';
           
           div.innerHTML = `
              <div class="lb-rank">${rankStr}</div>
-             <div class="lb-name">${user.name}${classBadge}</div>
+             <div class="lb-name">${escapeHtml(user.name)}${classBadge}</div>
              <div class="lb-count">${statStr}</div>
           `;
           list.appendChild(div);
@@ -1793,17 +2022,11 @@
        document.body.addEventListener('click', (e) => {
            if (e.target.id === 'lb-scope-class') {
                currentLbScope = 'class';
-               e.target.style.background = 'var(--primary)';
-               e.target.style.color = 'white';
-               const other = document.getElementById('lb-scope-grade');
-               if (other) { other.style.background = '#E5E7EB'; other.style.color = '#0E1318'; }
+               updateStudentLeaderboardButtons();
                fetchLeaderboard();
            } else if (e.target.id === 'lb-scope-grade') {
-               currentLbScope = 'grade';
-               e.target.style.background = 'var(--primary)';
-               e.target.style.color = 'white';
-               const other = document.getElementById('lb-scope-class');
-               if (other) { other.style.background = '#E5E7EB'; other.style.color = '#0E1318'; }
+               currentLbScope = (taskClasses.length > 1) ? 'task' : 'grade';
+               updateStudentLeaderboardButtons();
                fetchLeaderboard();
            } else if (e.target.id === 'lb-toggle-time') {
                currentLbMode = 'time';
@@ -1856,9 +2079,11 @@
 
     function checkStartBtn() {
        const sName = studentSelect.value;
+       const activeCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '');
+       const needsClass = taskClasses.length > 1;
        const restartContainer = document.getElementById('resume-container');
        
-       if (!sName || !assignmentData) {
+       if (!sName || !assignmentData || (needsClass && !activeCls)) {
           startBtn.disabled = true;
           startBtn.textContent = 'Mulai Mengerjakan';
           if (restartContainer) restartContainer.style.display = 'none';
@@ -1866,7 +2091,7 @@
        }
        
        startBtn.disabled = false;
-       const progress = checkRestore(sName, assignmentData.id);
+       const progress = checkRestore(sName, assignmentData.id, activeCls);
        
        if (progress) {
           if (progress.currentScreen === 'finish') {

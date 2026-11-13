@@ -136,14 +136,41 @@ var DB = {
       return type + '__r' + r + '__tm' + tm + '__' + vParts.join(';');
    },
 
+   _extractClasses: function(classInput, payload) {
+      if (payload && Array.isArray(payload.classes) && payload.classes.length > 0) {
+         return payload.classes.map(c => String(c).trim()).filter(c => c && c !== '-' && c.toUpperCase() !== 'ALL');
+      }
+      const raw = classInput || (payload && payload.cls) || '';
+      if (Array.isArray(raw)) {
+         return raw.map(c => String(c).trim()).filter(c => c && c !== '-' && c.toUpperCase() !== 'ALL');
+      }
+      return String(raw).split(',').map(c => c.trim()).filter(c => c && c !== '-' && c.toUpperCase() !== 'ALL');
+   },
+
+   _extractGrades: function(classInput, payload) {
+      const classes = this._extractClasses(classInput, payload);
+      const grades = new Set();
+      classes.forEach(c => {
+         const g = c.replace(/[^0-9]/g, '');
+         if (g) grades.add(g);
+      });
+      return grades;
+   },
+
    getTaskSubmissions: async function(taskId, className) {
       let url = `${this.url}/rest/v1/submissions?task_id=eq.${encodeURIComponent(taskId)}&select=*&order=submitted_at.desc`;
-      if (className) {
-         url += `&class=eq.${encodeURIComponent(className)}`;
+      const classes = this._extractClasses(className);
+      if (classes.length === 1) {
+         url += `&class=eq.${encodeURIComponent(classes[0])}`;
       }
       const res = await fetch(url, { headers: this.getHeaders() });
       if (!res.ok) return [];
-      return await res.json();
+      const data = await res.json();
+      if (classes.length > 1) {
+         const clsSet = new Set(classes.map(c => c.toUpperCase()));
+         return data.filter(s => s.class && clsSet.has(s.class.trim().toUpperCase()));
+      }
+      return data;
    },
 
    _aggregateLeaderboard: function(subs) {
@@ -168,9 +195,16 @@ var DB = {
    },
 
    getLeaderboard: async function(taskId, className, scope) {
-      // 1. Single Class Scope
+      // 1. Task-wide or Single-Class Scope
+      if (scope === 'task') {
+         const subs = await this.getTaskSubmissions(taskId);
+         return this._aggregateLeaderboard(subs);
+      }
+
       if (scope !== 'grade') {
-         const subs = await this.getTaskSubmissions(taskId, className);
+         const classes = this._extractClasses(className);
+         const filterCls = (classes.length === 1) ? classes[0] : null;
+         const subs = await this.getTaskSubmissions(taskId, filterCls);
          return this._aggregateLeaderboard(subs);
       }
 
@@ -184,7 +218,11 @@ var DB = {
 
          const targetPayload = JSON.parse(targetTask.payload);
          const targetKey = this.computeMaterialKey(targetPayload);
-         const gradePrefix = (className || targetTask.class || '').replace(/[^0-9]/g, '');
+         let targetGrades = this._extractGrades(className, null);
+         if (targetGrades.size === 0) {
+            targetGrades = this._extractGrades(targetTask.class, targetPayload);
+         }
+         const targetClassesUpper = new Set(this._extractClasses(className, targetPayload).map(c => c.toUpperCase()));
 
          // Fetch all tasks to match identical material in this grade
          const allTasks = await this.getTasks();
@@ -193,8 +231,20 @@ var DB = {
          allTasks.forEach(t => {
             try {
                const p = JSON.parse(t.payload);
-               const tGrade = (t.class || p.cls || '').replace(/[^0-9]/g, '');
-               if (!gradePrefix || tGrade === gradePrefix) {
+               const tGrades = this._extractGrades(t.class, p);
+               let gradeMatch = false;
+               if (targetGrades.size === 0) {
+                  const tClasses = this._extractClasses(t.class, p).map(c => c.toUpperCase());
+                  gradeMatch = (t.id === taskId) || tClasses.some(c => targetClassesUpper.has(c));
+               } else {
+                  for (const g of tGrades) {
+                     if (targetGrades.has(g)) {
+                        gradeMatch = true;
+                        break;
+                     }
+                  }
+               }
+               if (gradeMatch) {
                   const tKey = this.computeMaterialKey(p);
                   if (tKey === targetKey) {
                      matchingTaskIds.push(t.id);
@@ -206,14 +256,21 @@ var DB = {
          if (!matchingTaskIds.includes(taskId)) matchingTaskIds.push(taskId);
 
          // Fetch submissions for all matching tasks in 1 query
-         const idFilter = matchingTaskIds.join(',');
+         const idFilter = matchingTaskIds.map(id => encodeURIComponent(id)).join(',');
          const url = `${this.url}/rest/v1/submissions?task_id=in.(${idFilter})&select=*&order=submitted_at.desc`;
          const res = await fetch(url, { headers: this.getHeaders() });
          if (!res.ok) {
             const subs = await this.getTaskSubmissions(taskId, className);
             return this._aggregateLeaderboard(subs);
          }
-         const allSubs = await res.json();
+         let allSubs = await res.json();
+         if (targetGrades.size === 1) {
+            const gOnly = Array.from(targetGrades)[0];
+            allSubs = allSubs.filter(s => {
+               const sg = (s.class || '').replace(/[^0-9]/g, '');
+               return sg === gOnly || s.task_id === taskId;
+            });
+         }
          return this._aggregateLeaderboard(allSubs);
       } catch (err) {
          console.warn("Gagal fetch grade leaderboard, fallback to class:", err);
@@ -223,8 +280,8 @@ var DB = {
    },
 
    getAllProgressCount: async function() {
-      // Query unique submissions per task
-      const res = await fetch(`${this.url}/rest/v1/submissions?select=task_id,student_name`, {
+      // Query unique submissions per task (deduplicated per student_name + class)
+      const res = await fetch(`${this.url}/rest/v1/submissions?select=task_id,student_name,class`, {
          headers: this.getHeaders()
       });
       if (!res.ok) return {};
@@ -232,8 +289,11 @@ var DB = {
       const map = {};
       data.forEach(row => {
          const tid = row.task_id;
+         const sName = (row.student_name || '').trim().toUpperCase();
+         const sCls = (row.class || '').trim().toUpperCase();
+         if (!sName) return;
          if (!map[tid]) map[tid] = new Set();
-         map[tid].add(row.student_name);
+         map[tid].add(`${sName}__${sCls}`);
       });
       const countMap = {};
       for (const tid in map) {

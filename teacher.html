@@ -268,6 +268,244 @@
       box-shadow: 0 4px 12px rgba(27, 94, 32, 0.25);
     }
 
+    /* Multi-Class Picker & Remedial Student Selector */
+    #view-dashboard .grid-2 > .form-group:first-child { grid-column: 1 / -1; margin-bottom: 4px; }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+    .class-picker-box {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: var(--bg);
+    }
+    .class-picker-box.disabled-box {
+      opacity: 0.65;
+      pointer-events: none;
+    }
+    .class-quick-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--border);
+      align-items: center;
+    }
+    .class-quick-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .class-quick-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .class-quick-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+    .class-quick-btn.reset-btn {
+      margin-left: auto;
+      color: #DC2626;
+      border-color: #FCA5A5;
+      background: #FEF2F2;
+    }
+    .class-quick-btn.reset-btn:hover {
+      background: #FEE2E2;
+    }
+    .class-grade-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .class-grade-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .class-grade-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      min-width: 68px;
+      text-transform: uppercase;
+    }
+    .class-chip {
+      padding: 6px 13px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .class-chip:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .class-chip.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    .class-selected-summary {
+      display: inline-block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 2px 10px;
+      border-radius: 20px;
+      text-transform: none;
+      letter-spacing: normal;
+      margin-left: 8px;
+    }
+
+    /* Remedial Student Selector */
+    .remedial-picker-panel {
+      margin-top: 14px;
+      margin-bottom: 18px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 2px dashed #D97706;
+      background: rgba(245, 158, 11, 0.06);
+    }
+    .remedial-selected-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+      max-height: 110px;
+      overflow-y: auto;
+    }
+    .remedial-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #FEF3C7;
+      border: 1px solid #F59E0B;
+      color: #92400E;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .remedial-pill:hover {
+      background: #FDE68A;
+    }
+    .remedial-class-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .remedial-class-block:last-child {
+      margin-bottom: 0;
+    }
+    .remedial-class-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .remedial-students-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 8px;
+      max-height: 230px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .remedial-student-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 0.86rem;
+      transition: all 0.15s ease;
+    }
+    .remedial-student-item:hover {
+      border-color: #D97706;
+    }
+    .remedial-student-item.selected {
+      background: #FEF3C7;
+      border-color: #D97706;
+      color: #78350F;
+      font-weight: 700;
+    }
+    .detail-class-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+    .detail-class-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .detail-class-pill:hover {
+      border-color: var(--primary);
+    }
+    .detail-class-pill.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+    .class-mini-badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 5px;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .task-helper-warning {
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #B45309;
+      background: #FEF3C7;
+      border: 1px solid #FDE68A;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
     /* ════════════════════════════════════════════════════════════
        PERSONALIZED TEACHER THEMES (COLOR & FONTS)
        ════════════════════════════════════════════════════════════ */
@@ -624,35 +862,60 @@
 
       <div class="grid-2">
         <div class="form-group">
-          <label>Kelas</label>
-          <select id="class-select" disabled>
-            <option value="">Pilih Kelas...</option>
-          </select>
+          <label>
+            Pilih Kelas (Bisa 1 atau Beberapa Kelas)
+            <span id="class-selected-summary" class="class-selected-summary">Pilih Guru dulu</span>
+          </label>
+          <div id="class-picker-box" class="class-picker-box disabled-box">
+            <div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih Nama Guru terlebih dahulu...</div>
+          </div>
         </div>
 
         <div class="form-group">
           <label>Jumlah Pengulangan</label>
-          <input type="number" id="repetition" class="form-control" value="3" min="1" max="100" style="width: 100px;">
+          <input type="number" id="repetition" class="form-control" value="3" min="1" max="100" style="width: 120px;">
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:26px;">
+          <input type="checkbox" id="require-meaning">
+          <label for="require-meaning" style="margin-bottom:0; cursor:pointer; text-transform:none; letter-spacing:normal;">Wajib ketik arti Pinyin (Bahasa Indonesia)</label>
         </div>
       </div>
       
-      <div class="form-group" style="margin-top: 10px; margin-bottom: 20px;">
+      <div class="form-group" style="margin-top: 10px; margin-bottom: 10px;">
         <label>Jenis Penugasan</label>
         <div style="display:flex; gap:12px; margin-top:6px; flex-wrap:wrap;">
            <label id="label-type-tugas" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:var(--primary); text-transform:none; font-size:0.95rem; padding:10px 18px; border:2px solid var(--primary); border-radius:10px; background:rgba(27,94,32,0.08); transition:all 0.2s;">
               <input type="radio" name="task-type" id="task-type-tugas" value="tugas" checked style="width:18px; height:18px; cursor:pointer;">
-              <span>📝 Tugas Reguler</span>
+              <span>📝 Tugas Reguler (Seluruh Kelas)</span>
            </label>
            <label id="label-type-remedial" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:var(--text); text-transform:none; font-size:0.95rem; padding:10px 18px; border:2px solid var(--border); border-radius:10px; background:white; transition:all 0.2s;">
               <input type="radio" name="task-type" id="task-type-remedial" value="remedial" style="width:18px; height:18px; cursor:pointer;">
-              <span>🔁 Remedial (Latihan Tambahan)</span>
+              <span>🔁 Remedial (Pilih Siswa Tertentu)</span>
            </label>
         </div>
       </div>
-      
-      <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:5px; margin-bottom:15px;">
-        <input type="checkbox" id="require-meaning">
-        <label for="require-meaning" style="margin-bottom:0; cursor:pointer;">Wajib ketik arti Pinyin (Bahasa Indonesia)</label>
+
+      <!-- PEMILIH SISWA KHUSUS REMEDIAL -->
+      <div id="remedial-student-panel" class="remedial-picker-panel" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+          <div>
+            <h4 style="margin:0; color:#B45309; font-size:1.05rem;">🎯 Pilih Siswa yang Mengerjakan Remedial</h4>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">Hanya siswa yang dicentang yang namanya akan muncul di link remedial ini.</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span id="remedial-count-badge" style="background:#D97706; color:white; padding:4px 12px; border-radius:20px; font-size:0.82rem; font-weight:bold;">Terpilih: 0 siswa</span>
+            <button type="button" class="class-quick-btn" id="remedial-select-all-btn">✓ Pilih Semua</button>
+            <button type="button" class="class-quick-btn reset-btn" id="remedial-clear-all-btn" style="margin-left:0;">✕ Reset</button>
+          </div>
+        </div>
+        <div id="remedial-selected-pills" class="remedial-selected-pills" style="display:none;"></div>
+        <div style="margin-bottom:10px;">
+          <input type="text" id="remedial-student-search" class="form-control" placeholder="🔍 Cari nama siswa remedial..." style="padding:9px 12px; font-size:0.92rem;" autocomplete="off">
+        </div>
+        <div id="remedial-students-container">
+          <div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih minimal 1 kelas terlebih dahulu...</div>
+        </div>
       </div>
     </div>
 
@@ -727,9 +990,11 @@
       </div>
     </div>
 
+    <div id="generate-helper-warning" class="task-helper-warning"></div>
     <button class="btn" id="generate-btn" disabled>Buat Link Tugas</button>
 
     <div class="result-box card" id="result-box">
+      <div id="result-summary-banner" style="display:none; padding:10px 14px; border-radius:8px; background:rgba(16,185,129,0.1); border:1px solid #10B981; color:#065F46; font-size:0.9rem; font-weight:700; margin-bottom:12px;"></div>
       <label>Link Tugas (Bagikan ke Siswa):</label>
       <textarea id="link-output" readonly></textarea>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -807,9 +1072,13 @@
 
      <!-- TAB 1: DAFTAR PENGERJAAN SISWA -->
      <div id="tab-content-results" class="card" style="padding-top:16px;">
+        <div id="detail-remedial-banner" style="display:none; padding:10px 14px; border-radius:8px; background:#FEF3C7; border:1px solid #F59E0B; color:#92400E; font-size:0.9rem; font-weight:600; margin-bottom:14px;"></div>
+
+        <div id="detail-class-filter-bar" class="detail-class-pills" style="display:none;"></div>
+
         <!-- ANALISIS HURUF TERSULIT -->
         <div id="difficult-chars-section" class="difficult-char-card" style="display:none; margin-bottom:20px;">
-           <h4 style="color:#BE123C; margin-bottom:6px;">⚠️ Analisis Huruf Tersulit di Kelas Ini:</h4>
+           <h4 style="color:#BE123C; margin-bottom:6px;">⚠️ Analisis Huruf Tersulit:</h4>
            <div id="difficult-chars-list"></div>
         </div>
 
@@ -839,7 +1108,7 @@
            </div>
            
            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <!-- Scope: Kelas vs Satu Angkatan -->
+              <!-- Scope: Kelas / Tugas Ini vs Satu Angkatan -->
               <div style="display:flex; gap:4px; background:#F1F5F9; padding:4px; border-radius:8px; border:1px solid var(--border);">
                  <button id="lb-teacher-scope-class" style="padding:6px 14px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem;">🏫 Kelas Ini</button>
                  <button id="lb-teacher-scope-grade" style="padding:6px 14px; background:transparent; color:#0E1318; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.85rem;">🌍 Satu Angkatan</button>
@@ -852,6 +1121,7 @@
               </div>
            </div>
         </div>
+        <div id="lb-teacher-class-pills" class="detail-class-pills" style="display:none;"></div>
         <div class="sticky-table-wrapper" style="max-height:55vh;">
           <table class="data-table">
              <thead class="lb-head">
@@ -929,6 +1199,9 @@
     // --- APP STATE ---
     let DB_TEACHERS = {};
     let DB_STUDENTS = {};
+    let selectedClasses = [];
+    let selectedTaskType = 'tugas';
+    let selectedRemedialStudents = {};
     const FALLBACK_TEACHERS = {
        "DEMO LAO SHI": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
        "Giovanni": ["DEMO", "1A", "1B", "1C", "1D", "1E", "2A", "2B", "2C", "2D", "2E", "3A", "3B", "3C", "3D", "3E", "4A", "4B", "4C", "4D", "4E", "5A", "5B", "5C", "5D", "5E", "6A", "6B", "6C", "6D", "6E"],
@@ -1013,6 +1286,7 @@
           DB.getStudents().catch(() => null)
        ]).then(([supaT, supaS]) => {
           let updated = false;
+          let studentsUpdated = false;
           if (supaT && Object.keys(supaT).length > 0) {
              DB_TEACHERS = supaT;
              localStorage.setItem('stroke_app_cached_teachers', JSON.stringify(DB_TEACHERS));
@@ -1021,13 +1295,23 @@
           if (supaS && Object.keys(supaS).length > 0) {
              DB_STUDENTS = supaS;
              localStorage.setItem('stroke_app_cached_students', JSON.stringify(DB_STUDENTS));
+             studentsUpdated = true;
           }
           if (updated) {
              const currentT = document.getElementById('teacher-name').value;
              initDashboard();
              if (currentT && DB_TEACHERS[currentT]) {
                 document.getElementById('teacher-name').value = currentT;
+                currentTeacher = currentT;
+                updateClassSelect(currentT);
              }
+          } else if (studentsUpdated) {
+             if (selectedTaskType === 'remedial') {
+                renderRemedialStudentPicker();
+             }
+          }
+          if (studentsUpdated && typeof renderHistoryTable === 'function' && window.allHistoryTasks) {
+             renderHistoryTable();
           }
        });
     });
@@ -1036,7 +1320,10 @@
        try {
           const state = {
              teacherName: document.getElementById('teacher-name').value,
-             classSelect: document.getElementById('class-select').value,
+             selectedClasses: selectedClasses,
+             classSelect: selectedClasses.join(', '),
+             taskType: selectedTaskType,
+             selectedRemedialStudents: selectedRemedialStudents,
              repetition: document.getElementById('repetition').value,
              requireMeaning: document.getElementById('require-meaning').checked,
              selectedVocabs: selectedVocabs,
@@ -1067,20 +1354,37 @@
           if (state.customVocabs && Array.isArray(state.customVocabs)) {
              customVocabs = state.customVocabs;
           }
+
+          if (state.taskType === 'remedial' || state.taskType === 'tugas') {
+             selectedTaskType = state.taskType;
+             const radioEl = document.getElementById(selectedTaskType === 'remedial' ? 'task-type-remedial' : 'task-type-tugas');
+             if (radioEl) radioEl.checked = true;
+          }
+
+          if (state.selectedRemedialStudents && typeof state.selectedRemedialStudents === 'object') {
+             selectedRemedialStudents = state.selectedRemedialStudents;
+          }
           
           if (state.teacherName && DB_TEACHERS[state.teacherName]) {
              const ts = document.getElementById('teacher-name');
              ts.value = state.teacherName;
-             ts.dispatchEvent(new Event('change'));
-             
-             if (state.classSelect) {
-                const cs = document.getElementById('class-select');
-                cs.value = state.classSelect;
-                cs.dispatchEvent(new Event('change'));
+             currentTeacher = state.teacherName;
+
+             let restoredClasses = [];
+             if (Array.isArray(state.selectedClasses)) {
+                restoredClasses = state.selectedClasses;
+             } else if (state.classSelect) {
+                restoredClasses = String(state.classSelect).split(',').map(s => s.trim()).filter(Boolean);
              }
+             const validClasses = (DB_TEACHERS[currentTeacher] || []).map(c => c.trim());
+             selectedClasses = restoredClasses.filter(c => validClasses.includes(c));
+
+             updateClassSelect(state.teacherName);
           }
           if (state.repetition) document.getElementById('repetition').value = state.repetition;
           if (state.requireMeaning !== undefined) document.getElementById('require-meaning').checked = state.requireMeaning;
+
+          updateTaskTypeUI(true);
           
           if (state.selectedVocabs && Object.keys(state.selectedVocabs).length > 0) {
              selectedVocabs = state.selectedVocabs;
@@ -1095,15 +1399,53 @@
                 renderVocabSelection(currentBook, currentUnit);
              }
           }
+          updateGenerateBtn();
        } catch(e) {}
     }
 
-    ['class-select', 'repetition', 'require-meaning'].forEach(id => {
+    ['repetition', 'require-meaning'].forEach(id => {
        const el = document.getElementById(id);
        if(el) el.addEventListener('change', saveTeacherState);
     });
     const tnEl = document.getElementById('teacher-name');
     if(tnEl) tnEl.addEventListener('change', saveTeacherState);
+    document.querySelectorAll('input[name="task-type"]').forEach(radio => {
+       radio.addEventListener('change', () => updateTaskTypeUI(false));
+    });
+    const remSearchEl = document.getElementById('remedial-student-search');
+    if (remSearchEl) {
+       remSearchEl.addEventListener('input', () => renderRemedialStudentPicker());
+    }
+    const remSelAllBtn = document.getElementById('remedial-select-all-btn');
+    if (remSelAllBtn) {
+       remSelAllBtn.addEventListener('click', () => {
+          const activeClasses = getSelectedClasses();
+          const q = (document.getElementById('remedial-student-search')?.value || '').trim().toLowerCase();
+          activeClasses.forEach(cls => {
+             const students = getStudentsForClass(cls);
+             if (!selectedRemedialStudents[cls]) selectedRemedialStudents[cls] = [];
+             students.forEach(name => {
+                if (!q || name.toLowerCase().includes(q) || cls.toLowerCase().includes(q)) {
+                   if (!selectedRemedialStudents[cls].includes(name)) {
+                      selectedRemedialStudents[cls].push(name);
+                   }
+                }
+             });
+          });
+          renderRemedialStudentPicker();
+          updateGenerateBtn();
+          saveTeacherState();
+       });
+    }
+    const remClearAllBtn = document.getElementById('remedial-clear-all-btn');
+    if (remClearAllBtn) {
+       remClearAllBtn.addEventListener('click', () => {
+          selectedRemedialStudents = {};
+          renderRemedialStudentPicker();
+          updateGenerateBtn();
+          saveTeacherState();
+       });
+    }
 
     // --- DASHBOARD LOGIC ---
     let selectedVocabs = {};
@@ -1449,6 +1791,389 @@
        }
     }
 
+    function escapeHtml(str) {
+       return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+    }
+
+    function getStudentsForClass(cls) {
+       if (!cls || cls === '-') return [];
+       if (DB_STUDENTS && DB_STUDENTS[cls]) return DB_STUDENTS[cls];
+       if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) return _studentsDB[cls];
+       return [];
+    }
+
+    function parseTaskClasses(payload, fallbackClass) {
+       if (payload && Array.isArray(payload.classes) && payload.classes.length > 0) {
+          return payload.classes.map(c => String(c).trim()).filter(c => c && c !== '-');
+       }
+       const raw = (payload && payload.cls) || fallbackClass || '';
+       return String(raw).split(',').map(c => c.trim()).filter(c => c && c !== '-');
+    }
+
+    function getSelectedClasses() {
+       if (!currentTeacher || !DB_TEACHERS[currentTeacher]) return [];
+       const allowedOrder = DB_TEACHERS[currentTeacher].map(c => c.trim()).filter(Boolean);
+       return allowedOrder.filter(c => selectedClasses.includes(c));
+    }
+
+    function getSelectedRemedialTotal() {
+       const activeClasses = getSelectedClasses();
+       let total = 0;
+       activeClasses.forEach(c => {
+          if (Array.isArray(selectedRemedialStudents[c])) {
+             total += selectedRemedialStudents[c].length;
+          }
+       });
+       return total;
+    }
+
+    function getTeacherGradeGroups(classes) {
+       const groups = {};
+       classes.forEach(raw => {
+          const c = raw.trim();
+          if (!c) return;
+          const m = c.match(/^(\d+)/);
+          const key = m ? ('grade_' + m[1]) : 'other';
+          const label = m ? ('Kelas ' + m[1]) : 'Lainnya';
+          const shortLabel = m ? ('Kls ' + m[1]) : 'Lainnya';
+          const sortOrder = m ? parseInt(m[1], 10) : 999;
+          if (!groups[key]) groups[key] = { key, label, shortLabel, sortOrder, classes: [] };
+          if (!groups[key].classes.includes(c)) groups[key].classes.push(c);
+       });
+       return Object.values(groups).sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+
+    function onClassesSelectionChanged() {
+       renderClassPicker();
+       renderRemedialStudentPicker();
+       updateGenerateBtn();
+       saveTeacherState();
+    }
+
+    function renderClassPicker() {
+       const box = document.getElementById('class-picker-box');
+       const summary = document.getElementById('class-selected-summary');
+       if (!box) return;
+
+       if (!currentTeacher || !DB_TEACHERS[currentTeacher]) {
+          box.classList.add('disabled-box');
+          box.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih Nama Guru terlebih dahulu...</div>';
+          if (summary) summary.textContent = 'Pilih Guru dulu';
+          return;
+       }
+
+       box.classList.remove('disabled-box');
+       const teacherClasses = (DB_TEACHERS[currentTeacher] || []).map(c => c.trim()).filter(Boolean);
+       selectedClasses = selectedClasses.filter(c => teacherClasses.includes(c));
+       const orderedSelected = getSelectedClasses();
+
+       if (summary) {
+          if (orderedSelected.length === 0) {
+             summary.textContent = 'Belum ada kelas dipilih';
+          } else if (orderedSelected.length === 1) {
+             summary.textContent = `Terpilih: ${orderedSelected[0]}`;
+          } else {
+             summary.textContent = `Terpilih ${orderedSelected.length} kelas: ${orderedSelected.join(', ')}`;
+          }
+       }
+
+       if (teacherClasses.length === 0) {
+          box.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Guru ini belum memiliki kelas terdaftar di Options.</div>';
+          return;
+       }
+
+       box.innerHTML = '';
+       const groups = getTeacherGradeGroups(teacherClasses);
+
+       // Quick Grade Shortcuts
+       const quickBar = document.createElement('div');
+       quickBar.className = 'class-quick-bar';
+       let hasQuickBtn = false;
+
+       groups.forEach(g => {
+          if (g.classes.length >= 2) {
+             hasQuickBtn = true;
+             const allSelectedInGroup = g.classes.every(c => selectedClasses.includes(c));
+             const qBtn = document.createElement('button');
+             qBtn.type = 'button';
+             qBtn.className = 'class-quick-btn' + (allSelectedInGroup ? ' active' : '');
+             qBtn.textContent = (allSelectedInGroup ? '✓ ' : '+ ') + `Semua ${g.shortLabel} (${g.classes.length})`;
+             qBtn.onclick = () => {
+                if (allSelectedInGroup) {
+                   selectedClasses = selectedClasses.filter(c => !g.classes.includes(c));
+                } else {
+                   g.classes.forEach(c => {
+                      if (!selectedClasses.includes(c)) selectedClasses.push(c);
+                   });
+                }
+                onClassesSelectionChanged();
+             };
+             quickBar.appendChild(qBtn);
+          }
+       });
+
+       if (orderedSelected.length > 0) {
+          hasQuickBtn = true;
+          const resetBtn = document.createElement('button');
+          resetBtn.type = 'button';
+          resetBtn.className = 'class-quick-btn reset-btn';
+          resetBtn.textContent = `✕ Reset (${orderedSelected.length})`;
+          resetBtn.onclick = () => {
+             selectedClasses = [];
+             onClassesSelectionChanged();
+          };
+          quickBar.appendChild(resetBtn);
+       }
+
+       if (hasQuickBtn) {
+          box.appendChild(quickBar);
+       }
+
+       // Class Chips grouped by grade
+       const groupsContainer = document.createElement('div');
+       groupsContainer.className = 'class-grade-groups';
+
+       groups.forEach(g => {
+          const row = document.createElement('div');
+          row.className = 'class-grade-row';
+
+          const lbl = document.createElement('div');
+          lbl.className = 'class-grade-label';
+          lbl.textContent = g.label;
+          row.appendChild(lbl);
+
+          g.classes.forEach(c => {
+             const isSel = selectedClasses.includes(c);
+             const chip = document.createElement('button');
+             chip.type = 'button';
+             chip.className = 'class-chip' + (isSel ? ' active' : '');
+             chip.textContent = c;
+             chip.onclick = () => {
+                if (selectedClasses.includes(c)) {
+                   selectedClasses = selectedClasses.filter(item => item !== c);
+                } else {
+                   selectedClasses.push(c);
+                }
+                onClassesSelectionChanged();
+             };
+             row.appendChild(chip);
+          });
+
+          groupsContainer.appendChild(row);
+       });
+
+       box.appendChild(groupsContainer);
+    }
+
+    function updateTaskTypeUI(skipSave = false) {
+       const checked = document.querySelector('input[name="task-type"]:checked');
+       selectedTaskType = checked ? checked.value : 'tugas';
+
+       const lblTugas = document.getElementById('label-type-tugas');
+       const lblRemedial = document.getElementById('label-type-remedial');
+
+       if (lblTugas && lblRemedial) {
+          if (selectedTaskType === 'remedial') {
+             lblTugas.style.borderColor = 'var(--border)';
+             lblTugas.style.background = 'white';
+             lblTugas.style.color = 'var(--text)';
+             lblRemedial.style.borderColor = '#D97706';
+             lblRemedial.style.background = 'rgba(245,158,11,0.12)';
+             lblRemedial.style.color = '#B45309';
+          } else {
+             lblTugas.style.borderColor = 'var(--primary)';
+             lblTugas.style.background = 'rgba(27,94,32,0.08)';
+             lblTugas.style.color = 'var(--primary)';
+             lblRemedial.style.borderColor = 'var(--border)';
+             lblRemedial.style.background = 'white';
+             lblRemedial.style.color = 'var(--text)';
+          }
+       }
+
+       renderRemedialStudentPicker();
+       updateGenerateBtn();
+       if (!skipSave) saveTeacherState();
+    }
+
+    function updateRemedialSummaryUI() {
+       const activeClasses = getSelectedClasses();
+       const totalSelected = getSelectedRemedialTotal();
+       const badge = document.getElementById('remedial-count-badge');
+       if (badge) badge.textContent = `Terpilih: ${totalSelected} siswa`;
+
+       const pillsContainer = document.getElementById('remedial-selected-pills');
+       if (pillsContainer) {
+          pillsContainer.innerHTML = '';
+          if (totalSelected === 0) {
+             pillsContainer.style.display = 'none';
+          } else {
+             pillsContainer.style.display = 'flex';
+             activeClasses.forEach(cls => {
+                (selectedRemedialStudents[cls] || []).forEach(name => {
+                   const pill = document.createElement('span');
+                   pill.className = 'remedial-pill';
+                   pill.title = 'Klik untuk hapus siswa ini dari remedial';
+                   pill.innerHTML = `<span>${escapeHtml(cls)} • ${escapeHtml(name)}</span> <span style="font-weight:900;">×</span>`;
+                   pill.onclick = () => {
+                      selectedRemedialStudents[cls] = (selectedRemedialStudents[cls] || []).filter(n => n !== name);
+                      if (selectedRemedialStudents[cls].length === 0) delete selectedRemedialStudents[cls];
+                      renderRemedialStudentPicker();
+                      updateGenerateBtn();
+                      saveTeacherState();
+                   };
+                   pillsContainer.appendChild(pill);
+                });
+             });
+          }
+       }
+
+       activeClasses.forEach(cls => {
+          const cntEl = document.getElementById(`rem-cls-count-${cls}`);
+          if (cntEl) {
+             const totalCls = getStudentsForClass(cls).length;
+             const pickedCls = (selectedRemedialStudents[cls] || []).length;
+             cntEl.textContent = `(${pickedCls}/${totalCls} dipilih)`;
+          }
+       });
+    }
+
+    function renderRemedialStudentPicker() {
+       const panel = document.getElementById('remedial-student-panel');
+       const container = document.getElementById('remedial-students-container');
+       if (!panel || !container) return;
+
+       if (selectedTaskType !== 'remedial') {
+          panel.style.display = 'none';
+          return;
+       }
+
+       panel.style.display = 'block';
+       const activeClasses = getSelectedClasses();
+       updateRemedialSummaryUI();
+
+       if (activeClasses.length === 0) {
+          container.innerHTML = '<div style="color:#B45309; font-size:0.9rem; font-weight:600; padding:6px 0;">⚠️ Pilih minimal 1 kelas terlebih dahulu di atas untuk menampilkan daftar siswa.</div>';
+          return;
+       }
+
+       const q = (document.getElementById('remedial-student-search')?.value || '').trim().toLowerCase();
+       container.innerHTML = '';
+
+       activeClasses.forEach(cls => {
+          const students = getStudentsForClass(cls);
+          if (!Array.isArray(selectedRemedialStudents[cls])) {
+             selectedRemedialStudents[cls] = [];
+          }
+          const pickedSet = new Set(selectedRemedialStudents[cls]);
+
+          const block = document.createElement('div');
+          block.className = 'remedial-class-block';
+
+          const header = document.createElement('div');
+          header.className = 'remedial-class-header';
+
+          const titleWrap = document.createElement('div');
+          titleWrap.style.fontWeight = 'bold';
+          titleWrap.style.color = 'var(--text)';
+          titleWrap.innerHTML = `🏫 Kelas ${escapeHtml(cls)} <span id="rem-cls-count-${escapeHtml(cls)}" style="color:#B45309; font-size:0.85rem; margin-left:4px;">(${pickedSet.size}/${students.length} dipilih)</span>`;
+
+          const btnGroup = document.createElement('div');
+          btnGroup.style.display = 'flex';
+          btnGroup.style.gap = '6px';
+
+          const selClsBtn = document.createElement('button');
+          selClsBtn.type = 'button';
+          selClsBtn.className = 'class-quick-btn';
+          selClsBtn.textContent = 'Pilih Semua';
+          selClsBtn.onclick = () => {
+             selectedRemedialStudents[cls] = [...students];
+             renderRemedialStudentPicker();
+             updateGenerateBtn();
+             saveTeacherState();
+          };
+
+          const clrClsBtn = document.createElement('button');
+          clrClsBtn.type = 'button';
+          clrClsBtn.className = 'class-quick-btn';
+          clrClsBtn.style.color = '#DC2626';
+          clrClsBtn.textContent = 'Batal';
+          clrClsBtn.onclick = () => {
+             delete selectedRemedialStudents[cls];
+             renderRemedialStudentPicker();
+             updateGenerateBtn();
+             saveTeacherState();
+          };
+
+          btnGroup.appendChild(selClsBtn);
+          btnGroup.appendChild(clrClsBtn);
+          header.appendChild(titleWrap);
+          header.appendChild(btnGroup);
+          block.appendChild(header);
+
+          if (students.length === 0) {
+             const emptyMsg = document.createElement('div');
+             emptyMsg.style.cssText = 'color:var(--text-muted); font-size:0.85rem;';
+             emptyMsg.textContent = 'Daftar siswa untuk kelas ini belum tersedia.';
+             block.appendChild(emptyMsg);
+          } else {
+             const grid = document.createElement('div');
+             grid.className = 'remedial-students-grid';
+             let shownCount = 0;
+
+             students.forEach((sName, idx) => {
+                if (q && !sName.toLowerCase().includes(q) && !cls.toLowerCase().includes(q)) return;
+                shownCount++;
+
+                const isChecked = pickedSet.has(sName);
+                const lbl = document.createElement('label');
+                lbl.className = 'remedial-student-item' + (isChecked ? ' selected' : '');
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = isChecked;
+                cb.addEventListener('change', () => {
+                   if (!Array.isArray(selectedRemedialStudents[cls])) selectedRemedialStudents[cls] = [];
+                   if (cb.checked) {
+                      if (!selectedRemedialStudents[cls].includes(sName)) {
+                         selectedRemedialStudents[cls].push(sName);
+                      }
+                      lbl.classList.add('selected');
+                   } else {
+                      selectedRemedialStudents[cls] = selectedRemedialStudents[cls].filter(n => n !== sName);
+                      if (selectedRemedialStudents[cls].length === 0) delete selectedRemedialStudents[cls];
+                      lbl.classList.remove('selected');
+                   }
+                   updateRemedialSummaryUI();
+                   updateGenerateBtn();
+                   saveTeacherState();
+                });
+
+                const span = document.createElement('span');
+                span.textContent = `${idx + 1}. ${sName}`;
+                lbl.appendChild(cb);
+                lbl.appendChild(span);
+                grid.appendChild(lbl);
+             });
+
+             if (shownCount === 0) {
+                const noMatch = document.createElement('div');
+                noMatch.style.cssText = 'color:var(--text-muted); font-size:0.85rem; padding:4px 0;';
+                noMatch.textContent = `Tidak ada siswa cocok dengan "${q}" di kelas ${cls}.`;
+                block.appendChild(noMatch);
+             } else {
+                block.appendChild(grid);
+             }
+          }
+
+          container.appendChild(block);
+       });
+    }
+
     function initDashboard() {
        const ts = document.getElementById('teacher-name');
        const prevTeacher = ts.value || currentTeacher;
@@ -1465,6 +2190,8 @@
           updateClassSelect(prevTeacher);
        } else {
           applyTeacherTheme(currentTeacher);
+          renderClassPicker();
+          renderRemedialStudentPicker();
        }
        renderBookMatrix();
        initQuickSearch();
@@ -1472,36 +2199,27 @@
     
     function updateClassSelect(teacherName) {
        applyTeacherTheme(teacherName);
-       const cs = document.getElementById('class-select');
-       const prevClass = cs.value;
-       cs.innerHTML = '<option value="">Pilih Kelas...</option>';
        if(!teacherName) {
-          cs.disabled = true;
+          selectedClasses = [];
           document.getElementById('vocab-card').style.display = 'none';
+          renderClassPicker();
+          renderRemedialStudentPicker();
           updateGenerateBtn();
           return;
        }
-       cs.disabled = false;
-       const classes = DB_TEACHERS[teacherName] || [];
-       classes.forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.trim();
-          opt.textContent = c.trim();
-          cs.appendChild(opt);
-       });
-       if (prevClass && classes.map(c=>c.trim()).includes(prevClass)) {
-          cs.value = prevClass;
-       }
+       const classes = (DB_TEACHERS[teacherName] || []).map(c => c.trim()).filter(Boolean);
+       selectedClasses = selectedClasses.filter(c => classes.includes(c));
        document.getElementById('vocab-card').style.display = 'block';
+       renderClassPicker();
+       renderRemedialStudentPicker();
        updateGenerateBtn();
     }
     
     document.getElementById('teacher-name').addEventListener('change', (e) => {
        currentTeacher = e.target.value;
        updateClassSelect(currentTeacher);
+       saveTeacherState();
     });
-    
-    document.getElementById('class-select').addEventListener('change', updateGenerateBtn);
     
     // --- LIVE VOCABULARY SEARCH ---
     function initQuickSearch() {
@@ -1932,7 +2650,7 @@
     }
     
     function updateGenerateBtn() {
-       const cls = document.getElementById('class-select').value;
+       const activeClasses = getSelectedClasses();
        let hasVocab = false;
        for (const b in selectedVocabs) {
           for (const u in selectedVocabs[b]) {
@@ -1940,14 +2658,69 @@
           }
           if (hasVocab) break;
        }
-       generateBtn.disabled = !(currentTeacher && cls && (hasVocab || customVocabs.length > 0));
+       hasVocab = hasVocab || customVocabs.length > 0;
+
+       const remedialCount = getSelectedRemedialTotal();
+       const isRemedialValid = (selectedTaskType !== 'remedial') || (remedialCount > 0);
+       generateBtn.disabled = !(currentTeacher && activeClasses.length > 0 && isRemedialValid && hasVocab);
+
+       if (generateBtn.textContent !== 'Menyimpan Link...') {
+          if (selectedTaskType === 'remedial' && remedialCount > 0) {
+             generateBtn.textContent = `Buat Link Remedial (${remedialCount} Siswa)`;
+          } else if (activeClasses.length > 1) {
+             generateBtn.textContent = `Buat Link Tugas (${activeClasses.length} Kelas)`;
+          } else {
+             generateBtn.textContent = 'Buat Link Tugas';
+          }
+       }
+
+       const warnEl = document.getElementById('generate-helper-warning');
+       if (warnEl) {
+          if (currentTeacher && hasVocab && activeClasses.length === 0) {
+             warnEl.textContent = '⚠️ Silakan pilih minimal 1 kelas di bagian atas sebelum membuat link.';
+             warnEl.style.display = 'block';
+          } else if (currentTeacher && activeClasses.length > 0 && selectedTaskType === 'remedial' && remedialCount === 0) {
+             warnEl.textContent = '⚠️ Mode Remedial aktif: centang minimal 1 siswa yang harus mengerjakan remedial.';
+             warnEl.style.display = 'block';
+          } else {
+             warnEl.style.display = 'none';
+          }
+       }
     }
     
     generateBtn.addEventListener('click', async () => {
-      const cls = document.getElementById('class-select').value;
+      const selectedClassesArr = getSelectedClasses();
       const rep = document.getElementById('repetition').value;
       const requireMeaning = document.getElementById('require-meaning').checked;
       const guru = document.getElementById('teacher-name').value;
+      const taskType = document.querySelector('input[name="task-type"]:checked')?.value || 'tugas';
+
+      if (selectedClassesArr.length === 0) {
+         alert('Silakan pilih minimal 1 kelas terlebih dahulu!');
+         return;
+      }
+
+      let payloadClasses = [...selectedClassesArr];
+      let remedialMap = null;
+      let totalRemedialSelected = 0;
+
+      if (taskType === 'remedial') {
+         remedialMap = {};
+         selectedClassesArr.forEach(c => {
+            const picked = (selectedRemedialStudents[c] || []).filter(Boolean);
+            if (picked.length > 0) {
+               remedialMap[c] = picked;
+               totalRemedialSelected += picked.length;
+            }
+         });
+         payloadClasses = Object.keys(remedialMap);
+         if (payloadClasses.length === 0 || totalRemedialSelected === 0) {
+            alert('Silakan centang minimal 1 siswa untuk tugas Remedial!');
+            return;
+         }
+      }
+
+      const clsSummary = payloadClasses.join(', ');
       
       let vObj = {};
       for (const b in selectedVocabs) {
@@ -1964,10 +2737,22 @@
           }
       }
       
-      const taskType = document.querySelector('input[name="task-type"]:checked')?.value || 'tugas';
       const shortId = Math.random().toString(36).substring(2, 8);
       const payloadCustomVocabs = customVocabs.map(c => ({ char: c.char, pinyin: c.pinyin, meaning: c.meaning }));
-      const payload = { id: shortId, cls: cls, r: rep, v: vObj, cv: payloadCustomVocabs, tm: requireMeaning ? 1 : 0, guru: guru, type: taskType };
+      const payload = {
+         id: shortId,
+         cls: clsSummary,
+         classes: payloadClasses,
+         r: rep,
+         v: vObj,
+         cv: payloadCustomVocabs,
+         tm: requireMeaning ? 1 : 0,
+         guru: guru,
+         type: taskType
+      };
+      if (remedialMap) {
+         payload.rs = remedialMap;
+      }
       const payloadString = JSON.stringify(payload);
       
       let baseUrl = window.location.href.replace('teacher.html', 'student.html');
@@ -1978,11 +2763,24 @@
       generateBtn.textContent = 'Menyimpan Link...';
       
       try {
-         await DB.saveTask(shortId, payloadString, guru, cls);
+         await DB.saveTask(shortId, payloadString, guru, clsSummary);
          const finalUrl = `${baseUrl}?id=${shortId}`;
          
          linkOutput.value = finalUrl;
          resultBox.style.display = 'block';
+
+         const bannerEl = document.getElementById('result-summary-banner');
+         if (bannerEl) {
+            if (taskType === 'remedial' && remedialMap) {
+               const listPreview = Object.keys(remedialMap).map(c => `${c}: ${remedialMap[c].join(', ')}`).join(' | ');
+               bannerEl.innerHTML = `✅ Link <b>Remedial Khusus (${totalRemedialSelected} Siswa)</b> berhasil dibuat!<br><span style="font-weight:normal; font-size:0.84rem;">Siswa terpilih: ${escapeHtml(listPreview)}</span>`;
+            } else if (payloadClasses.length > 1) {
+               bannerEl.innerHTML = `✅ Link <b>Tugas Gabungan (${payloadClasses.length} Kelas: ${escapeHtml(clsSummary)})</b> berhasil dibuat! Siswa akan memilih kelas lalu nama mereka.`;
+            } else {
+               bannerEl.innerHTML = `✅ Link <b>Tugas Kelas ${escapeHtml(clsSummary)}</b> berhasil dibuat!`;
+            }
+            bannerEl.style.display = 'block';
+         }
          
          selectedVocabs = {};
          updateCombinedView();
@@ -2174,7 +2972,8 @@
        filteredTasks.forEach(t => {
           let payload = {};
           try { payload = typeof t.payload === 'string' ? JSON.parse(t.payload) : (t.payload || {}); } catch(e) {}
-          const cls = String(payload.cls || t.class || '-');
+          const taskClasses = parseTaskClasses(payload, t.class);
+          const cls = taskClasses.length > 0 ? taskClasses.join(', ') : String(payload.cls || t.class || '-');
           const guru = String(payload.guru || t.teacher_name || '-');
           const babInfo = getBabStringFromPayload(payload);
           
@@ -2186,22 +2985,52 @@
           const min = String(dateObj.getMinutes()).padStart(2, '0');
           const dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
           
-          let totalStudents = 30;
-          if (DB_STUDENTS[cls]) totalStudents = DB_STUDENTS[cls].length;
-          else if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) totalStudents = _studentsDB[cls].length;
+          const taskType = String(payload.type || 'tugas');
+          const rs = (payload.rs && typeof payload.rs === 'object') ? payload.rs : null;
+
+          let totalStudents = 0;
+          let remedialNamesList = [];
+          if (taskType === 'remedial' && rs) {
+             Object.keys(rs).forEach(rc => {
+                if (Array.isArray(rs[rc])) {
+                   rs[rc].forEach(n => {
+                      remedialNamesList.push(taskClasses.length > 1 ? `${n} (${rc})` : n);
+                   });
+                }
+             });
+             totalStudents = Math.max(1, remedialNamesList.length);
+          } else if (taskClasses.length > 0) {
+             taskClasses.forEach(c => {
+                const st = getStudentsForClass(c);
+                totalStudents += (st.length > 0 ? st.length : 30);
+             });
+             totalStudents = Math.max(1, totalStudents);
+          } else {
+             totalStudents = 30;
+          }
           
           const count = progressMap[t.id] || 0;
           const pct = Math.min(100, Math.round((count / totalStudents) * 100));
           
-          const taskType = String(payload.type || 'tugas');
           const typeBadge = taskType === 'remedial'
              ? `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#FEF3C7; color:#D97706; font-size:0.75rem; font-weight:bold; margin-right:4px;">🔁 Remedial</span>`
              : `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#EDE9FE; color:var(--primary); font-size:0.75rem; font-weight:bold; margin-right:4px;">📝 Tugas</span>`;
+
+          let classSubInfo = '';
+          if (taskType === 'remedial' && rs && remedialNamesList.length > 0) {
+             const preview = remedialNamesList.slice(0, 3).map(n => escapeHtml(n)).join(', ') +
+                (remedialNamesList.length > 3 ? ` (+${remedialNamesList.length - 3} lainnya)` : '');
+             classSubInfo = `<div style="font-size:0.76rem; color:#B45309; margin-top:3px;">🎯 ${remedialNamesList.length} siswa: ${preview}</div>`;
+          } else if (taskClasses.length > 1) {
+             classSubInfo = `<div style="font-size:0.76rem; color:var(--text-muted); margin-top:3px;">(${taskClasses.length} Kelas Gabungan)</div>`;
+          }
 
           // Store in global lookup for reliable instant access
           window.allHistoryTasksMap[t.id] = {
              id: t.id,
              cls: cls,
+             classes: taskClasses,
+             rs: rs,
              babInfo: babInfo,
              taskType: taskType,
              guru: guru,
@@ -2212,9 +3041,9 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
              <td>${dateStr}</td>
-             <td><b>${guru}</b></td>
-             <td>${typeBadge} <b>${cls}</b></td>
-             <td><small>${babInfo || '-'}</small></td>
+             <td><b>${escapeHtml(guru)}</b></td>
+             <td>${typeBadge} <b>${escapeHtml(cls)}</b>${classSubInfo}</td>
+             <td><small>${escapeHtml(babInfo || '-')}</small></td>
              <td>
                 <div style="font-weight:bold; font-size:0.9rem;">${count} / ${totalStudents} Murid (${pct}%)</div>
                 <div class="class-progress-bar">
@@ -2248,12 +3077,14 @@
        let cls = '-';
        let babInfo = '';
        let taskType = 'tugas';
+       let payload = {};
        if (t) {
-          cls = t.cls || (t.payload && t.payload.cls) || '-';
-          babInfo = t.babInfo || (t.payload ? getBabStringFromPayload(t.payload) : '');
-          taskType = t.taskType || (t.payload && t.payload.type) || 'tugas';
+          try { payload = typeof t.payload === 'string' ? JSON.parse(t.payload) : (t.payload || {}); } catch(e) {}
+          cls = t.cls || payload.cls || '-';
+          babInfo = t.babInfo || (payload ? getBabStringFromPayload(payload) : '');
+          taskType = t.taskType || payload.type || 'tugas';
        }
-       viewTaskResults(taskId, cls, babInfo, taskType);
+       viewTaskResults(taskId, cls, babInfo, taskType, { classes: t?.classes || parseTaskClasses(payload, cls), rs: t?.rs || payload.rs || null });
     };
 
     function copyHistoryTaskLink(taskId, btnEl) {
@@ -2301,8 +3132,13 @@
     let currentTeacherLbData = [];
     let currentTeacherLbMode = 'time';
     let currentTeacherLbScope = 'class';
+    let currentTeacherLbFilterClass = 'ALL';
     let currentActiveTaskId = '';
     let currentActiveTaskClass = '';
+    let currentActiveTaskClasses = [];
+    let currentActiveTaskRs = null;
+    window.currentDetailRows = [];
+    window.currentDetailFilterClass = 'ALL';
     
     async function fetchTeacherLeaderboard() {
        if (!currentActiveTaskId) return;
@@ -2310,6 +3146,7 @@
        if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">⏳ Memuat data peringkat...</td></tr>';
        try {
           currentTeacherLbData = await DB.getLeaderboard(currentActiveTaskId, currentActiveTaskClass, currentTeacherLbScope);
+          renderTeacherLeaderboardPills();
           renderTeacherLeaderboard();
        } catch (err) {
           console.error("Gagal memuat leaderboard guru", err);
@@ -2344,7 +3181,8 @@
        
        if (btnScopeClass && btnScopeGrade) {
            btnScopeClass.addEventListener('click', () => {
-               currentTeacherLbScope = 'class';
+               currentTeacherLbScope = (currentActiveTaskClasses.length > 1) ? 'task' : 'class';
+               currentTeacherLbFilterClass = 'ALL';
                btnScopeClass.style.background = 'var(--primary)';
                btnScopeClass.style.color = 'white';
                btnScopeGrade.style.background = 'transparent';
@@ -2353,6 +3191,7 @@
            });
            btnScopeGrade.addEventListener('click', () => {
                currentTeacherLbScope = 'grade';
+               currentTeacherLbFilterClass = 'ALL';
                btnScopeGrade.style.background = 'var(--primary)';
                btnScopeGrade.style.color = 'white';
                btnScopeClass.style.background = 'transparent';
@@ -2380,6 +3219,42 @@
         }
     }
 
+    function renderTeacherLeaderboardPills() {
+        const pillsWrap = document.getElementById('lb-teacher-class-pills');
+        if (!pillsWrap) return;
+        pillsWrap.innerHTML = '';
+
+        // Collect unique classes from both currentActiveTaskClasses & actual leaderboard data
+        const classSet = new Set(currentActiveTaskClasses);
+        (currentTeacherLbData || []).forEach(u => {
+            if (u && u.cls) classSet.add(u.cls);
+        });
+        const allClasses = Array.from(classSet);
+
+        if (allClasses.length <= 1) {
+            pillsWrap.style.display = 'none';
+            currentTeacherLbFilterClass = 'ALL';
+            return;
+        }
+
+        pillsWrap.style.display = 'flex';
+        const makePill = (label, filterVal) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'detail-class-pill' + (currentTeacherLbFilterClass === filterVal ? ' active' : '');
+            btn.textContent = label;
+            btn.onclick = () => {
+                currentTeacherLbFilterClass = filterVal;
+                renderTeacherLeaderboardPills();
+                renderTeacherLeaderboard();
+            };
+            pillsWrap.appendChild(btn);
+        };
+
+        makePill(`🏆 Semua (${allClasses.length} Kelas)`, 'ALL');
+        allClasses.forEach(c => makePill(c, c));
+    }
+
     function renderTeacherLeaderboard() {
         const lbTbody = document.getElementById('task-leaderboard-body');
         const header = document.getElementById('lb-teacher-stat-header');
@@ -2392,6 +3267,10 @@
         }
         
         let sortedData = [...currentTeacherLbData];
+        if (currentTeacherLbFilterClass && currentTeacherLbFilterClass !== 'ALL') {
+            sortedData = sortedData.filter(u => u.cls && u.cls.trim().toUpperCase() === currentTeacherLbFilterClass.trim().toUpperCase());
+        }
+
         if (currentTeacherLbMode === 'time') {
             if (header) header.textContent = 'Waktu Tercepat';
             sortedData = sortedData.filter(u => (u.fastestTime || 0) > 0);
@@ -2406,7 +3285,7 @@
         }
         
         if (sortedData.length === 0) {
-            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">Belum ada data untuk mode ini.</td></tr>';
+            lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:gray; padding:15px;">Belum ada data untuk mode/kelas ini.</td></tr>';
             return;
         }
 
@@ -2454,12 +3333,13 @@
             else if (rankToDisplay === 2) rankLabel = '🥈 2';
             else if (rankToDisplay === 3) rankLabel = '🥉 3';
             
-            const classBadge = (currentTeacherLbScope === 'grade' || (user.cls && user.cls !== currentActiveTaskClass))
-               ? `<span style="display:inline-block; padding:1px 6px; border-radius:4px; background:rgba(139,61,255,0.12); color:var(--primary); font-size:0.75rem; font-weight:bold; margin-left:6px;">${user.cls || ''}</span>` : '';
+            const showClassBadge = currentTeacherLbScope === 'grade' || currentActiveTaskClasses.length > 1 || (user.cls && user.cls !== currentActiveTaskClass);
+            const classBadge = (showClassBadge && user.cls)
+               ? `<span class="class-mini-badge">${escapeHtml(user.cls)}</span>` : '';
 
             tr.innerHTML = `
                <td style="text-align:center; font-weight:bold;">${rankLabel}</td>
-               <td><b>${user.name}</b>${classBadge}</td>
+               <td><b>${escapeHtml(user.name)}</b>${classBadge}</td>
                <td>${statStr}</td>
             `;
             lbTbody.appendChild(tr);
@@ -2486,10 +3366,139 @@
        }
     }
 
-    async function viewTaskResults(id, cls, babInfo, taskType) {
+    function renderDetailClassFilterBar() {
+        const bar = document.getElementById('detail-class-filter-bar');
+        if (!bar) return;
+        bar.innerHTML = '';
+
+        const rows = window.currentDetailRows || [];
+        const classSet = new Set(currentActiveTaskClasses);
+        rows.forEach(r => { if (r.student_class) classSet.add(r.student_class); });
+        const classes = Array.from(classSet);
+
+        if (classes.length <= 1) {
+            bar.style.display = 'none';
+            window.currentDetailFilterClass = 'ALL';
+            return;
+        }
+
+        bar.style.display = 'flex';
+        const totalDone = rows.filter(r => r.status === 'Selesai').length;
+
+        const addPill = (label, filterVal) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'detail-class-pill' + (window.currentDetailFilterClass === filterVal ? ' active' : '');
+            btn.textContent = label;
+            btn.onclick = () => {
+                window.currentDetailFilterClass = filterVal;
+                renderDetailClassFilterBar();
+                renderDetailRowsTable();
+            };
+            bar.appendChild(btn);
+        };
+
+        addPill(`Semua Kelas (${totalDone}/${rows.length})`, 'ALL');
+        classes.forEach(c => {
+            const clsRows = rows.filter(r => (r.student_class || '').toUpperCase() === c.toUpperCase());
+            const clsDone = clsRows.filter(r => r.status === 'Selesai').length;
+            addPill(`${c} (${clsDone}/${clsRows.length})`, c);
+        });
+    }
+
+    function renderDetailRowsTable() {
+        const tbody = document.getElementById('task-results-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        let rowsToRender = window.currentDetailRows || [];
+        if (window.currentDetailFilterClass && window.currentDetailFilterClass !== 'ALL') {
+            rowsToRender = rowsToRender.filter(r => (r.student_class || '').toUpperCase() === window.currentDetailFilterClass.toUpperCase());
+        }
+
+        const isMultiClass = currentActiveTaskClasses.length > 1;
+        let mistakesAggregation = {};
+
+        if (rowsToRender.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">📭 Belum ada data murid untuk ditampilkan.</td></tr>';
+        } else {
+            rowsToRender.forEach(r => {
+                const isComplete = r.status === 'Selesai';
+                let dateStr = '-';
+                if (r.submitted_at) {
+                    const dObj = new Date(r.submitted_at);
+                    const dd = String(dObj.getDate()).padStart(2, '0');
+                    const mmm = dObj.toLocaleString('id-ID', { month: 'short' });
+                    const yyyy = dObj.getFullYear();
+                    const hh = String(dObj.getHours()).padStart(2, '0');
+                    const min = String(dObj.getMinutes()).padStart(2, '0');
+                    dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.style.background = isComplete ? 'rgba(16,185,129,0.04)' : '';
+                const statusBadge = isComplete
+                    ? '<span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#D1FAE5; color:#065F46; font-weight:bold; font-size:0.85rem;">✓ Selesai</span>'
+                    : '<span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#F1F5F9; color:#64748B; font-weight:bold; font-size:0.85rem;">Belum</span>';
+
+                const clsBadge = (isMultiClass && r.student_class)
+                    ? `<span class="class-mini-badge">${escapeHtml(r.student_class)}</span>`
+                    : '';
+
+                tr.innerHTML = `
+                    <td><b>${escapeHtml(r.student_name)}</b>${clsBadge}</td>
+                    <td>${dateStr}</td>
+                    <td>${statusBadge}</td>
+                    <td>${isComplete ? (r.repetitions || 1) + 'x' : '-'}</td>
+                    <td><small>${isComplete ? escapeHtml(r.mistakes_detail || '-') : '-'}</small></td>
+                `;
+                tbody.appendChild(tr);
+
+                if (isComplete && r.mistakes_detail) {
+                    r.mistakes_detail.split('|').forEach(p => {
+                        const parts = p.split(':');
+                        if (parts.length >= 2) {
+                            const char = parts[0].trim();
+                            const mCount = parseInt(parts[1].trim()) || 0;
+                            if (char && mCount > 0) {
+                                mistakesAggregation[char] = (mistakesAggregation[char] || 0) + mCount;
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        const diffSection = document.getElementById('difficult-chars-section');
+        const diffList = document.getElementById('difficult-chars-list');
+        const sortedMistakes = Object.entries(mistakesAggregation).filter(([_, count]) => count > 0).sort((a, b) => b[1] - a[1]);
+
+        if (diffSection && diffList) {
+            if (sortedMistakes.length > 0) {
+                diffSection.style.display = 'block';
+                diffList.innerHTML = sortedMistakes.slice(0, 5).map(([char, count]) => `
+                    <span class="difficult-char-badge">🔥 ${escapeHtml(char)}: ${count} kesalahan</span>
+                `).join('');
+            } else {
+                diffSection.style.display = 'none';
+            }
+        }
+    }
+
+    async function viewTaskResults(id, cls, babInfo, taskType, extraMeta) {
         currentActiveTaskId = id;
         currentActiveTaskClass = cls;
-        currentTeacherLbScope = 'class';
+
+        const meta = extraMeta || (window.allHistoryTasksMap && window.allHistoryTasksMap[id]) || {};
+        currentActiveTaskClasses = Array.isArray(meta.classes) && meta.classes.length > 0
+            ? meta.classes
+            : parseTaskClasses(null, cls);
+        currentActiveTaskRs = (meta.rs && typeof meta.rs === 'object') ? meta.rs : null;
+
+        currentTeacherLbFilterClass = 'ALL';
+        currentTeacherLbScope = (currentActiveTaskClasses.length > 1) ? 'task' : 'class';
+        window.currentDetailFilterClass = 'ALL';
+
         const tType = taskType || 'tugas';
         const typeBadge = tType === 'remedial' ? '🔁 Remedial' : '📝 Tugas Reguler';
 
@@ -2504,137 +3513,122 @@
         const infoEl = document.getElementById('detail-task-info');
         if (infoEl) infoEl.textContent = `Bab: ${babInfo || '-'}`;
 
+        const remBanner = document.getElementById('detail-remedial-banner');
+        if (remBanner) {
+            if (tType === 'remedial' && currentActiveTaskRs) {
+                const targetList = [];
+                Object.keys(currentActiveTaskRs).forEach(rc => {
+                    (currentActiveTaskRs[rc] || []).forEach(n => {
+                        targetList.push(currentActiveTaskClasses.length > 1 ? `${n} (${rc})` : n);
+                    });
+                });
+                if (targetList.length > 0) {
+                    remBanner.innerHTML = `🎯 <b>Remedial Khusus untuk ${targetList.length} Murid Terpilih:</b> ${escapeHtml(targetList.join(', '))}`;
+                    remBanner.style.display = 'block';
+                } else {
+                    remBanner.style.display = 'none';
+                }
+            } else {
+                remBanner.style.display = 'none';
+            }
+        }
+
         const lbSubtitle = document.getElementById('lb-teacher-subtitle');
         if (lbSubtitle) lbSubtitle.textContent = `${typeBadge} • Bab ${babInfo || '-'}`;
 
         const btnScopeClass = document.getElementById('lb-teacher-scope-class');
         const btnScopeGrade = document.getElementById('lb-teacher-scope-grade');
         if (btnScopeClass && btnScopeGrade) {
-           btnScopeClass.textContent = `🏫 Kelas ${cls}`;
+           btnScopeClass.textContent = (currentActiveTaskClasses.length > 1)
+              ? `🏆 Tugas Ini (${currentActiveTaskClasses.length} Kelas)`
+              : `🏫 Kelas ${currentActiveTaskClasses[0] || cls}`;
            btnScopeClass.style.background = 'var(--primary)';
            btnScopeClass.style.color = 'white';
            btnScopeGrade.style.background = 'transparent';
            btnScopeGrade.style.color = '#0E1318';
         }
 
+        const filterBar = document.getElementById('detail-class-filter-bar');
+        if (filterBar) filterBar.style.display = 'none';
+        const lbPills = document.getElementById('lb-teacher-class-pills');
+        if (lbPills) lbPills.style.display = 'none';
+
         const tbody = document.getElementById('task-results-body');
         if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:25px; color:var(--text-muted); font-size:1rem;">⏳ Memuat data pengerjaan murid...</td></tr>';
 
-        // 3. Fetch submissions & build full class roster
+        // 3. Fetch submissions & build expected roster (supports remedial subset & multi-class)
         try {
            const subs = await DB.getTaskSubmissions(id);
-           if (tbody) tbody.innerHTML = '';
 
-           let mistakesAggregation = {};
-
-           let classStudents = [];
-           if (cls && cls !== '-') {
-              if (DB_STUDENTS[cls]) classStudents = DB_STUDENTS[cls];
-              else if (typeof _studentsDB !== 'undefined' && _studentsDB[cls]) classStudents = _studentsDB[cls];
+           const expectedRoster = [];
+           if (tType === 'remedial' && currentActiveTaskRs) {
+              Object.keys(currentActiveTaskRs).forEach(rc => {
+                 (currentActiveTaskRs[rc] || []).forEach(sName => {
+                    expectedRoster.push({ cls: rc, name: sName });
+                 });
+              });
+           } else {
+              currentActiveTaskClasses.forEach(c => {
+                 getStudentsForClass(c).forEach(sName => {
+                    expectedRoster.push({ cls: c, name: sName });
+                 });
+              });
            }
 
-           const subsMap = {};
-           (subs || []).forEach(s => {
+           const subsMapByKey = {};
+           const subsMapByName = {};
+           (subs || []).forEach((s, idx) => {
               if (s && s.student_name) {
-                 subsMap[s.student_name.trim().toUpperCase()] = s;
+                 const normName = s.student_name.trim().toUpperCase();
+                 const normCls = (s.class || '').trim().toUpperCase();
+                 const key = `${normName}__${normCls}`;
+                 if (!subsMapByKey[key]) subsMapByKey[key] = { sub: s, idx };
+                 if (!subsMapByName[normName]) subsMapByName[normName] = { sub: s, idx };
               }
            });
 
            const displayRows = [];
-           const addedNames = new Set();
+           const usedSubIndices = new Set();
 
-           if (classStudents && classStudents.length > 0) {
-              classStudents.forEach(sName => {
-                 const norm = sName.trim().toUpperCase();
-                 addedNames.add(norm);
-                 if (subsMap[norm]) {
-                    displayRows.push(subsMap[norm]);
-                 } else {
-                    displayRows.push({
-                       student_name: sName,
-                       status: 'Belum',
-                       submitted_at: '',
-                       mistakes_detail: '',
-                       repetitions: '-',
-                       duration: 0
-                    });
-                 }
-              });
-           }
+           expectedRoster.forEach(entry => {
+              const normName = entry.name.trim().toUpperCase();
+              const normCls = entry.cls.trim().toUpperCase();
+              const exactHit = subsMapByKey[`${normName}__${normCls}`];
+              const fallbackHit = (currentActiveTaskClasses.length <= 1) ? subsMapByName[normName] : null;
+              const match = exactHit || fallbackHit;
 
-           (subs || []).forEach(s => {
-              if (s && s.student_name) {
-                 const norm = s.student_name.trim().toUpperCase();
-                 if (!addedNames.has(norm)) {
-                    displayRows.push(s);
-                    addedNames.add(norm);
-                 }
+              if (match) {
+                 usedSubIndices.add(match.idx);
+                 displayRows.push(Object.assign({}, match.sub, {
+                    student_class: match.sub.class || entry.cls
+                 }));
+              } else {
+                 displayRows.push({
+                    student_name: entry.name,
+                    student_class: entry.cls,
+                    status: 'Belum',
+                    submitted_at: '',
+                    mistakes_detail: '',
+                    repetitions: '-',
+                    duration: 0
+                 });
               }
            });
 
-           if (displayRows.length === 0) {
-              if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">📭 Belum ada murid yang mengumpulkan tugas ini.</td></tr>';
-           } else {
-              displayRows.forEach(r => {
-                 const isComplete = r.status === 'Selesai';
-                 let dateStr = '-';
-                 if (r.submitted_at) {
-                    const dObj = new Date(r.submitted_at);
-                    const dd = String(dObj.getDate()).padStart(2, '0');
-                    const mmm = dObj.toLocaleString('id-ID', { month: 'short' });
-                    const yyyy = dObj.getFullYear();
-                    const hh = String(dObj.getHours()).padStart(2, '0');
-                    const min = String(dObj.getMinutes()).padStart(2, '0');
-                    dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
-                 }
-
-                 const tr = document.createElement('tr');
-                 tr.style.background = isComplete ? 'rgba(16,185,129,0.04)' : '';
-                 const statusBadge = isComplete
-                    ? '<span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#D1FAE5; color:#065F46; font-weight:bold; font-size:0.85rem;">✓ Selesai</span>'
-                    : '<span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#F1F5F9; color:#64748B; font-weight:bold; font-size:0.85rem;">Belum</span>';
-
-                 tr.innerHTML = `
-                    <td><b>${r.student_name}</b></td>
-                    <td>${dateStr}</td>
-                    <td>${statusBadge}</td>
-                    <td>${isComplete ? (r.repetitions || 1) + 'x' : '-'}</td>
-                    <td><small>${isComplete ? (r.mistakes_detail || '-') : '-'}</small></td>
-                 `;
-                 if (tbody) tbody.appendChild(tr);
-
-                 if (isComplete && r.mistakes_detail) {
-                    r.mistakes_detail.split('|').forEach(p => {
-                       const parts = p.split(':');
-                       if (parts.length >= 2) {
-                          const char = parts[0].trim();
-                          const mCount = parseInt(parts[1].trim()) || 0;
-                          if (char && mCount > 0) {
-                             mistakesAggregation[char] = (mistakesAggregation[char] || 0) + mCount;
-                          }
-                       }
-                    });
-                 }
-              });
-           }
-
-           const diffSection = document.getElementById('difficult-chars-section');
-           const diffList = document.getElementById('difficult-chars-list');
-           const sortedMistakes = Object.entries(mistakesAggregation).filter(([_, count]) => count > 0).sort((a, b) => b[1] - a[1]);
-
-           if (diffSection && diffList) {
-              if (sortedMistakes.length > 0) {
-                 diffSection.style.display = 'block';
-                 diffList.innerHTML = sortedMistakes.slice(0, 5).map(([char, count]) => `
-                    <span class="difficult-char-badge">🔥 ${char}: ${count} kesalahan</span>
-                 `).join('');
-              } else {
-                 diffSection.style.display = 'none';
+           (subs || []).forEach((s, idx) => {
+              if (s && s.student_name && !usedSubIndices.has(idx)) {
+                 displayRows.push(Object.assign({}, s, {
+                    student_class: s.class || (currentActiveTaskClasses.length === 1 ? currentActiveTaskClasses[0] : '')
+                 }));
               }
-           }
+           });
+
+           window.currentDetailRows = displayRows;
+           renderDetailClassFilterBar();
+           renderDetailRowsTable();
         } catch (err) {
            console.error('viewTaskResults error:', err);
-           if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:25px; color:#EF4444;">Gagal memuat data: ${err.message}</td></tr>`;
+           if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:25px; color:#EF4444;">Gagal memuat data: ${escapeHtml(err.message)}</td></tr>`;
         }
 
         // 4. Fetch Leaderboard for this Task ID
@@ -2642,6 +3636,7 @@
         if (lbTbody) lbTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:var(--text-muted);">⏳ Memuat data peringkat...</td></tr>';
         try {
            currentTeacherLbData = await DB.getLeaderboard(id, cls, currentTeacherLbScope);
+           renderTeacherLeaderboardPills();
            renderTeacherLeaderboard();
         } catch (e) {
            console.warn('Leaderboard load error:', e);
