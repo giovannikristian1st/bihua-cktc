@@ -239,30 +239,92 @@
     
     .sticky-table-wrapper {
       max-height: none !important;
-      overflow-x: auto;
-      overflow-y: visible !important;
+      overflow: visible !important;
       border: 1px solid var(--border);
       border-radius: 10px;
       background: #FFFFFF;
       box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
+
+    /* Normal static headers for Riwayat Tugas & Options */
+    #view-history table.data-table thead th,
+    #view-options table.data-table thead th {
+      position: static !important;
+      top: auto !important;
+      background: transparent !important;
+      color: #FFFFFF !important;
+      box-shadow: none !important;
+    }
     
-    table.data-table thead th {
+    /* Sticky header ONLY for Detail Hasil and Leaderboard tables */
+    #tab-content-results table.data-table thead th {
       position: sticky;
-      top: var(--detail-table-header-top, 140px);
+      top: var(--detail-table-header-top, 180px);
       z-index: 35;
       background: var(--primary-dark) !important;
       color: white !important;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
     }
 
-    table.data-table thead.lb-head th {
+    #tab-content-leaderboard table.data-table thead.lb-head th {
       position: sticky;
-      top: var(--detail-table-header-top, 140px);
+      top: var(--detail-table-header-top, 180px);
       z-index: 35;
       background: #F59E0B !important;
       color: white !important;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    }
+
+    /* Status Filter Bar (Sudah / Belum Mengerjakan) */
+    .detail-status-filter-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      margin-bottom: 2px;
+    }
+
+    .status-filter-pill {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .status-filter-pill:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .status-filter-pill.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .status-filter-pill.pill-done.active {
+      background: #059669;
+      border-color: #059669;
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+    }
+
+    .status-filter-pill.pill-pending.active {
+      background: #D97706;
+      border-color: #D97706;
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
     }
 
     /* Task Detail Switch Tabs */
@@ -1185,7 +1247,10 @@
 
         <div id="detail-remedial-banner" style="display:none; padding:10px 14px; border-radius:8px; background:#FEF3C7; border:1px solid #F59E0B; color:#92400E; font-size:0.9rem; font-weight:600; margin-bottom:12px;"></div>
 
-        <div id="detail-class-filter-bar" class="detail-class-pills" style="display:none; margin-bottom:0;"></div>
+        <div id="detail-class-filter-bar" class="detail-class-pills" style="display:none; margin-bottom:6px;"></div>
+
+        <!-- STATUS FILTER (SUDAH / BELUM MENGERJAKAN) -->
+        <div id="detail-status-filter-bar" class="detail-status-filter-bar" style="display:none;"></div>
      </div>
 
      <!-- TAB 1: DAFTAR PENGERJAAN SISWA -->
@@ -3562,9 +3627,12 @@
     function updateDetailStickyOffset() {
        requestAnimationFrame(() => {
           const master = document.getElementById('detail-sticky-master');
-          if (master) {
+          const detailsView = document.getElementById('view-task-details');
+          if (master && detailsView && detailsView.style.display !== 'none') {
              const h = master.offsetHeight;
-             document.documentElement.style.setProperty('--detail-table-header-top', `${h}px`);
+             if (h > 0) {
+                document.documentElement.style.setProperty('--detail-table-header-top', `${h}px`);
+             }
           }
        });
     }
@@ -3605,6 +3673,7 @@
         if (classes.length <= 1) {
             bar.style.display = 'none';
             window.currentDetailFilterClass = 'ALL';
+            renderDetailStatusFilterBar();
             updateDetailStickyOffset();
             return;
         }
@@ -3634,6 +3703,7 @@
             btn.onclick = () => {
                 window.currentDetailFilterClass = filterVal;
                 renderDetailClassFilterBar();
+                renderDetailStatusFilterBar();
                 renderDetailRowsTable();
                 updateDetailStickyOffset();
             };
@@ -3648,7 +3718,51 @@
             const denominator = stCount > 0 ? stCount : clsRows.length;
             addPill(`${c} (${clsDone}/${denominator})`, c);
         });
+        renderDetailStatusFilterBar();
         updateDetailStickyOffset();
+    }
+
+    function renderDetailStatusFilterBar() {
+        const bar = document.getElementById('detail-status-filter-bar');
+        if (!bar) return;
+        bar.innerHTML = '';
+
+        const allRows = window.currentDetailRows || [];
+        if (allRows.length === 0) {
+            bar.style.display = 'none';
+            return;
+        }
+
+        bar.style.display = 'flex';
+
+        // Filter rows by currently active class to compute accurate counts for this class
+        let scopedRows = allRows;
+        if (window.currentDetailFilterClass && window.currentDetailFilterClass !== 'ALL') {
+            scopedRows = allRows.filter(r => (r.student_class || '').toUpperCase() === window.currentDetailFilterClass.toUpperCase());
+        }
+
+        const totalCount = scopedRows.length;
+        const doneCount = scopedRows.filter(r => r.status === 'Selesai').length;
+        const pendingCount = totalCount - doneCount;
+
+        const makePill = (label, statusVal, pillType) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            const isActive = (window.currentDetailFilterStatus === statusVal);
+            btn.className = `status-filter-pill ${pillType}` + (isActive ? ' active' : '');
+            btn.textContent = label;
+            btn.onclick = () => {
+                window.currentDetailFilterStatus = statusVal;
+                renderDetailStatusFilterBar();
+                renderDetailRowsTable();
+                updateDetailStickyOffset();
+            };
+            bar.appendChild(btn);
+        };
+
+        makePill(`Semua Status (${totalCount})`, 'ALL', 'pill-all');
+        makePill(`✓ Sudah Mengerjakan (${doneCount})`, 'SELESAI', 'pill-done');
+        makePill(`⏳ Belum Mengerjakan (${pendingCount})`, 'BELUM', 'pill-pending');
     }
 
     function renderDetailRowsTable() {
@@ -3657,15 +3771,30 @@
         tbody.innerHTML = '';
 
         let rowsToRender = window.currentDetailRows || [];
+
+        // 1. Filter by Class
         if (window.currentDetailFilterClass && window.currentDetailFilterClass !== 'ALL') {
             rowsToRender = rowsToRender.filter(r => (r.student_class || '').toUpperCase() === window.currentDetailFilterClass.toUpperCase());
+        }
+
+        // 2. Filter by Status (Sudah / Belum)
+        if (window.currentDetailFilterStatus === 'SELESAI') {
+            rowsToRender = rowsToRender.filter(r => r.status === 'Selesai');
+        } else if (window.currentDetailFilterStatus === 'BELUM') {
+            rowsToRender = rowsToRender.filter(r => r.status !== 'Selesai');
         }
 
         const isMultiClass = currentActiveTaskClasses.length > 1;
         let mistakesAggregation = {};
 
         if (rowsToRender.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">📭 Belum ada data murid untuk ditampilkan.</td></tr>';
+            let emptyMessage = '📭 Belum ada data murid untuk ditampilkan.';
+            if (window.currentDetailFilterStatus === 'SELESAI') {
+                emptyMessage = '⏳ Belum ada murid yang selesai mengerjakan tugas untuk filter ini.';
+            } else if (window.currentDetailFilterStatus === 'BELUM') {
+                emptyMessage = '🎉 Hebat! Semua murid untuk filter ini sudah selesai mengerjakan tugas.';
+            }
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:35px 20px; color:var(--text-muted); font-size:1rem;">${emptyMessage}</td></tr>`;
         } else {
             rowsToRender.forEach(r => {
                 const isComplete = r.status === 'Selesai';
@@ -3690,11 +3819,19 @@
                     ? `<span class="class-mini-badge">${escapeHtml(r.student_class)}</span>`
                     : '';
 
+                // Clean repetition format: strictly 1x, 2x, 3x - never 3xx
+                let repText = '-';
+                if (isComplete) {
+                    let rawRep = String(r.repetitions || 1).replace(/x+/gi, '').trim();
+                    const countNum = parseInt(rawRep, 10) || 1;
+                    repText = `${countNum}x`;
+                }
+
                 tr.innerHTML = `
                     <td><b>${escapeHtml(r.student_name)}</b>${clsBadge}</td>
                     <td>${dateStr}</td>
                     <td>${statusBadge}</td>
-                    <td>${isComplete ? (r.repetitions || 1) + 'x' : '-'}</td>
+                    <td>${repText}</td>
                     <td><small>${isComplete ? escapeHtml(r.mistakes_detail || '-') : '-'}</small></td>
                 `;
                 tbody.appendChild(tr);
@@ -3743,6 +3880,7 @@
         currentTeacherLbFilterClass = 'ALL';
         currentTeacherLbScope = (currentActiveTaskClasses.length > 1) ? 'task' : 'class';
         window.currentDetailFilterClass = 'ALL';
+        window.currentDetailFilterStatus = 'ALL';
 
         const tType = taskType || 'tugas';
         const typeBadge = tType === 'remedial' ? '🔁 Remedial' : '📝 Tugas Reguler';
@@ -3870,7 +4008,7 @@
                     student_name: entry.name,
                     student_class: entry.cls,
                     status: 'Selesai',
-                    repetitions: completionsCount + 'x'
+                    repetitions: completionsCount
                  }));
               } else {
                  displayRows.push({
@@ -3895,13 +4033,14 @@
                     student_name: latestSub.student_name,
                     student_class: latestSub.class || (currentActiveTaskClasses.length === 1 ? currentActiveTaskClasses[0] : ''),
                     status: 'Selesai',
-                    repetitions: completionsCount + 'x'
+                    repetitions: completionsCount
                  }));
               }
            }
 
            window.currentDetailRows = displayRows;
            renderDetailClassFilterBar();
+           renderDetailStatusFilterBar();
            renderDetailRowsTable();
            updateDetailStickyOffset();
         } catch (err) {
