@@ -74,16 +74,62 @@
     
     .nav-bar {
       background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      padding: 15px 30px;
+      padding: 14px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
       color: white;
       margin-bottom: 30px;
       box-shadow: 0 4px 15px rgba(27, 94, 32, 0.2);
     }
     
     .nav-title { font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+
+    /* Centered Header Teacher Selector */
+    .nav-teacher-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.16);
+      padding: 5px 14px;
+      border-radius: 30px;
+      border: 1.5px solid rgba(255, 255, 255, 0.38);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(8px);
+    }
+    .header-teacher-select {
+      width: auto !important;
+      min-width: 180px;
+      max-width: 260px;
+      padding: 6px 14px !important;
+      border-radius: 20px !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+      background-color: #FFFFFF !important;
+      color: #0E1318 !important;
+      font-weight: 800 !important;
+      font-size: 0.95rem !important;
+      cursor: pointer;
+      outline: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      transition: all 0.2s ease;
+    }
+    .header-teacher-select:focus {
+      border-color: #FFFFFF !important;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45) !important;
+    }
+
+    body.theme-teacher-harrypotter .nav-teacher-center { border-color: #EEBA30; }
+    body.theme-teacher-harrypotter .header-teacher-select { border-color: #EEBA30 !important; color: #740001 !important; }
+    body.theme-teacher-lotr .nav-teacher-center { border-color: #FDE047; }
+    body.theme-teacher-lotr .header-teacher-select { border-color: #D97706 !important; color: #78350F !important; }
+    body.theme-teacher-insideout .nav-teacher-center { border-color: #FCD34D; }
+    body.theme-teacher-insideout .header-teacher-select { border-color: #D97706 !important; color: #92400E !important; }
+    body.theme-teacher-marvel .nav-teacher-center { border-color: #ED1D24; }
+    body.theme-teacher-marvel .header-teacher-select { border-color: #ED1D24 !important; color: #ED1D24 !important; }
+    body.theme-teacher-barbie .nav-teacher-center { border-color: #FBCFE8; }
+    body.theme-teacher-barbie .header-teacher-select { border-color: #E0218A !important; color: #E0218A !important; }
     
     .nav-links { display: flex; gap: 12px; }
     .nav-btn {
@@ -1009,6 +1055,16 @@
       <span>🖌️ Brush Master Admin</span>
       <span id="teacher-theme-badge" style="display:none; font-size:0.75rem; padding:3px 10px; border-radius:20px; background:rgba(255,255,255,0.22); font-weight:bold; vertical-align:middle; border:1px solid rgba(255,255,255,0.4); text-transform:none; letter-spacing:normal;"></span>
     </div>
+
+    <!-- HEADER TEACHER SELECTOR (BAGIAN TENGAH) -->
+    <div class="nav-teacher-center">
+      <span style="font-size:1.15rem; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.2));">👩‍🏫</span>
+      <label for="teacher-name" style="margin:0; font-size:0.9rem; font-weight:700; color:#FFFFFF; white-space:nowrap; text-transform:none; letter-spacing:normal;">Guru:</label>
+      <select id="teacher-name" class="header-teacher-select">
+        <option value="">Pilih Guru...</option>
+      </select>
+    </div>
+
     <div class="nav-links" style="display:flex; align-items:center; gap:10px;">
       <button id="btn-harry-music" class="nav-btn" onclick="toggleHedwigMusic()" style="display:none; background:rgba(238,186,48,0.25); border:1.5px solid #EEBA30; color:#FFE484; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">⚡ 🎵 Hedwig's Theme <span id="music-state-icon">▶</span></button>
       <button id="btn-gio-music" class="nav-btn" onclick="toggleLotrMusic()" style="display:none; background:rgba(254,240,138,0.25); border:1.5px solid #FDE047; color:#FFF8D6; font-size:0.85rem; padding:6px 14px; border-radius:20px; font-weight:bold; cursor:pointer; align-items:center; gap:6px;">💍 🎵 LOTR Theme <span id="music-state-icon-gio">▶</span></button>
@@ -1034,21 +1090,14 @@
     </header>
 
     <div class="card">
-      <div class="form-group">
-        <label>Nama Guru</label>
-        <select id="teacher-name">
-          <option value="">Pilih Guru...</option>
-        </select>
-      </div>
-
       <div class="grid-2">
         <div class="form-group">
           <label>
             Pilih Kelas (Bisa 1 atau Beberapa Kelas)
-            <span id="class-selected-summary" class="class-selected-summary">Pilih Guru dulu</span>
+            <span id="class-selected-summary" class="class-selected-summary">Pilih Guru di header atas</span>
           </label>
           <div id="class-picker-box" class="class-picker-box disabled-box">
-            <div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih Nama Guru terlebih dahulu...</div>
+            <div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih Guru di header atas terlebih dahulu...</div>
           </div>
         </div>
 
@@ -2079,8 +2128,8 @@
 
        if (!currentTeacher || !DB_TEACHERS[currentTeacher]) {
           box.classList.add('disabled-box');
-          box.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih Nama Guru terlebih dahulu...</div>';
-          if (summary) summary.textContent = 'Pilih Guru dulu';
+          box.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih Guru di header atas terlebih dahulu...</div>';
+          if (summary) summary.textContent = 'Pilih Guru di header atas';
           return;
        }
 
@@ -2490,6 +2539,17 @@
        currentTeacher = e.target.value;
        updateClassSelect(currentTeacher);
        saveTeacherState();
+       
+       // Update badge & re-filter history table in real-time
+       const teacherBadge = document.getElementById('history-active-teacher-name');
+       if (teacherBadge) {
+          teacherBadge.textContent = currentTeacher ? `👩‍🏫 ${currentTeacher}` : 'Semua Guru (Belum Dipilih)';
+       }
+       if (window.allHistoryTasks) {
+          renderHistoryTable();
+       } else if (document.getElementById('view-history') && document.getElementById('view-history').style.display !== 'none') {
+          fetchTasks();
+       }
     });
     
     // --- LIVE VOCABULARY SEARCH ---
