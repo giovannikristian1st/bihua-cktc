@@ -279,27 +279,41 @@ var DB = {
       }
    },
 
-   getAllProgressCount: async function() {
-      // Query unique submissions per task (deduplicated per student_name + class)
+   getAllProgressInfo: async function() {
+      // Query unique submissions and distinct classes per task
       const res = await fetch(`${this.url}/rest/v1/submissions?select=task_id,student_name,class`, {
          headers: this.getHeaders()
       });
-      if (!res.ok) return {};
+      if (!res.ok) return { countMap: {}, classMap: {} };
       const data = await res.json();
-      const map = {};
+      const studentMap = {};
+      const classMap = {};
       data.forEach(row => {
          const tid = row.task_id;
          const sName = (row.student_name || '').trim().toUpperCase();
          const sCls = (row.class || '').trim().toUpperCase();
          if (!sName) return;
-         if (!map[tid]) map[tid] = new Set();
-         map[tid].add(`${sName}__${sCls}`);
+         if (!studentMap[tid]) studentMap[tid] = new Set();
+         studentMap[tid].add(`${sName}__${sCls}`);
+         if (sCls && sCls !== '-' && sCls !== 'TIDAK DIKETAHUI') {
+            if (!classMap[tid]) classMap[tid] = new Set();
+            classMap[tid].add(sCls);
+         }
       });
       const countMap = {};
-      for (const tid in map) {
-         countMap[tid] = map[tid].size;
+      for (const tid in studentMap) {
+         countMap[tid] = studentMap[tid].size;
       }
-      return countMap;
+      const classListMap = {};
+      for (const tid in classMap) {
+         classListMap[tid] = Array.from(classMap[tid]);
+      }
+      return { countMap: countMap, classMap: classListMap };
+   },
+
+   getAllProgressCount: async function() {
+      const info = await this.getAllProgressInfo();
+      return (info && info.countMap) ? info.countMap : {};
    },
 
    // --- TEACHERS ---

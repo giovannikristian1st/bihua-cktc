@@ -100,7 +100,7 @@
     .nav-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     
     .container {
-      max-width: 1100px;
+      max-width: 1560px;
       width: 95%;
       margin: 0 auto;
       padding-bottom: 50px;
@@ -200,38 +200,69 @@
       content:''; position: absolute; top: 0; bottom: 0; left: 25px; border-left: 1px dashed #FFCDD2;
     }
 
-    /* Sticky Task Detail Header & Table Freeze */
-    .sticky-task-header {
+    /* Difficult Characters Analysis */
+    .difficult-char-card {
+      background: #FFF1F2;
+      border: 1.5px solid #FECDD3;
+      border-radius: 12px;
+      padding: 14px 18px;
+    }
+    .difficult-char-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      border: 1px solid #FDA4AF;
+      color: #BE123C;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-right: 8px;
+      margin-top: 6px;
+    }
+
+    /* Sticky Task Detail Master Panel & Table Freeze */
+    .detail-sticky-master {
       position: sticky;
       top: 0;
       z-index: 50;
       background: var(--bg);
-      padding: 10px 0 16px 0;
+      padding: 10px 0 10px 0;
       border-bottom: 2px solid var(--border);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+    }
+
+    .sticky-task-header {
+      padding: 0 0 10px 0;
     }
     
     .sticky-table-wrapper {
-      max-height: 55vh;
-      overflow-y: auto;
+      max-height: none !important;
+      overflow-x: auto;
+      overflow-y: visible !important;
       border: 1px solid var(--border);
       border-radius: 10px;
       background: #FFFFFF;
       box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     
-    .sticky-table-wrapper table.data-table thead th {
+    table.data-table thead th {
       position: sticky;
-      top: 0;
-      z-index: 20;
+      top: var(--detail-table-header-top, 140px);
+      z-index: 35;
       background: var(--primary-dark) !important;
       color: white !important;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    .sticky-table-wrapper table.data-table thead.lb-head th {
+    table.data-table thead.lb-head th {
+      position: sticky;
+      top: var(--detail-table-header-top, 140px);
+      z-index: 35;
       background: #F59E0B !important;
       color: white !important;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     /* Task Detail Switch Tabs */
@@ -371,6 +402,94 @@
       text-transform: none;
       letter-spacing: normal;
       margin-left: 8px;
+    }
+
+    /* Class Checkbox Chip */
+    .class-checkbox-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .class-checkbox-chip:hover {
+      border-color: var(--primary);
+      background: rgba(27, 94, 32, 0.04);
+      transform: translateY(-1px);
+    }
+    .class-checkbox-chip.active {
+      background: rgba(27, 94, 32, 0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(27, 94, 32, 0.15);
+    }
+    .class-checkbox-chip input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Remedial Pop-up Modal */
+    .remedial-modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(2px);
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .remedial-modal-box {
+      background: var(--card, #FFFFFF);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 920px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .remedial-modal-header {
+      padding: 18px 24px;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg);
+    }
+    .remedial-modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .remedial-modal-footer {
+      padding: 14px 24px;
+      border-top: 1.5px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg);
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     /* Remedial Student Selector */
@@ -896,26 +1015,19 @@
         </div>
       </div>
 
-      <!-- PEMILIH SISWA KHUSUS REMEDIAL -->
+      <!-- PEMILIH SISWA KHUSUS REMEDIAL (TRIGGER & SELECTED PILLS) -->
       <div id="remedial-student-panel" class="remedial-picker-panel" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
           <div>
-            <h4 style="margin:0; color:#B45309; font-size:1.05rem;">🎯 Pilih Siswa yang Mengerjakan Remedial</h4>
-            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">Hanya siswa yang dicentang yang namanya akan muncul di link remedial ini.</div>
+            <h4 style="margin:0; color:#B45309; font-size:1.05rem;">🎯 Siswa yang Mengerjakan Remedial</h4>
+            <div style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Buka jendela pop-up untuk mencentang nama siswa yang harus remedial.</div>
           </div>
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span id="remedial-count-badge" style="background:#D97706; color:white; padding:4px 12px; border-radius:20px; font-size:0.82rem; font-weight:bold;">Terpilih: 0 siswa</span>
-            <button type="button" class="class-quick-btn" id="remedial-select-all-btn">✓ Pilih Semua</button>
-            <button type="button" class="class-quick-btn reset-btn" id="remedial-clear-all-btn" style="margin-left:0;">✕ Reset</button>
-          </div>
+          <button type="button" class="btn" id="btn-open-remedial-modal" style="width:auto; padding:10px 22px; font-size:0.95rem; display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg, #D97706, #F59E0B); box-shadow:0 4px 14px rgba(217,119,6,0.25);" onclick="openRemedialModal()">
+            <span>🎯 Pilih Nama Murid Remedial</span>
+            <span id="remedial-btn-count" style="background:rgba(0,0,0,0.2); padding:2px 8px; border-radius:12px; font-size:0.82rem;">(0 Siswa)</span>
+          </button>
         </div>
-        <div id="remedial-selected-pills" class="remedial-selected-pills" style="display:none;"></div>
-        <div style="margin-bottom:10px;">
-          <input type="text" id="remedial-student-search" class="form-control" placeholder="🔍 Cari nama siswa remedial..." style="padding:9px 12px; font-size:0.92rem;" autocomplete="off">
-        </div>
-        <div id="remedial-students-container">
-          <div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih minimal 1 kelas terlebih dahulu...</div>
-        </div>
+        <div id="remedial-selected-pills" class="remedial-selected-pills" style="display:none; margin-top:14px; margin-bottom:0;"></div>
       </div>
     </div>
 
@@ -1046,37 +1158,39 @@
   
   <!-- TASK DETAILS -->
   <div class="container" id="view-task-details" style="display:none; padding-top:10px;">
-     <!-- STICKY TOP BAR -->
-     <div class="sticky-task-header">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-           <div>
-              <h1 style="font-size:1.65rem; margin:0; line-height:1.2;">Detail Hasil Tugas</h1>
-              <div style="display:flex; gap:15px; align-items:center; margin-top:5px;">
-                 <span id="detail-task-id" style="font-weight:bold; color:var(--primary); font-size:1.05rem;">ID: -</span>
-                 <span id="detail-task-info" style="color:var(--text-muted); font-size:0.95rem; font-weight:600;"></span>
+     <!-- MASTER STICKY PANEL -->
+     <div id="detail-sticky-master" class="detail-sticky-master">
+        <div class="sticky-task-header">
+           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div>
+                 <h1 style="font-size:1.65rem; margin:0; line-height:1.2;">Detail Hasil Tugas</h1>
+                 <div style="display:flex; gap:15px; align-items:center; margin-top:5px;">
+                    <span id="detail-task-id" style="font-weight:bold; color:var(--primary); font-size:1.05rem;">ID: -</span>
+                    <span id="detail-task-info" style="color:var(--text-muted); font-size:0.95rem; font-weight:600;"></span>
+                 </div>
               </div>
+              <button class="btn copy-btn" style="width:auto; padding:10px 22px; margin:0; font-weight:bold; font-size:0.95rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); cursor:pointer;" onclick="showView('view-history')">🔙 Kembali ke Riwayat</button>
            </div>
-           <button class="btn copy-btn" style="width:auto; padding:10px 22px; margin:0; font-weight:bold; font-size:0.95rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); cursor:pointer;" onclick="showView('view-history')">🔙 Kembali ke Riwayat</button>
         </div>
-     </div>
 
-     <!-- TAB NAVIGATION SWITCHER -->
-     <div class="task-detail-tab-bar">
-        <button id="tab-btn-results" class="detail-tab-btn active" onclick="switchDetailTab('results')">
-           📋 Daftar Pengerjaan Siswa
-        </button>
-        <button id="tab-btn-leaderboard" class="detail-tab-btn" onclick="switchDetailTab('leaderboard')">
-           🏆 Papan Peringkat (Leaderboard)
-        </button>
+        <!-- TAB NAVIGATION SWITCHER -->
+        <div class="task-detail-tab-bar" style="margin-bottom:12px; padding-bottom:8px;">
+           <button id="tab-btn-results" class="detail-tab-btn active" onclick="switchDetailTab('results')">
+              📋 Daftar Pengerjaan Siswa
+           </button>
+           <button id="tab-btn-leaderboard" class="detail-tab-btn" onclick="switchDetailTab('leaderboard')">
+              🏆 Papan Peringkat (Leaderboard)
+           </button>
+        </div>
+
+        <div id="detail-remedial-banner" style="display:none; padding:10px 14px; border-radius:8px; background:#FEF3C7; border:1px solid #F59E0B; color:#92400E; font-size:0.9rem; font-weight:600; margin-bottom:12px;"></div>
+
+        <div id="detail-class-filter-bar" class="detail-class-pills" style="display:none; margin-bottom:0;"></div>
      </div>
 
      <!-- TAB 1: DAFTAR PENGERJAAN SISWA -->
      <div id="tab-content-results" class="card" style="padding-top:16px;">
-        <div id="detail-remedial-banner" style="display:none; padding:10px 14px; border-radius:8px; background:#FEF3C7; border:1px solid #F59E0B; color:#92400E; font-size:0.9rem; font-weight:600; margin-bottom:14px;"></div>
-
-        <div id="detail-class-filter-bar" class="detail-class-pills" style="display:none;"></div>
-
-        <!-- ANALISIS HURUF TERSULIT -->
+        <!-- ANALISIS HURUF TERSULIT (SCROLLS NATURALLY) -->
         <div id="difficult-chars-section" class="difficult-char-card" style="display:none; margin-bottom:20px;">
            <h4 style="color:#BE123C; margin-bottom:6px;">⚠️ Analisis Huruf Tersulit:</h4>
            <div id="difficult-chars-list"></div>
@@ -1122,7 +1236,7 @@
            </div>
         </div>
         <div id="lb-teacher-class-pills" class="detail-class-pills" style="display:none;"></div>
-        <div class="sticky-table-wrapper" style="max-height:55vh;">
+        <div class="sticky-table-wrapper">
           <table class="data-table">
              <thead class="lb-head">
                 <tr>
@@ -1192,6 +1306,44 @@
        <div id="printable-worksheet-content" style="background:#FFFFFF; padding:20px; font-family:'Kaiti', 'KaiTi', STKaiti, serif;">
           <!-- Generated via JS -->
        </div>
+    </div>
+  </div>
+
+  <!-- REMEDIAL STUDENT SELECTION MODAL -->
+  <div id="remedial-modal" class="remedial-modal-backdrop">
+    <div class="remedial-modal-box">
+      <div class="remedial-modal-header">
+        <div>
+          <h3 style="margin:0; color:#B45309; font-size:1.2rem; display:flex; align-items:center; gap:8px;">
+            <span>🎯</span> Pilih Siswa Remedial
+          </h3>
+          <p style="margin:2px 0 0 0; color:var(--text-muted); font-size:0.85rem;">Centang siswa yang harus mengerjakan tugas remedial.</p>
+        </div>
+        <button type="button" class="btn copy-btn" style="width:36px; height:36px; padding:0; border-radius:50%; font-size:1.2rem; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="closeRemedialModal()">✕</button>
+      </div>
+      <div class="remedial-modal-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+          <div style="flex:1; min-width:240px;">
+            <input type="text" id="remedial-student-search" class="form-control" placeholder="🔍 Cari nama siswa remedial..." style="padding:10px 14px; font-size:0.95rem; border-radius:8px;" autocomplete="off">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="class-quick-btn" id="remedial-select-all-btn">✓ Pilih Semua</button>
+            <button type="button" class="class-quick-btn reset-btn" id="remedial-clear-all-btn" style="margin-left:0;">✕ Reset Semua</button>
+          </div>
+        </div>
+        <div id="remedial-students-container">
+          <div style="color:var(--text-muted); font-size:0.9rem;">Silakan pilih minimal 1 kelas terlebih dahulu...</div>
+        </div>
+      </div>
+      <div class="remedial-modal-footer">
+        <div style="font-weight:bold; color:#B45309; font-size:0.95rem;" id="remedial-modal-footer-count">
+          Total Terpilih: 0 Siswa
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn copy-btn" style="width:auto; padding:10px 18px; cursor:pointer;" onclick="closeRemedialModal()">Batal</button>
+          <button type="button" class="btn" style="width:auto; padding:10px 24px; background:#10B981; cursor:pointer;" onclick="closeRemedialModal()">✓ Selesai & Simpan</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1949,19 +2101,28 @@
 
           g.classes.forEach(c => {
              const isSel = selectedClasses.includes(c);
-             const chip = document.createElement('button');
-             chip.type = 'button';
-             chip.className = 'class-chip' + (isSel ? ' active' : '');
-             chip.textContent = c;
-             chip.onclick = () => {
-                if (selectedClasses.includes(c)) {
-                   selectedClasses = selectedClasses.filter(item => item !== c);
+             const label = document.createElement('label');
+             label.className = 'class-checkbox-chip' + (isSel ? ' active' : '');
+
+             const cb = document.createElement('input');
+             cb.type = 'checkbox';
+             cb.checked = isSel;
+             cb.addEventListener('change', (e) => {
+                e.stopPropagation();
+                if (cb.checked) {
+                   if (!selectedClasses.includes(c)) selectedClasses.push(c);
                 } else {
-                   selectedClasses.push(c);
+                   selectedClasses = selectedClasses.filter(item => item !== c);
                 }
                 onClassesSelectionChanged();
-             };
-             row.appendChild(chip);
+             });
+
+             const txt = document.createElement('span');
+             txt.textContent = c;
+
+             label.appendChild(cb);
+             label.appendChild(txt);
+             row.appendChild(label);
           });
 
           groupsContainer.appendChild(row);
@@ -2000,11 +2161,56 @@
        if (!skipSave) saveTeacherState();
     }
 
+    function openRemedialModal() {
+       const activeClasses = getSelectedClasses();
+       if (activeClasses.length === 0) {
+          alert('Silakan pilih minimal 1 kelas terlebih dahulu di form Buat Tugas!');
+          return;
+       }
+       const modal = document.getElementById('remedial-modal');
+       if (modal) {
+          modal.style.display = 'flex';
+          renderRemedialStudentPicker();
+          const search = document.getElementById('remedial-student-search');
+          if (search) search.focus();
+       }
+    }
+
+    function closeRemedialModal() {
+       const modal = document.getElementById('remedial-modal');
+       if (modal) modal.style.display = 'none';
+       updateRemedialSummaryUI();
+       updateGenerateBtn();
+       saveTeacherState();
+    }
+
+    window.addEventListener('click', (e) => {
+       const modal = document.getElementById('remedial-modal');
+       if (modal && e.target === modal) {
+          closeRemedialModal();
+       }
+    });
+
+    window.addEventListener('keydown', (e) => {
+       if (e.key === 'Escape') {
+          const modal = document.getElementById('remedial-modal');
+          if (modal && modal.style.display === 'flex') {
+             closeRemedialModal();
+          }
+       }
+    });
+
     function updateRemedialSummaryUI() {
        const activeClasses = getSelectedClasses();
        const totalSelected = getSelectedRemedialTotal();
        const badge = document.getElementById('remedial-count-badge');
        if (badge) badge.textContent = `Terpilih: ${totalSelected} siswa`;
+
+       const btnCount = document.getElementById('remedial-btn-count');
+       if (btnCount) btnCount.textContent = `(${totalSelected} Siswa Terpilih)`;
+
+       const footerCount = document.getElementById('remedial-modal-footer-count');
+       if (footerCount) footerCount.textContent = `Total Terpilih: ${totalSelected} Siswa`;
 
        const pillsContainer = document.getElementById('remedial-selected-pills');
        if (pillsContainer) {
@@ -2940,13 +3146,15 @@
           teacherBadge.textContent = activeTeacher ? `👩‍🏫 ${activeTeacher}` : 'Semua Guru (Belum Dipilih)';
        }
        
-       // 1. Fetch bulk progress map for accurate submission counts
-       let progressMap = {};
+       // 1. Fetch bulk progress info (unique counts & classes from submissions)
+       let progressInfo = { countMap: {}, classMap: {} };
        try {
-          progressMap = await DB.getAllProgressCount();
+          progressInfo = await DB.getAllProgressInfo();
        } catch(e) {
-          console.warn("Gagal memuat progress map", e);
+          console.warn("Gagal memuat progress info", e);
        }
+       const progressMap = progressInfo.countMap || {};
+       const progressClassMap = progressInfo.classMap || {};
        
        const filteredTasks = window.allHistoryTasks.filter(t => {
           let payload = {};
@@ -2973,6 +3181,11 @@
           let payload = {};
           try { payload = typeof t.payload === 'string' ? JSON.parse(t.payload) : (t.payload || {}); } catch(e) {}
           const taskClasses = parseTaskClasses(payload, t.class);
+          if (progressClassMap[t.id] && Array.isArray(progressClassMap[t.id])) {
+             progressClassMap[t.id].forEach(c => {
+                if (c && c !== '-' && !taskClasses.includes(c)) taskClasses.push(c);
+             });
+          }
           const cls = taskClasses.length > 0 ? taskClasses.join(', ') : String(payload.cls || t.class || '-');
           const guru = String(payload.guru || t.teacher_name || '-');
           const babInfo = getBabStringFromPayload(payload);
@@ -3002,11 +3215,11 @@
           } else if (taskClasses.length > 0) {
              taskClasses.forEach(c => {
                 const st = getStudentsForClass(c);
-                totalStudents += (st.length > 0 ? st.length : 30);
+                totalStudents += (st.length > 0 ? st.length : 32);
              });
              totalStudents = Math.max(1, totalStudents);
           } else {
-             totalStudents = 30;
+             totalStudents = 32;
           }
           
           const count = progressMap[t.id] || 0;
@@ -3346,6 +3559,17 @@
         });
     }
 
+    function updateDetailStickyOffset() {
+       requestAnimationFrame(() => {
+          const master = document.getElementById('detail-sticky-master');
+          if (master) {
+             const h = master.offsetHeight;
+             document.documentElement.style.setProperty('--detail-table-header-top', `${h}px`);
+          }
+       });
+    }
+    window.addEventListener('resize', updateDetailStickyOffset);
+
     function switchDetailTab(tabName) {
        const tabResults = document.getElementById('tab-content-results');
        const tabLb = document.getElementById('tab-content-leaderboard');
@@ -3357,12 +3581,14 @@
           if (tabLb) tabLb.style.display = 'none';
           if (btnResults) btnResults.classList.add('active');
           if (btnLb) btnLb.classList.remove('active');
+          updateDetailStickyOffset();
        } else {
           if (tabResults) tabResults.style.display = 'none';
           if (tabLb) tabLb.style.display = 'block';
           if (btnResults) btnResults.classList.remove('active');
           if (btnLb) btnLb.classList.add('active');
           fetchTeacherLeaderboard();
+          updateDetailStickyOffset();
        }
     }
 
@@ -3379,10 +3605,25 @@
         if (classes.length <= 1) {
             bar.style.display = 'none';
             window.currentDetailFilterClass = 'ALL';
+            updateDetailStickyOffset();
             return;
         }
 
         bar.style.display = 'flex';
+
+        let totalExpected = 0;
+        if (currentActiveTaskRs) {
+           Object.keys(currentActiveTaskRs).forEach(rc => {
+              totalExpected += (currentActiveTaskRs[rc] || []).length;
+           });
+        } else {
+           currentActiveTaskClasses.forEach(c => {
+              const st = getStudentsForClass(c);
+              totalExpected += (st.length > 0 ? st.length : 32);
+           });
+        }
+        if (totalExpected === 0) totalExpected = rows.length;
+
         const totalDone = rows.filter(r => r.status === 'Selesai').length;
 
         const addPill = (label, filterVal) => {
@@ -3394,16 +3635,20 @@
                 window.currentDetailFilterClass = filterVal;
                 renderDetailClassFilterBar();
                 renderDetailRowsTable();
+                updateDetailStickyOffset();
             };
             bar.appendChild(btn);
         };
 
-        addPill(`Semua Kelas (${totalDone}/${rows.length})`, 'ALL');
+        addPill(`Semua Kelas (${totalDone}/${totalExpected})`, 'ALL');
         classes.forEach(c => {
             const clsRows = rows.filter(r => (r.student_class || '').toUpperCase() === c.toUpperCase());
             const clsDone = clsRows.filter(r => r.status === 'Selesai').length;
-            addPill(`${c} (${clsDone}/${clsRows.length})`, c);
+            const stCount = getStudentsForClass(c).length;
+            const denominator = stCount > 0 ? stCount : clsRows.length;
+            addPill(`${c} (${clsDone}/${denominator})`, c);
         });
+        updateDetailStickyOffset();
     }
 
     function renderDetailRowsTable() {
@@ -3532,6 +3777,7 @@
                 remBanner.style.display = 'none';
             }
         }
+        updateDetailStickyOffset();
 
         const lbSubtitle = document.getElementById('lb-teacher-subtitle');
         if (lbSubtitle) lbSubtitle.textContent = `${typeBadge} • Bab ${babInfo || '-'}`;
@@ -3575,32 +3821,56 @@
               });
            }
 
-           const subsMapByKey = {};
-           const subsMapByName = {};
-           (subs || []).forEach((s, idx) => {
-              if (s && s.student_name) {
-                 const normName = s.student_name.trim().toUpperCase();
-                 const normCls = (s.class || '').trim().toUpperCase();
-                 const key = `${normName}__${normCls}`;
-                 if (!subsMapByKey[key]) subsMapByKey[key] = { sub: s, idx };
-                 if (!subsMapByName[normName]) subsMapByName[normName] = { sub: s, idx };
-              }
+           // Group submissions by student (normName + normCls)
+           const studentSubsGroup = {};
+           (subs || []).forEach(s => {
+              if (!s || !s.student_name) return;
+              const normName = s.student_name.trim().toUpperCase();
+              const normCls = (s.class || '').trim().toUpperCase();
+              const key = `${normName}__${normCls}`;
+              if (!studentSubsGroup[key]) studentSubsGroup[key] = [];
+              studentSubsGroup[key].push(s);
            });
 
+           function pickLatestSub(list) {
+              if (!list || list.length === 0) return null;
+              const sorted = [...list].sort((a, b) => {
+                 const tA = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+                 const tB = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+                 return tB - tA;
+              });
+              return sorted[0];
+           }
+
            const displayRows = [];
-           const usedSubIndices = new Set();
+           const matchedKeys = new Set();
 
            expectedRoster.forEach(entry => {
               const normName = entry.name.trim().toUpperCase();
               const normCls = entry.cls.trim().toUpperCase();
-              const exactHit = subsMapByKey[`${normName}__${normCls}`];
-              const fallbackHit = (currentActiveTaskClasses.length <= 1) ? subsMapByName[normName] : null;
-              const match = exactHit || fallbackHit;
+              const exactKey = `${normName}__${normCls}`;
+              let group = studentSubsGroup[exactKey];
 
-              if (match) {
-                 usedSubIndices.add(match.idx);
-                 displayRows.push(Object.assign({}, match.sub, {
-                    student_class: match.sub.class || entry.cls
+              // Fallback match by student name if task is for a single class
+              if (!group && currentActiveTaskClasses.length <= 1) {
+                 for (const k in studentSubsGroup) {
+                    if (k.startsWith(`${normName}__`)) {
+                       group = studentSubsGroup[k];
+                       matchedKeys.add(k);
+                       break;
+                    }
+                 }
+              }
+
+              if (group && group.length > 0) {
+                 matchedKeys.add(exactKey);
+                 const latestSub = pickLatestSub(group);
+                 const completionsCount = group.length;
+                 displayRows.push(Object.assign({}, latestSub, {
+                    student_name: entry.name,
+                    student_class: entry.cls,
+                    status: 'Selesai',
+                    repetitions: completionsCount + 'x'
                  }));
               } else {
                  displayRows.push({
@@ -3615,17 +3885,25 @@
               }
            });
 
-           (subs || []).forEach((s, idx) => {
-              if (s && s.student_name && !usedSubIndices.has(idx)) {
-                 displayRows.push(Object.assign({}, s, {
-                    student_class: s.class || (currentActiveTaskClasses.length === 1 ? currentActiveTaskClasses[0] : '')
+           // Extra submissions from students outside expected roster (added at most once)
+           for (const k in studentSubsGroup) {
+              if (!matchedKeys.has(k)) {
+                 const group = studentSubsGroup[k];
+                 const latestSub = pickLatestSub(group);
+                 const completionsCount = group.length;
+                 displayRows.push(Object.assign({}, latestSub, {
+                    student_name: latestSub.student_name,
+                    student_class: latestSub.class || (currentActiveTaskClasses.length === 1 ? currentActiveTaskClasses[0] : ''),
+                    status: 'Selesai',
+                    repetitions: completionsCount + 'x'
                  }));
               }
-           });
+           }
 
            window.currentDetailRows = displayRows;
            renderDetailClassFilterBar();
            renderDetailRowsTable();
+           updateDetailStickyOffset();
         } catch (err) {
            console.error('viewTaskResults error:', err);
            if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:25px; color:#EF4444;">Gagal memuat data: ${escapeHtml(err.message)}</td></tr>`;
