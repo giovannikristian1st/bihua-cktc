@@ -60,7 +60,7 @@ var DB = {
    },
 
    // --- SUBMISSIONS ---
-   submitAssignment: async function(taskId, className, studentName, totalMistakes, totalWords, repetitions, duration, mistakesMap, strokeMistakesMap) {
+   submitAssignment: async function(taskId, className, studentName, totalMistakes, totalWords, repetitions, duration, mistakesMap, strokeMistakesMap, metaStats) {
       let mistakesDetailStr = "";
       if (mistakesMap && typeof mistakesMap === 'object') {
          const parts = [];
@@ -76,6 +76,9 @@ var DB = {
             parts.push(`${char}: ${mistakesMap[char]}${sInfo}`);
          }
          mistakesDetailStr = parts.join(' | ');
+      }
+      if (metaStats && typeof metaStats === 'object') {
+         mistakesDetailStr += " ;; META:" + JSON.stringify(metaStats);
       }
 
       // Auto ensure task exists in tasks table to prevent foreign key errors for old/direct links

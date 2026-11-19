@@ -6,6 +6,7 @@
   <title>Brush Master - Portal Guru</title>
   
   <script src="meihuadb.js"></script>
+  <script src="brushstrokedb.js"></script>
   <script src="vocabdb.js"></script>
   <script src="students.js"></script>
   <script src="config.js"></script>
@@ -525,6 +526,45 @@
       color: #991B1B;
       font-size: 0.74rem;
       font-weight: 700;
+    }
+
+    /* Smart Pedagogical Insights Strip */
+    .pedagogical-insights-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .pedagogical-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+      transition: all 0.2s ease;
+    }
+    .pedagogical-chip:hover {
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .pedagogical-chip-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+    .pedagogical-chip-title {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pedagogical-chip-val {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-top: 2px;
     }
 
     /* Status Filter Bar (Sudah / Belum Mengerjakan) */
@@ -1645,20 +1685,81 @@
            </div>
         </div>
 
-        <!-- 3 VISUAL CHARTS GRID -->
+        <!-- SMART PEDAGOGICAL INSIGHTS STRIP -->
+        <div class="pedagogical-insights-strip" id="pedagogical-insights-strip">
+           <div class="pedagogical-chip">
+              <span class="pedagogical-chip-icon">📈</span>
+              <div>
+                 <div class="pedagogical-chip-title">Tren Perbaikan</div>
+                 <div class="pedagogical-chip-val" id="insight-improvement-val">-</div>
+              </div>
+           </div>
+           <div class="pedagogical-chip">
+              <span class="pedagogical-chip-icon">📱</span>
+              <div>
+                 <div class="pedagogical-chip-title">Perangkat Pengerjaan</div>
+                 <div class="pedagogical-chip-val" id="insight-device-val">-</div>
+              </div>
+           </div>
+           <div class="pedagogical-chip">
+              <span class="pedagogical-chip-icon">💡</span>
+              <div>
+                 <div class="pedagogical-chip-title">Kemandirian Siswa</div>
+                 <div class="pedagogical-chip-val" id="insight-independence-val">-</div>
+              </div>
+           </div>
+           <div class="pedagogical-chip">
+              <span class="pedagogical-chip-icon">⏳</span>
+              <div>
+                 <div class="pedagogical-chip-title">Karakter Ragu Terlama</div>
+                 <div class="pedagogical-chip-val" id="insight-hesitation-val">-</div>
+              </div>
+           </div>
+           <div class="pedagogical-chip">
+              <span class="pedagogical-chip-icon">🖌️</span>
+              <div>
+                 <div class="pedagogical-chip-title">Tipe Guratan Rentan</div>
+                 <div class="pedagogical-chip-val" id="insight-stroketype-val">-</div>
+              </div>
+           </div>
+        </div>
+
+        <!-- 5 VISUAL CHARTS GRID -->
         <div class="analytics-charts-grid">
-           <!-- CHART 1: TINGKAT PENGULANGAN / KETEKUNAN SISWA -->
+           <!-- CHART 1: KURVA PENINGKATAN BELAJAR (LEARNING CURVE) -->
            <div class="analytics-chart-card">
               <div class="analytics-chart-header">
-                 <h5 class="analytics-chart-title">🔁 Pengulangan Latihan (Ketekunan)</h5>
-                 <p class="analytics-chart-sub">Berapa kali siswa mengulang pengerjaan materi</p>
+                 <h5 class="analytics-chart-title">📈 Kurva Peningkatan Belajar</h5>
+                 <p class="analytics-chart-sub">Rata-rata kesalahan per putaran latihan</p>
               </div>
               <div class="analytics-chart-canvas-wrapper">
-                 <canvas id="chart-repetitions"></canvas>
+                 <canvas id="chart-learning-curve"></canvas>
               </div>
            </div>
 
-           <!-- CHART 2: WAKTU & JAM PENGUMPULAN MURID -->
+           <!-- CHART 2: DISTRIBUSI JENIS GURATAN DASAR (BIHUA) -->
+           <div class="analytics-chart-card">
+              <div class="analytics-chart-header">
+                 <h5 class="analytics-chart-title">🖌️ Kesalahan Jenis Guratan</h5>
+                 <p class="analytics-chart-sub">Rekap kesalahan pada 8 tipe guratan dasar</p>
+              </div>
+              <div class="analytics-chart-canvas-wrapper">
+                 <canvas id="chart-stroke-types"></canvas>
+              </div>
+           </div>
+
+           <!-- CHART 3: PROPORSI KESALAHAN PER KARAKTER -->
+           <div class="analytics-chart-card">
+              <div class="analytics-chart-header">
+                 <h5 class="analytics-chart-title">🍩 Proporsi Kesalahan Karakter</h5>
+                 <p class="analytics-chart-sub">Beban persentase kesalahan dari tiap aksara</p>
+              </div>
+              <div class="analytics-chart-canvas-wrapper">
+                 <canvas id="chart-character-errors"></canvas>
+              </div>
+           </div>
+
+           <!-- CHART 4: WAKTU & JAM PENGUMPULAN MURID -->
            <div class="analytics-chart-card">
               <div class="analytics-chart-header">
                  <h5 class="analytics-chart-title">📊 Waktu Pengumpulan Tugas</h5>
@@ -1672,14 +1773,14 @@
               </div>
            </div>
 
-           <!-- CHART 3: PROPORSI KESALAHAN PER KARAKTER -->
+           <!-- CHART 5: TINGKAT PENGULANGAN / KETEKUNAN SISWA -->
            <div class="analytics-chart-card">
               <div class="analytics-chart-header">
-                 <h5 class="analytics-chart-title">🍩 Proporsi Kesalahan Karakter</h5>
-                 <p class="analytics-chart-sub">Beban persentase kesalahan dari masing-masing aksara</p>
+                 <h5 class="analytics-chart-title">🔁 Pengulangan Latihan (Ketekunan)</h5>
+                 <p class="analytics-chart-sub">Berapa kali siswa mengulang pengerjaan materi</p>
               </div>
               <div class="analytics-chart-canvas-wrapper">
-                 <canvas id="chart-character-errors"></canvas>
+                 <canvas id="chart-repetitions"></canvas>
               </div>
            </div>
         </div>
@@ -4309,17 +4410,18 @@
                     repText = `${countNum}x`;
                 }
 
+                let cleanDetail = (r.mistakes_detail || '').split(';; META:')[0].trim();
                 tr.innerHTML = `
                     <td><b>${escapeHtml(r.student_name)}</b>${clsBadge}</td>
                     <td>${dateStr}</td>
                     <td>${statusBadge}</td>
                     <td>${repText}</td>
-                    <td><small>${isComplete ? escapeHtml(r.mistakes_detail || '-') : '-'}</small></td>
+                    <td><small>${isComplete ? escapeHtml(cleanDetail || '-') : '-'}</small></td>
                 `;
                 tbody.appendChild(tr);
 
-                if (isComplete && r.mistakes_detail) {
-                    r.mistakes_detail.split('|').forEach(p => {
+                if (isComplete && cleanDetail) {
+                    cleanDetail.split('|').forEach(p => {
                         const parts = p.split(':');
                         if (parts.length >= 2) {
                             const char = parts[0].trim();
@@ -4393,8 +4495,94 @@
     window.analyticsChartInstances = {
        repetitions: null,
        time: null,
-       charErrors: null
+       charErrors: null,
+       learningCurve: null,
+       strokeTypes: null
     };
+
+    function classifyStrokeType(char, strokeIndex1Based) {
+       if (typeof BM_STROKE_DATA === 'undefined' || !BM_STROKE_DATA[char] || !BM_STROKE_DATA[char].medians) {
+          return { code: `G#${strokeIndex1Based}`, pinyin: '', ind: '', label: `Guratan #${strokeIndex1Based}` };
+       }
+       const points = BM_STROKE_DATA[char].medians[strokeIndex1Based - 1];
+       if (!points || points.length < 2) {
+          return { code: '点', pinyin: 'Diǎn', ind: 'Titik', label: '点 (Diǎn)' };
+       }
+
+       let totalLen = 0;
+       const segs = [];
+       for (let i = 0; i < points.length - 1; i++) {
+          const dx = points[i+1][0] - points[i][0];
+          const dy = points[i+1][1] - points[i][1];
+          const len = Math.hypot(dx, dy);
+          totalLen += len;
+          segs.push({ dx, dy, len });
+       }
+
+       if (totalLen < 170) {
+          return { code: '点', pinyin: 'Diǎn', ind: 'Titik', label: '点 (Diǎn)' };
+       }
+
+       // Hook at tail (last 1-2 segments turn sharply back or up)
+       if (points.length >= 4 && totalLen > 180) {
+          const lastSeg = segs[segs.length - 1];
+          const mainDx = points[points.length - 2][0] - points[0][0];
+          const mainDy = points[points.length - 2][1] - points[0][1];
+          const mainLen = Math.hypot(mainDx, mainDy);
+          if (lastSeg.len > 15 && lastSeg.len < totalLen * 0.32) {
+             const dot = (mainDx * lastSeg.dx + mainDy * lastSeg.dy) / (mainLen * lastSeg.len);
+             if (dot < 0.25 || (mainDy < -120 && lastSeg.dy > 10)) {
+                return { code: '钩', pinyin: 'Gōu', ind: 'Kait', label: '钩 (Gōu)' };
+             }
+          }
+       }
+
+       // Internal fold / turn (Zhé)
+       let dist = 0;
+       let pStartEnd = points[0];
+       let pEndStart = points[points.length - 1];
+       for (let i = 0; i < points.length - 1; i++) {
+          dist += segs[i].len;
+          if (dist >= totalLen * 0.30 && pStartEnd === points[0]) pStartEnd = points[i+1];
+          if (dist >= totalLen * 0.70 && pEndStart === points[points.length - 1]) pEndStart = points[i];
+       }
+       const dir1 = { dx: pStartEnd[0] - points[0][0], dy: pStartEnd[1] - points[0][1] };
+       const dir2 = { dx: points[points.length - 1][0] - pEndStart[0], dy: points[points.length - 1][1] - pEndStart[1] };
+       const len1 = Math.hypot(dir1.dx, dir1.dy);
+       const len2 = Math.hypot(dir2.dx, dir2.dy);
+       if (len1 > 20 && len2 > 20) {
+          const dot = (dir1.dx * dir2.dx + dir1.dy * dir2.dy) / (len1 * len2);
+          const isSmoothPie = (dir1.dx <= 0 && dir1.dy < 0 && dir2.dx < 0 && dir2.dy < 0);
+          if (dot < 0.65 && !isSmoothPie) {
+             return { code: '折', pinyin: 'Zhé', ind: 'Lipat / Belok', label: '折 (Zhé)' };
+          }
+       }
+
+       const netDx = points[points.length - 1][0] - points[0][0];
+       const netDy = points[points.length - 1][1] - points[0][1];
+       const angleDeg = Math.atan2(netDy, netDx) * 180 / Math.PI;
+
+       if (angleDeg >= -22 && angleDeg <= 25) {
+          return { code: '横', pinyin: 'Héng', ind: 'Mendatar', label: '横 (Héng)' };
+       }
+       if (angleDeg > 25 && angleDeg < 80) {
+          return { code: '提', pinyin: 'Tí', ind: 'Naik Serong', label: '提 (Tí)' };
+       }
+       if (angleDeg >= -115 && angleDeg <= -65) {
+          return { code: '竖', pinyin: 'Shù', ind: 'Tegak', label: '竖 (Shù)' };
+       }
+       if (angleDeg < -115 && angleDeg >= -175) {
+          return { code: '撇', pinyin: 'Piě', ind: 'Serong Kiri', label: '撇 (Piě)' };
+       }
+       if (angleDeg > -65 && angleDeg < -22) {
+          return { code: '捺', pinyin: 'Nà', ind: 'Serong Kanan', label: '捺 (Nà)' };
+       }
+
+       if (netDy < 0) {
+          return netDx < 0 ? { code: '撇', pinyin: 'Piě', ind: 'Serong Kiri', label: '撇 (Piě)' } : { code: '捺', pinyin: 'Nà', ind: 'Serong Kanan', label: '捺 (Nà)' };
+       }
+       return { code: '横', pinyin: 'Héng', ind: 'Mendatar', label: '横 (Héng)' };
+    }
 
     function formatDurationHuman(sec) {
        if (!sec || sec <= 0) return '-';
@@ -4404,7 +4592,7 @@
        return `${m} mnt ${s} dtk`;
     }
 
-    function renderAnalyticsCharts(students, sortedChars, totalCompleted) {
+    function renderAnalyticsCharts(students, sortedChars, totalCompleted, strokeTypeStats, repMistakesAgg) {
        if (typeof Chart === 'undefined') return;
 
        if (typeof ChartDataLabels !== 'undefined') {
@@ -4424,10 +4612,20 @@
           window.analyticsChartInstances.charErrors.destroy();
           window.analyticsChartInstances.charErrors = null;
        }
+       if (window.analyticsChartInstances.learningCurve) {
+          window.analyticsChartInstances.learningCurve.destroy();
+          window.analyticsChartInstances.learningCurve = null;
+       }
+       if (window.analyticsChartInstances.strokeTypes) {
+          window.analyticsChartInstances.strokeTypes.destroy();
+          window.analyticsChartInstances.strokeTypes = null;
+       }
 
        const canvasRep = document.getElementById('chart-repetitions');
        const canvasTime = document.getElementById('chart-submission-time');
        const canvasChar = document.getElementById('chart-character-errors');
+       const canvasLearn = document.getElementById('chart-learning-curve');
+       const canvasStroke = document.getElementById('chart-stroke-types');
        if (!canvasRep || !canvasTime || !canvasChar) return;
 
        // 1. CHART 1: REPETITIONS DOUGHNUT CHART (Ketekunan Murid)
@@ -4671,6 +4869,142 @@
              }
           });
        }
+
+       // 4. CHART 4: LEARNING CURVE PER ROUND
+       if (canvasLearn) {
+          const rounds = Object.keys(repMistakesAgg || {}).map(Number).sort((a,b) => a - b);
+          let learnLabels = [];
+          let learnData = [];
+          if (rounds.length > 0) {
+             rounds.forEach(r => {
+                const arr = repMistakesAgg[r] || [];
+                const avg = arr.length > 0 ? Number((arr.reduce((a,b) => a + b, 0) / arr.length).toFixed(1)) : 0;
+                learnLabels.push(`Putaran ${r}`);
+                learnData.push(avg);
+             });
+          } else {
+             learnLabels = ['Putaran 1', 'Putaran 2'];
+             learnData = [0, 0];
+          }
+
+          window.analyticsChartInstances.learningCurve = new Chart(canvasLearn, {
+             type: 'line',
+             data: {
+                labels: learnLabels,
+                datasets: [{
+                   label: 'Rata-rata Kesalahan',
+                   data: learnData,
+                   borderColor: '#10B981',
+                   backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                   borderWidth: 3,
+                   tension: 0.35,
+                   fill: true,
+                   pointBackgroundColor: '#059669',
+                   pointBorderColor: '#FFFFFF',
+                   pointBorderWidth: 2,
+                   pointRadius: 6,
+                   pointHoverRadius: 8
+                }]
+             },
+             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { top: 22, right: 18, left: 10 } },
+                plugins: {
+                   legend: { display: false },
+                   tooltip: {
+                      callbacks: {
+                         label: function(ctx) { return ` Rata-rata ${ctx.raw} kesalahan`; }
+                      }
+                   },
+                   datalabels: {
+                      color: '#065F46',
+                      align: 'top',
+                      offset: 4,
+                      font: { weight: 'bold', size: 11 },
+                      formatter: function(val) {
+                         if (rounds.length === 0) return 'Belum ada data';
+                         return `${val} salah`;
+                      }
+                   }
+                },
+                scales: {
+                   y: {
+                      beginAtZero: true,
+                      grid: { color: 'rgba(0,0,0,0.05)' },
+                      ticks: { font: { size: 10 } }
+                   },
+                   x: {
+                      grid: { display: false },
+                      ticks: { font: { size: 11, weight: '600' } }
+                   }
+                }
+             }
+          });
+       }
+
+       // 5. CHART 5: STROKE TYPE ERRORS (BIHUA)
+       if (canvasStroke) {
+          const strokeOrder = ['折', '钩', '撇', '竖', '横', '捺', '点', '提'];
+          const strokeLabels = ['折 Zhé', '钩 Gōu', '撇 Piě', '竖 Shù', '横 Héng', '捺 Nà', '点 Diǎn', '提 Tí'];
+          const strokeColors = ['#DC2626', '#8B5CF6', '#F59E0B', '#10B981', '#3B82F6', '#EC4899', '#06B6D4', '#14B8A6'];
+          const strokeCounts = strokeOrder.map(code => (strokeTypeStats && strokeTypeStats[code]) ? strokeTypeStats[code].count : 0);
+          const totalStrokeErrors = strokeCounts.reduce((a, b) => a + b, 0);
+
+          const maxStrokeVal = Math.max(...strokeCounts, 5);
+
+          window.analyticsChartInstances.strokeTypes = new Chart(canvasStroke, {
+             type: 'bar',
+             data: {
+                labels: strokeLabels,
+                datasets: [{
+                   data: strokeCounts,
+                   backgroundColor: strokeColors,
+                   borderRadius: 5
+                }]
+             },
+             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { top: 22 } },
+                plugins: {
+                   legend: { display: false },
+                   tooltip: {
+                      callbacks: {
+                         label: function(ctx) {
+                            const val = ctx.raw || 0;
+                            const pct = totalStrokeErrors > 0 ? Math.round((val / totalStrokeErrors) * 100) : 0;
+                            return ` ${val}x salah (${pct}%)`;
+                         }
+                      }
+                   },
+                   datalabels: {
+                      color: '#1E293B',
+                      anchor: 'end',
+                      align: 'top',
+                      font: { weight: 'bold', size: 10 },
+                      formatter: function(val) {
+                         if (!val || val <= 0) return '';
+                         const pct = totalStrokeErrors > 0 ? Math.round((val / totalStrokeErrors) * 100) : 0;
+                         return `${val}x\n(${pct}%)`;
+                      }
+                   }
+                },
+                scales: {
+                   y: {
+                      beginAtZero: true,
+                      max: maxStrokeVal + Math.ceil(maxStrokeVal * 0.2),
+                      grid: { color: 'rgba(0,0,0,0.05)' },
+                      ticks: { precision: 0, font: { size: 10 } }
+                   },
+                   x: {
+                      grid: { display: false },
+                      ticks: { font: { size: 10, weight: '600' } }
+                   }
+                }
+             }
+          });
+       }
     }
 
     function renderMistakesClassPills() {
@@ -4723,18 +5057,70 @@
        const completed = rows.filter(r => r.status === 'Selesai');
        const totalCompleted = completed.length;
 
-       // Aggregate characters and student mistakes
+       // Aggregate characters, pedagogical insights, and student mistakes
        const charMap = {};
        const analyzedStudents = [];
        let grandTotalMistakes = 0;
        let perfectCount = 0;
 
+       const strokeTypeStats = {
+          '折': { code: '折', name: '折 Zhé (Lipat / Belok)', count: 0, color: '#DC2626' },
+          '钩': { code: '钩', name: '钩 Gōu (Kait)', count: 0, color: '#8B5CF6' },
+          '撇': { code: '撇', name: '撇 Piě (Serong Kiri)', count: 0, color: '#F59E0B' },
+          '竖': { code: '竖', name: '竖 Shù (Tegak)', count: 0, color: '#10B981' },
+          '横': { code: '横', name: '横 Héng (Mendatar)', count: 0, color: '#3B82F6' },
+          '捺': { code: '捺', name: '捺 Nà (Serong Kanan)', count: 0, color: '#EC4899' },
+          '点': { code: '点', name: '点 Diǎn (Titik)', count: 0, color: '#06B6D4' },
+          '提': { code: '提', name: '提 Tí (Naik Serong)', count: 0, color: '#14B8A6' }
+       };
+
+       const repMistakesAgg = {};
+       const deviceAgg = { 'Touchscreen': 0, 'Mouse': 0 };
+       let totalHintsAcrossAll = 0;
+       let studentsWithHintsCount = 0;
+       const charHesitationAgg = {};
+
        completed.forEach(r => {
           let sTotalMistakes = 0;
           const sCharMistakes = [];
 
-          if (r.mistakes_detail && typeof r.mistakes_detail === 'string') {
-             const parts = r.mistakes_detail.split('|');
+          let meta = null;
+          let rawMistakes = r.mistakes_detail;
+          if (rawMistakes && typeof rawMistakes === 'string' && rawMistakes.includes(';; META:')) {
+             const spl = rawMistakes.split(';; META:');
+             rawMistakes = spl[0].trim();
+             try { meta = JSON.parse(spl[1].trim()); } catch(e) {}
+          }
+
+          if (meta) {
+             if (meta.device) {
+                if (meta.device.toLowerCase().includes('touch')) deviceAgg['Touchscreen']++;
+                else deviceAgg['Mouse']++;
+             }
+             const hCount = (meta.hintUsageCount || 0) + (meta.autoHintCount || 0);
+             totalHintsAcrossAll += hCount;
+             if (hCount > 0) studentsWithHintsCount++;
+             if (meta.repMistakes && typeof meta.repMistakes === 'object') {
+                for (const rNum in meta.repMistakes) {
+                   const rIdx = parseInt(rNum, 10) || 1;
+                   if (!repMistakesAgg[rIdx]) repMistakesAgg[rIdx] = [];
+                   repMistakesAgg[rIdx].push(meta.repMistakes[rNum] || 0);
+                }
+             }
+             if (meta.charDurations && typeof meta.charDurations === 'object') {
+                for (const ch in meta.charDurations) {
+                   const dur = Number(meta.charDurations[ch]) || 0;
+                   if (dur > 0) {
+                      if (!charHesitationAgg[ch]) charHesitationAgg[ch] = { totalSec: 0, count: 0 };
+                      charHesitationAgg[ch].totalSec += dur;
+                      charHesitationAgg[ch].count += 1;
+                   }
+                }
+             }
+          }
+
+          if (rawMistakes && typeof rawMistakes === 'string') {
+             const parts = rawMistakes.split('|');
              parts.forEach(p => {
                 const seg = p.trim();
                 if (!seg) return;
@@ -4749,7 +5135,13 @@
                          if (pair.length === 2) {
                             const sNum = pair[0].replace(/[^0-9]/g, '');
                             const sCnt = parseInt(pair[1], 10) || 0;
-                            if (sNum && sCnt > 0) strokeDetails[sNum] = sCnt;
+                            if (sNum && sCnt > 0) {
+                               strokeDetails[sNum] = sCnt;
+                               const sType = classifyStrokeType(ch, parseInt(sNum, 10));
+                               if (sType && strokeTypeStats[sType.code]) {
+                                  strokeTypeStats[sType.code].count += sCnt;
+                               }
+                            }
                          }
                       });
                    }
@@ -4793,9 +5185,11 @@
              name: r.student_name,
              cls: r.student_class || '',
              submitted_at: r.submitted_at,
+             duration: r.duration,
              repetitions: r.repetitions || 1,
              totalMistakes: sTotalMistakes,
-             charMistakes: sCharMistakes
+             charMistakes: sCharMistakes,
+             meta: meta
           });
        });
 
@@ -4807,7 +5201,7 @@
        analyzedStudents.sort((a, b) => b.totalMistakes - a.totalMistakes);
        window.currentMistakesAnalyzedStudents = analyzedStudents;
 
-       // --- 1. UPDATE KPIS ---
+       // --- 1. UPDATE KPIS & PEDAGOGICAL INSIGHTS ---
        const kpiTotalEl = document.getElementById('kpi-total-mistakes');
        const kpiTotalSub = document.getElementById('kpi-total-mistakes-sub');
        const kpiAvgEl = document.getElementById('kpi-avg-mistakes');
@@ -4840,6 +5234,75 @@
        const perfectPct = totalCompleted > 0 ? Math.round((perfectCount / totalCompleted) * 100) : 0;
        if (kpiPerfectEl) kpiPerfectEl.textContent = perfectCount;
        if (kpiPerfectSub) kpiPerfectSub.textContent = `${perfectPct}% dari total murid selesai`;
+
+       // Update Smart Pedagogical Insights Strip
+       const elImprove = document.getElementById('insight-improvement-val');
+       const elDevice = document.getElementById('insight-device-val');
+       const elIndep = document.getElementById('insight-independence-val');
+       const elHesitate = document.getElementById('insight-hesitation-val');
+       const elStroke = document.getElementById('insight-stroketype-val');
+
+       if (elImprove) {
+          const r1 = repMistakesAgg[1] || [];
+          const r2 = repMistakesAgg[2] || [];
+          if (r1.length > 0 && r2.length > 0) {
+             const avg1 = r1.reduce((a,b)=>a+b, 0) / r1.length;
+             const avg2 = r2.reduce((a,b)=>a+b, 0) / r2.length;
+             if (avg1 > 0) {
+                const dropPct = Math.round(((avg1 - avg2) / avg1) * 100);
+                elImprove.innerHTML = dropPct >= 0 
+                   ? `<span style="color:#059669;">Kesalahan turun ${dropPct}%</span> <small style="font-weight:600; color:var(--text-muted);">(P1: ${avg1.toFixed(1)} → P2: ${avg2.toFixed(1)})</small>`
+                   : `<span>P1: ${avg1.toFixed(1)} → P2: ${avg2.toFixed(1)}</span>`;
+             } else {
+                elImprove.textContent = 'Stabil (0 kesalahan)';
+             }
+          } else {
+             elImprove.textContent = (totalCompleted > 0) ? `Rata-rata ${avgMistakes} salah / anak` : '-';
+          }
+       }
+
+       if (elDevice) {
+          const totalDev = deviceAgg['Touchscreen'] + deviceAgg['Mouse'];
+          if (totalDev > 0) {
+             const pctTouch = Math.round((deviceAgg['Touchscreen'] / totalDev) * 100);
+             const pctMouse = 100 - pctTouch;
+             elDevice.innerHTML = `<span>${pctTouch}% Touchscreen</span> &nbsp;•&nbsp; <span style="color:var(--text-muted); font-size:0.85rem;">${pctMouse}% Mouse</span>`;
+          } else {
+             elDevice.textContent = totalCompleted > 0 ? 'Tersedia di tugas baru' : '-';
+          }
+       }
+
+       if (elIndep) {
+          if (totalCompleted > 0) {
+             const avgH = (totalHintsAcrossAll / totalCompleted).toFixed(1);
+             const pctIndep = Math.round(((totalCompleted - studentsWithHintsCount) / totalCompleted) * 100);
+             elIndep.innerHTML = `<span style="color:#059669;">${pctIndep}% Mandiri</span> <small style="font-weight:600; color:var(--text-muted);">(Rata-rata ${avgH}x bantuan)</small>`;
+          } else {
+             elIndep.textContent = '-';
+          }
+       }
+
+       if (elHesitate) {
+          const hesEntries = Object.entries(charHesitationAgg).filter(([_, h]) => h.count > 0);
+          if (hesEntries.length > 0) {
+             hesEntries.sort((a,b) => (b[1].totalSec / b[1].count) - (a[1].totalSec / a[1].count));
+             const topH = hesEntries[0];
+             const avgSec = Math.round(topH[1].totalSec / topH[1].count);
+             elHesitate.innerHTML = `<span style="color:#2563EB;">Aksara 「${escapeHtml(topH[0])}」</span> <small style="font-weight:600; color:var(--text-muted);">(~${avgSec} dtk/anak)</small>`;
+          } else {
+             elHesitate.textContent = totalCompleted > 0 ? 'Tersedia di tugas baru' : '-';
+          }
+       }
+
+       if (elStroke) {
+          const strokeList = Object.values(strokeTypeStats).filter(s => s.count > 0).sort((a,b) => b.count - a.count);
+          if (strokeList.length > 0) {
+             const topS = strokeList[0];
+             elStroke.innerHTML = `<span style="color:#DC2626;">${topS.code} (${topS.name.split(' ')[1] || topS.code})</span> <small style="font-weight:600; color:var(--text-muted);">(${topS.count}x salah)</small>`;
+          } else {
+             elStroke.textContent = totalCompleted > 0 ? 'Tidak ada kesalahan goresan' : '-';
+          }
+       }
 
        // --- 2. RENDER CHARACTERS TABLE ---
        const charTbody = document.getElementById('mistakes-char-tbody');
@@ -4881,8 +5344,18 @@
                 let strokeTagsHtml = '';
                 if (item.strokeMistakes && Object.keys(item.strokeMistakes).length > 0) {
                    const sortedStrokes = Object.entries(item.strokeMistakes).sort((a,b) => b[1] - a[1]);
-                   const strokeTags = sortedStrokes.map(([sNum, sCnt]) => `<span class="stroke-tag" title="Guratan #${sNum} salah ${sCnt}x">Guratan #${sNum}: <b>${sCnt}x</b></span>`).join(' ');
+                   const strokeTags = sortedStrokes.map(([sNum, sCnt]) => {
+                      const sType = classifyStrokeType(item.char, parseInt(sNum, 10));
+                      const typeLabel = (sType && sType.pinyin) ? ` (${sType.code} ${sType.pinyin})` : '';
+                      return `<span class="stroke-tag" title="Guratan #${sNum}${typeLabel} salah ${sCnt}x">Guratan #${sNum}${typeLabel}: <b>${sCnt}x</b></span>`;
+                   }).join(' ');
                    strokeTagsHtml = `<div class="stroke-breakdown-tags">${strokeTags}</div>`;
+                }
+
+                let hesitationSubHtml = '';
+                if (charHesitationAgg[item.char] && charHesitationAgg[item.char].count > 0) {
+                   const avgHes = Math.round(charHesitationAgg[item.char].totalSec / charHesitationAgg[item.char].count);
+                   hesitationSubHtml = `<div style="font-size:0.75rem; color:#2563EB; font-weight:600; margin-top:3px;">⏱️ Rata-rata durasi: ~${avgHes} dtk / anak</div>`;
                 }
 
                 const tr = document.createElement('tr');
@@ -4892,6 +5365,7 @@
                    <td>
                       <div style="font-weight:700; color:var(--primary); font-size:1rem;">${escapeHtml(info.pinyin)}</div>
                       <div style="font-size:0.85rem; color:var(--text-muted);">${escapeHtml(info.meaning)}</div>
+                      ${hesitationSubHtml}
                       ${strokeTagsHtml}
                    </td>
                    <td>
@@ -4913,8 +5387,8 @@
           }
        }
 
-       // --- 3. RENDER 3 VISUAL CHARTS ---
-       renderAnalyticsCharts(analyzedStudents, sortedChars, totalCompleted);
+       // --- 3. RENDER 5 VISUAL CHARTS ---
+       renderAnalyticsCharts(analyzedStudents, sortedChars, totalCompleted, strokeTypeStats, repMistakesAgg);
 
        // --- 4. RENDER STUDENTS TABLE ---
        filterMistakesStudentTable();
@@ -4981,6 +5455,12 @@
           }
 
           const clsBadge = s.cls ? `<span class="class-mini-badge">${escapeHtml(s.cls)}</span>` : '';
+          const devBadge = s.meta?.device 
+             ? `<div style="font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-top:2px;">${s.meta.device.includes('Touch') ? '📱 Layar Sentuh' : '💻 Mouse / PC'}</div>` 
+             : '';
+          const hintBadge = (s.meta && ((s.meta.hintUsageCount || 0) + (s.meta.autoHintCount || 0) > 0))
+             ? `<div style="font-size:0.72rem; color:#D97706; font-weight:700;">💡 ${(s.meta.hintUsageCount || 0) + (s.meta.autoHintCount || 0)}x bantuan</div>`
+             : '';
 
           let repText = '-';
           let rawRep = String(s.repetitions || 1).replace(/x+/gi, '').trim();
@@ -4990,7 +5470,7 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
              <td style="text-align:center; font-weight:700; color:var(--text-muted);">${idx + 1}</td>
-             <td><b>${escapeHtml(s.name)}</b>${clsBadge}</td>
+             <td><b>${escapeHtml(s.name)}</b>${clsBadge}${devBadge}${hintBadge}</td>
              <td><span style="font-weight:900; font-size:1.1rem; color:${mistakeColor};">${s.totalMistakes}x</span></td>
              <td>${gradeBadge}</td>
              <td>${charDetailHtml}</td>
@@ -5074,7 +5554,7 @@
 
        // Sheet 1: Analisis Huruf Tersulit
        const charData = [
-          ['No', 'Aksara', 'Pinyin', 'Arti', 'Total Kesalahan', 'Jumlah Murid Salah', 'Persentase Murid (%)', 'Tingkat Kesulitan', 'Rincian Nomor Guratan', 'Daftar Murid yang Sering Salah']
+          ['No', 'Aksara', 'Pinyin', 'Arti', 'Total Kesalahan', 'Jumlah Murid Salah', 'Persentase Murid (%)', 'Tingkat Kesulitan', 'Rincian Nomor & Tipe Guratan', 'Daftar Murid yang Sering Salah']
        ];
 
        const totalCompleted = students.length;
@@ -5087,7 +5567,11 @@
           if (pct >= 50 || item.totalMistakes >= 30) level = 'Tinggi';
           else if (pct >= 20 || item.totalMistakes >= 10) level = 'Sedang';
 
-          const strokeStr = Object.entries(item.strokeMistakes || {}).map(([sn, sc]) => `Guratan #${sn}: ${sc}x`).join(', ') || '-';
+          const strokeStr = Object.entries(item.strokeMistakes || {}).map(([sn, sc]) => {
+             const sType = classifyStrokeType(item.char, parseInt(sn, 10));
+             const tName = sType?.pinyin ? ` (${sType.code} ${sType.pinyin})` : '';
+             return `Guratan #${sn}${tName}: ${sc}x`;
+          }).join(', ') || '-';
           const studentListStr = item.students.map(s => `${s.name}${s.cls ? ` (${s.cls})` : ''}: ${s.count}x`).join(', ');
 
           charData.push([
@@ -5109,7 +5593,7 @@
 
        // Sheet 2: Rincian Siswa
        const studentData = [
-          ['No', 'Nama Murid', 'Kelas', 'Total Kesalahan', 'Predikat', 'Rincian Huruf yang Salah', 'Waktu Pengumpulan', 'Selesai (Kali)']
+          ['No', 'Nama Murid', 'Kelas', 'Total Kesalahan', 'Predikat', 'Perangkat', 'Bantuan (Hints)', 'Rincian Huruf yang Salah', 'Waktu Pengumpulan', 'Selesai (Kali)']
        ];
 
        students.forEach((s, idx) => {
@@ -5140,6 +5624,8 @@
           }
 
           let repText = `${parseInt(String(s.repetitions || 1).replace(/x+/gi, '').trim(), 10) || 1}x`;
+          const devText = s.meta?.device || 'Tidak terdeteksi';
+          const hintText = s.meta ? `${(s.meta.hintUsageCount || 0) + (s.meta.autoHintCount || 0)}x` : '-';
 
           studentData.push([
              idx + 1,
@@ -5147,6 +5633,8 @@
              s.cls || '',
              s.totalMistakes,
              predicate,
+             devText,
+             hintText,
              charMistakesStr,
              dateStr,
              repText

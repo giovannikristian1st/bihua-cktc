@@ -421,6 +421,12 @@
     let drawnChars = new Set();
     let mistakesMap = {};
     let strokeMistakesMap = {};
+    let repMistakes = {};
+    let charDurations = {};
+    let currentCharStartTime = 0;
+    let hintUsageCount = 0;
+    let autoHintCount = 0;
+    let charHints = {};
     let currentWordMistakes = 0;
     let isDemonstrating = false;
     
@@ -564,6 +570,12 @@
     document.getElementById('btn-demo-stroke').addEventListener('click', () => {
        if (writer && !isDemonstrating) {
           isDemonstrating = true;
+          hintUsageCount++;
+          if (tasks[currentTaskIndex]) {
+             const ch = tasks[currentTaskIndex].char;
+             if (ch) charHints[ch] = (charHints[ch] || 0) + 1;
+          }
+          saveStudentProgress();
           writer.animateCharacter({
              onComplete: () => {
                 isDemonstrating = false;
@@ -1096,6 +1108,11 @@
             currentRepIndex: currentRepIndex,
             mistakesMap: mistakesMap,
             strokeMistakesMap: strokeMistakesMap,
+            repMistakes: repMistakes,
+            charDurations: charDurations,
+            hintUsageCount: hintUsageCount,
+            autoHintCount: autoHintCount,
+            charHints: charHints,
             studentName: studentName,
             studentClass: activeCls,
             currentWordMistakes: currentWordMistakes,
@@ -1181,6 +1198,11 @@
                 currentRepIndex = progress.currentRepIndex || 0;
                 mistakesMap = progress.mistakesMap || {};
                 strokeMistakesMap = progress.strokeMistakesMap || {};
+                repMistakes = progress.repMistakes || {};
+                charDurations = progress.charDurations || {};
+                hintUsageCount = progress.hintUsageCount || 0;
+                autoHintCount = progress.autoHintCount || 0;
+                charHints = progress.charHints || {};
                 currentWordMistakes = progress.currentWordMistakes || 0;
                 
                 // Repopulate drawnChars for previously completed tasks
@@ -1222,6 +1244,12 @@
       currentRepIndex = 0;
       mistakesMap = {};
       strokeMistakesMap = {};
+      repMistakes = {};
+      charDurations = {};
+      currentCharStartTime = Date.now();
+      hintUsageCount = 0;
+      autoHintCount = 0;
+      charHints = {};
       tasks.forEach(t => mistakesMap[t.char] = 0);
       drawnChars.clear();
       currentWordMistakes = 0;
@@ -1274,6 +1302,7 @@
       }
       
       const task = tasks[currentTaskIndex];
+      currentCharStartTime = Date.now();
       
       if(drawnChars.has(task.char)) {
          checkTypingAndNext();
@@ -1379,6 +1408,11 @@
              if (!strokeMistakesMap[char]) strokeMistakesMap[char] = {};
              strokeMistakesMap[char][strokeNum] = (strokeMistakesMap[char][strokeNum] || 0) + 1;
           }
+          const curRep = (currentRepIndex + 1);
+          repMistakes[curRep] = (repMistakes[curRep] || 0) + 1;
+          if (currentWordMistakes === 2) {
+             autoHintCount++;
+          }
           currentWordMistakes++;
           updateMistakeUI();
           saveStudentProgress();
@@ -1392,6 +1426,12 @@
         },
         onComplete: function() {
           playSound('rep_complete');
+          if (tasks[currentTaskIndex]) {
+             const ch = tasks[currentTaskIndex].char;
+             const durSec = Math.max(1, Math.round((Date.now() - (currentCharStartTime || Date.now())) / 1000));
+             charDurations[ch] = (charDurations[ch] || 0) + durSec;
+             currentCharStartTime = Date.now();
+          }
           setTimeout(handleRepetition, 500);
         }
       });
@@ -1876,6 +1916,16 @@
       const durationSec = (Date.now() - taskStartTime) / 1000;
       const submitCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || assignmentData.cls || "Tidak diketahui";
       
+      const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+      const metaStats = {
+         repMistakes: repMistakes,
+         charDurations: charDurations,
+         hintUsageCount: hintUsageCount,
+         autoHintCount: autoHintCount,
+         charHints: charHints,
+         device: isTouch ? 'Touchscreen (HP/Tablet)' : 'Mouse / Laptop PC'
+      };
+
       try {
          await DB.submitAssignment(
             assignmentData.id,
@@ -1886,7 +1936,8 @@
             repetitions,
             durationSec,
             mistakesMap,
-            strokeMistakesMap
+            strokeMistakesMap,
+            metaStats
          );
          statusEl.innerHTML = `
            <div style="color: #10B981; font-size: 2.5rem; margin-bottom: 5px;">✓</div>
@@ -2078,6 +2129,12 @@
        
        mistakesMap = {};
        strokeMistakesMap = {};
+       repMistakes = {};
+       charDurations = {};
+       currentCharStartTime = Date.now();
+       hintUsageCount = 0;
+       autoHintCount = 0;
+       charHints = {};
        tasks.forEach(t => mistakesMap[t.char] = 0);
        
        saveStudentProgress();
