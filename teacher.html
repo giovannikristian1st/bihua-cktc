@@ -122,8 +122,8 @@
 
     body.theme-teacher-harrypotter .nav-teacher-center { border-color: #EEBA30; }
     body.theme-teacher-harrypotter .header-teacher-select { border-color: #EEBA30 !important; color: #740001 !important; }
-    body.theme-teacher-lotr .nav-teacher-center { border-color: #FDE047; }
-    body.theme-teacher-lotr .header-teacher-select { border-color: #D97706 !important; color: #78350F !important; }
+    body.theme-teacher-lotr .nav-teacher-center { border-color: #F59E0B; }
+    body.theme-teacher-lotr .header-teacher-select { border-color: #B45309 !important; color: #78350F !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; font-weight: 700 !important; }
     body.theme-teacher-insideout .nav-teacher-center { border-color: #FCD34D; }
     body.theme-teacher-insideout .header-teacher-select { border-color: #D97706 !important; color: #92400E !important; }
     body.theme-teacher-marvel .nav-teacher-center { border-color: #ED1D24; }
@@ -316,7 +316,7 @@
       position: sticky;
       top: var(--detail-table-header-top, 180px);
       z-index: 35;
-      background: #F59E0B !important;
+      background: #B45309 !important;
       color: white !important;
       box-shadow: 0 2px 5px rgba(0,0,0,0.12);
     }
@@ -924,65 +924,90 @@
       border: 2px solid #EEBA30;
     }
 
-    /* 💍 2. GIOVANNI / GIO - LORD OF THE RINGS / RADIANT POSTER SUNFIRE GOLD STYLE */
+    /* 💍 2. GIOVANNI / GIO - ELEGANT WARM THEME / CLEAN SANS & KAITI */
     body.theme-teacher-lotr {
-      --primary: #D97706;          /* Radiant One Ring Gold */
-      --primary-dark: #78350F;     /* Deep Auburn Bronze */
-      --primary-light: #F59E0B;    /* Sunfire Fellowship Amber */
-      --accent-gold: #FDE047;      /* Bright Golden Inscription */
-      --bg: #FAF6EE;               /* Luminous Middle-earth Map Parchment */
+      --primary: #B45309;          /* Refined Warm Amber */
+      --primary-dark: #78350F;     /* Deep Chestnut Bronze */
+      --primary-light: #D97706;    /* Vibrant Amber */
+      --accent-gold: #F59E0B;      /* Warm Gold Accent */
+      --bg: #FDFBF7;               /* Soft Eye-friendly Warm Ivory */
       --card: #FFFFFF;
-      --text: #2C1810;             /* Ancient Inscribed Ink */
-      --text-muted: #715848;
-      --border: #E8DEC8;
-      font-family: 'Uncial Antiqua', 'MedievalSharp', serif;
+      --text: #1E293B;             /* Crisp Slate Ink */
+      --text-muted: #64748B;       /* Readable Slate Muted */
+      --border: #E5E0D8;           /* Soft Balanced Border */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body.theme-teacher-lotr h1 {
-      font-family: 'Cinzel Decorative', 'Uncial Antiqua', serif;
-      letter-spacing: 3px;
-      font-weight: 900;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #78350F 0%, #D97706 40%, #F59E0B 75%, #FDE047 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 12px rgba(217, 119, 6, 0.2);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: -0.5px;
+      font-weight: 800;
+      text-transform: none;
+      color: #78350F;
+      background: none;
+      -webkit-background-clip: initial;
+      -webkit-text-fill-color: #78350F;
+      text-shadow: none;
     }
     body.theme-teacher-lotr h2,
     body.theme-teacher-lotr h3,
     body.theme-teacher-lotr h4,
     body.theme-teacher-lotr .nav-title {
-      font-family: 'Cinzel Decorative', 'Uncial Antiqua', serif;
-      letter-spacing: 2px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: normal;
       font-weight: 700;
+      color: #78350F;
     }
     body.theme-teacher-lotr .nav-bar {
-      background: linear-gradient(135deg, #78350F 0%, #B45309 30%, #D97706 65%, #F59E0B 100%);
-      box-shadow: 0 4px 22px rgba(217, 119, 6, 0.35);
-      border-bottom: 3.5px solid #FDE047;
+      background: linear-gradient(135deg, #78350F 0%, #92400E 50%, #B45309 100%);
+      box-shadow: 0 4px 18px rgba(120, 53, 15, 0.2);
+      border-bottom: 3px solid #F59E0B;
     }
     body.theme-teacher-lotr .btn {
-      font-family: 'Cinzel Decorative', 'Uncial Antiqua', serif;
-      letter-spacing: 1.5px;
-      font-weight: 900;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #78350F 0%, #D97706 50%, #F59E0B 100%);
-      border: 1.5px solid #FEF08A;
-      border-radius: 10px;
-      box-shadow: 0 4px 18px rgba(217, 119, 6, 0.35);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: normal;
+      font-weight: 700;
+      text-transform: none;
+      background: linear-gradient(135deg, #B45309 0%, #D97706 100%);
+      color: #FFFFFF !important;
+      border: 1px solid #D97706;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(180, 83, 9, 0.2);
     }
     body.theme-teacher-lotr .btn:hover {
-      box-shadow: 0 6px 24px rgba(245, 158, 11, 0.55);
-      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(180, 83, 9, 0.35);
+      transform: translateY(-1px);
     }
     body.theme-teacher-lotr .card {
-      border: 1.5px solid #E8DEC8;
-      border-top: 4px solid #D97706;
-      box-shadow: 0 4px 20px rgba(120, 53, 15, 0.08);
-      border-radius: 14px;
+      border: 1px solid #E5E0D8;
+      border-top: 3.5px solid #B45309;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      border-radius: 12px;
     }
     body.theme-teacher-lotr .nav-btn.active {
       color: #78350F;
-      border: 2px solid #FDE047;
+      border: 2px solid #F59E0B;
+      background: #FFFFFF;
+    }
+    body.theme-teacher-lotr .difficult-char-card {
+      background: #FFFBEB;
+      border: 1.5px solid #FDE68A;
+      color: #92400E;
+    }
+    body.theme-teacher-lotr .difficult-char-card h4 {
+      color: #B45309;
+    }
+    body.theme-teacher-lotr .difficult-char-badge {
+      background: #FFFFFF;
+      border: 1px solid #FCD34D;
+      color: #B45309;
+    }
+    body.theme-teacher-lotr table.data-table thead th {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: normal;
+    }
+    body.theme-teacher-lotr .mistake-char-box,
+    body.theme-teacher-lotr .tianzige-print-box {
+      font-family: 'Kaiti', 'KaiTi', STKaiti, '楷体', serif !important;
     }
 
     /* 🐉 3. IMELDA / IMEL - GAME OF THRONES MAJESTIC STYLE */
