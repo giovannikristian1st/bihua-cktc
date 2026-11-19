@@ -3699,22 +3699,38 @@
     window.addEventListener('resize', updateDetailStickyOffset);
 
     function switchDetailTab(tabName) {
+       window.currentActiveDetailTab = tabName;
        const tabResults = document.getElementById('tab-content-results');
        const tabLb = document.getElementById('tab-content-leaderboard');
        const btnResults = document.getElementById('tab-btn-results');
        const btnLb = document.getElementById('tab-btn-leaderboard');
+       const barClass = document.getElementById('detail-class-filter-bar');
+       const barStatus = document.getElementById('detail-status-filter-bar');
+       const remBanner = document.getElementById('detail-remedial-banner');
        
        if (tabName === 'results') {
           if (tabResults) tabResults.style.display = 'block';
           if (tabLb) tabLb.style.display = 'none';
           if (btnResults) btnResults.classList.add('active');
           if (btnLb) btnLb.classList.remove('active');
+          
+          if (remBanner && remBanner.innerHTML.trim() !== '') {
+             remBanner.style.display = 'block';
+          }
+          renderDetailClassFilterBar();
+          renderDetailStatusFilterBar();
           updateDetailStickyOffset();
        } else {
           if (tabResults) tabResults.style.display = 'none';
           if (tabLb) tabLb.style.display = 'block';
           if (btnResults) btnResults.classList.remove('active');
           if (btnLb) btnLb.classList.add('active');
+          
+          // Sembunyikan filter daftar siswa saat di tab Papan Peringkat agar tidak double
+          if (barClass) barClass.style.display = 'none';
+          if (barStatus) barStatus.style.display = 'none';
+          if (remBanner) remBanner.style.display = 'none';
+          
           fetchTeacherLeaderboard();
           updateDetailStickyOffset();
        }
@@ -3723,6 +3739,10 @@
     function renderDetailClassFilterBar() {
         const bar = document.getElementById('detail-class-filter-bar');
         if (!bar) return;
+        if (window.currentActiveDetailTab === 'leaderboard') {
+            bar.style.display = 'none';
+            return;
+        }
         bar.innerHTML = '';
 
         const rows = window.currentDetailRows || [];
@@ -3785,6 +3805,10 @@
     function renderDetailStatusFilterBar() {
         const bar = document.getElementById('detail-status-filter-bar');
         if (!bar) return;
+        if (window.currentActiveDetailTab === 'leaderboard') {
+            bar.style.display = 'none';
+            return;
+        }
         bar.innerHTML = '';
 
         const allRows = window.currentDetailRows || [];
