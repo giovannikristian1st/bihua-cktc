@@ -1913,7 +1913,13 @@
     async function submitData() {
       const statusEl = document.getElementById('submit-status');
       const totalMistakes = Object.values(mistakesMap).reduce((a, b) => a + b, 0);
-      const durationSec = (Date.now() - taskStartTime) / 1000;
+      let durationSec = (Date.now() - taskStartTime) / 1000;
+      const totalCharDuration = Object.values(charDurations || {}).reduce((a, b) => a + b, 0);
+      // If student closed app and resumed later, wall-clock time can reach hundreds of minutes.
+      // Use active char writing time if wall-clock exceeds 60 minutes or is wildly higher.
+      if (totalCharDuration > 0 && (durationSec > 60 * 60 || durationSec > totalCharDuration * 3)) {
+         durationSec = totalCharDuration;
+      }
       const submitCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || assignmentData.cls || "Tidak diketahui";
       
       const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);

@@ -4592,6 +4592,42 @@
        return `${m} mnt ${s} dtk`;
     }
 
+    function getCleanDurationStats(rawDurations) {
+       if (!rawDurations || rawDurations.length === 0) {
+          return { cleanAvg: 0, minSec: 0, maxSec: 0, excludedCount: 0, maxAllowedSec: 0 };
+       }
+       const valid = rawDurations
+          .map(d => Number(d))
+          .filter(d => typeof d === 'number' && d > 0 && isFinite(d))
+          .sort((a, b) => a - b);
+
+       if (valid.length === 0) {
+          return { cleanAvg: 0, minSec: 0, maxSec: 0, excludedCount: 0, maxAllowedSec: 0 };
+       }
+
+       // Outlier ceiling rule:
+       // Exclude abnormal sessions where students closed the app/browser and resumed hours or days later.
+       let maxAllowedSec = 90 * 60; // 90 minutes max reasonable threshold
+       if (valid.length >= 4) {
+          const q1 = valid[Math.floor(valid.length * 0.25)];
+          const q3 = valid[Math.floor(valid.length * 0.75)];
+          const iqr = q3 - q1;
+          const iqrCeiling = q3 + 2.0 * iqr;
+          // Never filter below 45 minutes, and cap at 90 minutes
+          maxAllowedSec = Math.min(90 * 60, Math.max(45 * 60, iqrCeiling));
+       }
+
+       const cleanList = valid.filter(d => d <= maxAllowedSec);
+       const finalClean = cleanList.length > 0 ? cleanList : [valid[0]];
+       const excludedCount = valid.length - finalClean.length;
+
+       const cleanAvg = finalClean.reduce((a, b) => a + b, 0) / finalClean.length;
+       const minSec = finalClean[0];
+       const maxSec = finalClean[finalClean.length - 1];
+
+       return { cleanAvg, minSec, maxSec, excludedCount, maxAllowedSec };
+    }
+
     function renderAnalyticsCharts(students, sortedChars, totalCompleted, strokeTypeStats, repMistakesAgg) {
        if (typeof Chart === 'undefined') return;
 
@@ -4706,18 +4742,27 @@
              else timeBuckets['Malam (18-24)']++;
           }
           if (s.duration && Number(s.duration) > 0) {
-             durations.push(Number(s.duration));
+             let dVal = Number(s.duration);
+             if (s.meta && s.meta.charDurations && typeof s.meta.charDurations === 'object') {
+                const sumCharDurs = Object.values(s.meta.charDurations).reduce((a, b) => a + Number(b || 0), 0);
+                if (sumCharDurs > 0 && (dVal > 60 * 60 || dVal > sumCharDurs * 3)) {
+                   dVal = sumCharDurs;
+                }
+             }
+             durations.push(dVal);
           }
        });
 
-       // Update Average Duration Badge
+       // Update Average Duration Badge (Filtered to exclude abnormal sessions > hundreds of minutes)
        const durBadge = document.getElementById('chart-avg-duration-badge');
        if (durBadge) {
           if (durations.length > 0) {
-             const avgSec = durations.reduce((a, b) => a + b, 0) / durations.length;
-             const minSec = Math.min(...durations);
-             const maxSec = Math.max(...durations);
-             durBadge.innerHTML = `⏱️ Rata-rata Durasi: <b>${formatDurationHuman(avgSec)}</b> &nbsp;|&nbsp; Tercepat: <b>${formatDurationHuman(minSec)}</b> &nbsp;|&nbsp; Terlama: <b>${formatDurationHuman(maxSec)}</b>`;
+             const durStats = getCleanDurationStats(durations);
+             let noteHtml = '';
+             if (durStats.excludedCount > 0) {
+                noteHtml = ` <span style="font-size:0.75rem; color:#64748B; font-weight:normal; margin-left:4px;" title="Mengabaikan ${durStats.excludedCount} data pengerjaan abnormal (ratusan menit) karena aplikasi ditinggal/ditutup lalu dikerjakan kembali">(*${durStats.excludedCount} data abnormal diabaikan)</span>`;
+             }
+             durBadge.innerHTML = `⏱️ Rata-rata Durasi: <b>${formatDurationHuman(durStats.cleanAvg)}</b> &nbsp;|&nbsp; Tercepat: <b>${formatDurationHuman(durStats.minSec)}</b> &nbsp;|&nbsp; Wajar Terlama: <b>${formatDurationHuman(durStats.maxSec)}</b>${noteHtml}`;
              durBadge.style.display = 'inline-flex';
           } else {
              durBadge.innerHTML = `⏱️ Durasi pengerjaan: Belum ada data waktu tercatat`;
