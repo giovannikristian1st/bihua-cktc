@@ -60,12 +60,20 @@ var DB = {
    },
 
    // --- SUBMISSIONS ---
-   submitAssignment: async function(taskId, className, studentName, totalMistakes, totalWords, repetitions, duration, mistakesMap) {
+   submitAssignment: async function(taskId, className, studentName, totalMistakes, totalWords, repetitions, duration, mistakesMap, strokeMistakesMap) {
       let mistakesDetailStr = "";
       if (mistakesMap && typeof mistakesMap === 'object') {
          const parts = [];
          for (const char in mistakesMap) {
-            parts.push(`${char}: ${mistakesMap[char]}`);
+            let sInfo = "";
+            if (strokeMistakesMap && strokeMistakesMap[char] && Object.keys(strokeMistakesMap[char]).length > 0) {
+               const sParts = [];
+               for (const sNum in strokeMistakesMap[char]) {
+                  sParts.push(`g${sNum}:${strokeMistakesMap[char][sNum]}`);
+               }
+               sInfo = ` (${sParts.join(',')})`;
+            }
+            parts.push(`${char}: ${mistakesMap[char]}${sInfo}`);
          }
          mistakesDetailStr = parts.join(' | ');
       }

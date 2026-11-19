@@ -420,6 +420,7 @@
     
     let drawnChars = new Set();
     let mistakesMap = {};
+    let strokeMistakesMap = {};
     let currentWordMistakes = 0;
     let isDemonstrating = false;
     
@@ -1094,6 +1095,7 @@
             taskStartTime: taskStartTime,
             currentRepIndex: currentRepIndex,
             mistakesMap: mistakesMap,
+            strokeMistakesMap: strokeMistakesMap,
             studentName: studentName,
             studentClass: activeCls,
             currentWordMistakes: currentWordMistakes,
@@ -1178,6 +1180,7 @@
                 taskStartTime = progress.taskStartTime || Date.now();
                 currentRepIndex = progress.currentRepIndex || 0;
                 mistakesMap = progress.mistakesMap || {};
+                strokeMistakesMap = progress.strokeMistakesMap || {};
                 currentWordMistakes = progress.currentWordMistakes || 0;
                 
                 // Repopulate drawnChars for previously completed tasks
@@ -1218,6 +1221,7 @@
       currentTaskIndex = 0;
       currentRepIndex = 0;
       mistakesMap = {};
+      strokeMistakesMap = {};
       tasks.forEach(t => mistakesMap[t.char] = 0);
       drawnChars.clear();
       currentWordMistakes = 0;
@@ -1370,8 +1374,14 @@
           playSound('stroke_mistake');
           const char = tasks[currentTaskIndex].char;
           mistakesMap[char]++;
+          const strokeNum = (strokeData && typeof strokeData.strokeNum === 'number') ? (strokeData.strokeNum + 1) : null;
+          if (strokeNum) {
+             if (!strokeMistakesMap[char]) strokeMistakesMap[char] = {};
+             strokeMistakesMap[char][strokeNum] = (strokeMistakesMap[char][strokeNum] || 0) + 1;
+          }
           currentWordMistakes++;
           updateMistakeUI();
+          saveStudentProgress();
           
           const container = document.getElementById('writer-container') || document.getElementById('writer-target');
           if (container) {
@@ -1875,7 +1885,8 @@
             tasks.length,
             repetitions,
             durationSec,
-            mistakesMap
+            mistakesMap,
+            strokeMistakesMap
          );
          statusEl.innerHTML = `
            <div style="color: #10B981; font-size: 2.5rem; margin-bottom: 5px;">✓</div>
@@ -2066,6 +2077,7 @@
        currentWordMistakes = 0;
        
        mistakesMap = {};
+       strokeMistakesMap = {};
        tasks.forEach(t => mistakesMap[t.char] = 0);
        
        saveStudentProgress();

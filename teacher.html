@@ -11,6 +11,7 @@
   <script src="config.js"></script>
   <script src="db.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="themes.css">
   
   <!-- Google Fonts for Personalized Teacher Themes -->
@@ -445,6 +446,84 @@
     .grade-struggling {
       background: #FEE2E2;
       color: #B91C1C;
+    }
+
+    /* Analytics Visual Charts Grid */
+    .analytics-charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .analytics-chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s ease;
+    }
+    .analytics-chart-card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .analytics-chart-header {
+      margin-bottom: 12px;
+    }
+    .analytics-chart-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .analytics-chart-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 2px 0 0 0;
+    }
+    .analytics-chart-canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .duration-stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 10px;
+      line-height: 1.3;
+    }
+    .stroke-breakdown-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+    }
+    .stroke-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #991B1B;
+      font-size: 0.74rem;
+      font-weight: 700;
     }
 
     /* Status Filter Bar (Sudah / Belum Mengerjakan) */
@@ -1562,6 +1641,45 @@
               <span class="mistake-kpi-label">Penguasaan Sempurna (0 Salah)</span>
               <span class="mistake-kpi-val" style="color:#059669;" id="kpi-perfect-count">0</span>
               <span class="mistake-kpi-sub" id="kpi-perfect-sub">0% dari murid selesai</span>
+           </div>
+        </div>
+
+        <!-- 3 VISUAL CHARTS GRID -->
+        <div class="analytics-charts-grid">
+           <!-- CHART 1: PREDIKAT PENGUASAAN SISWA -->
+           <div class="analytics-chart-card">
+              <div class="analytics-chart-header">
+                 <h5 class="analytics-chart-title">🥧 Predikat Penguasaan Siswa</h5>
+                 <p class="analytics-chart-sub">Persentase siswa berdasarkan jumlah kesalahan goresan</p>
+              </div>
+              <div class="analytics-chart-canvas-wrapper">
+                 <canvas id="chart-mastery"></canvas>
+              </div>
+           </div>
+
+           <!-- CHART 2: WAKTU & JAM PENGUMPULAN MURID -->
+           <div class="analytics-chart-card">
+              <div class="analytics-chart-header">
+                 <h5 class="analytics-chart-title">📊 Waktu Pengumpulan Tugas</h5>
+                 <p class="analytics-chart-sub">Distribusi jam pengerjaan siswa</p>
+              </div>
+              <div class="analytics-chart-canvas-wrapper">
+                 <canvas id="chart-submission-time"></canvas>
+              </div>
+              <div id="chart-avg-duration-badge" class="duration-stat-badge">
+                 ⏱️ Rata-rata Durasi: <b>-</b>
+              </div>
+           </div>
+
+           <!-- CHART 3: PROPORSI KESALAHAN PER KARAKTER -->
+           <div class="analytics-chart-card">
+              <div class="analytics-chart-header">
+                 <h5 class="analytics-chart-title">🍩 Proporsi Kesalahan Karakter</h5>
+                 <p class="analytics-chart-sub">Beban persentase kesalahan dari masing-masing aksara</p>
+              </div>
+              <div class="analytics-chart-canvas-wrapper">
+                 <canvas id="chart-character-errors"></canvas>
+              </div>
            </div>
         </div>
 
@@ -4271,6 +4389,246 @@
        return { char: char, pinyin: '-', meaning: '-' };
     }
 
+    window.analyticsChartInstances = {
+       mastery: null,
+       time: null,
+       charErrors: null
+    };
+
+    function formatDurationHuman(sec) {
+       if (!sec || sec <= 0) return '-';
+       const m = Math.floor(sec / 60);
+       const s = Math.round(sec % 60);
+       if (m === 0) return `${s} dtk`;
+       return `${m} mnt ${s} dtk`;
+    }
+
+    function renderAnalyticsCharts(students, sortedChars, totalCompleted) {
+       if (typeof Chart === 'undefined') return;
+
+       // Destroy previous instances to avoid canvas reuse error
+       if (window.analyticsChartInstances.mastery) {
+          window.analyticsChartInstances.mastery.destroy();
+          window.analyticsChartInstances.mastery = null;
+       }
+       if (window.analyticsChartInstances.time) {
+          window.analyticsChartInstances.time.destroy();
+          window.analyticsChartInstances.time = null;
+       }
+       if (window.analyticsChartInstances.charErrors) {
+          window.analyticsChartInstances.charErrors.destroy();
+          window.analyticsChartInstances.charErrors = null;
+       }
+
+       const canvasMastery = document.getElementById('chart-mastery');
+       const canvasTime = document.getElementById('chart-submission-time');
+       const canvasChar = document.getElementById('chart-character-errors');
+       if (!canvasMastery || !canvasTime || !canvasChar) return;
+
+       // 1. CHART 1: MASTERY PIE CHART
+       let countPerfect = 0;
+       let countGood = 0;
+       let countPractice = 0;
+       let countStruggle = 0;
+
+       students.forEach(s => {
+          const tm = s.totalMistakes || 0;
+          if (tm === 0) countPerfect++;
+          else if (tm <= 3) countGood++;
+          else if (tm <= 10) countPractice++;
+          else countStruggle++;
+       });
+
+       window.analyticsChartInstances.mastery = new Chart(canvasMastery, {
+          type: 'pie',
+          data: {
+             labels: ['Sempurna (0)', 'Sangat Baik (1-3)', 'Perlu Latihan (4-10)', 'Perlu Bimbingan (>10)'],
+             datasets: [{
+                data: [countPerfect, countGood, countPractice, countStruggle],
+                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'],
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
+             }]
+          },
+          options: {
+             responsive: true,
+             maintainAspectRatio: false,
+             plugins: {
+                legend: {
+                   position: 'bottom',
+                   labels: { boxWidth: 12, font: { size: 11 } }
+                },
+                tooltip: {
+                   callbacks: {
+                      label: function(ctx) {
+                         const val = ctx.raw || 0;
+                         const pct = totalCompleted > 0 ? Math.round((val / totalCompleted) * 100) : 0;
+                         return ` ${ctx.label}: ${val} siswa (${pct}%)`;
+                      }
+                   }
+                }
+             }
+          }
+       });
+
+       // 2. CHART 2: TIME OF SUBMISSION BAR CHART
+       let timeBuckets = {
+          'Subuh (00-06)': 0,
+          'Pagi (06-12)': 0,
+          'Siang (12-15)': 0,
+          'Sore (15-18)': 0,
+          'Malam (18-24)': 0
+       };
+       let durations = [];
+
+       students.forEach(s => {
+          if (s.submitted_at) {
+             const d = new Date(s.submitted_at);
+             const hr = d.getHours();
+             if (hr >= 0 && hr < 6) timeBuckets['Subuh (00-06)']++;
+             else if (hr >= 6 && hr < 12) timeBuckets['Pagi (06-12)']++;
+             else if (hr >= 12 && hr < 15) timeBuckets['Siang (12-15)']++;
+             else if (hr >= 15 && hr < 18) timeBuckets['Sore (15-18)']++;
+             else timeBuckets['Malam (18-24)']++;
+          }
+          if (s.duration && Number(s.duration) > 0) {
+             durations.push(Number(s.duration));
+          }
+       });
+
+       // Update Average Duration Badge
+       const durBadge = document.getElementById('chart-avg-duration-badge');
+       if (durBadge) {
+          if (durations.length > 0) {
+             const avgSec = durations.reduce((a, b) => a + b, 0) / durations.length;
+             const minSec = Math.min(...durations);
+             const maxSec = Math.max(...durations);
+             durBadge.innerHTML = `⏱️ Rata-rata Durasi: <b>${formatDurationHuman(avgSec)}</b> &nbsp;|&nbsp; Tercepat: <b>${formatDurationHuman(minSec)}</b> &nbsp;|&nbsp; Terlama: <b>${formatDurationHuman(maxSec)}</b>`;
+             durBadge.style.display = 'inline-flex';
+          } else {
+             durBadge.innerHTML = `⏱️ Durasi pengerjaan: Belum ada data waktu tercatat`;
+             durBadge.style.display = 'inline-flex';
+          }
+       }
+
+       window.analyticsChartInstances.time = new Chart(canvasTime, {
+          type: 'bar',
+          data: {
+             labels: Object.keys(timeBuckets),
+             datasets: [{
+                label: 'Jumlah Murid',
+                data: Object.values(timeBuckets),
+                backgroundColor: '#B45309',
+                borderRadius: 6
+             }]
+          },
+          options: {
+             responsive: true,
+             maintainAspectRatio: false,
+             scales: {
+                y: {
+                   beginAtZero: true,
+                   ticks: { precision: 0, font: { size: 10 } },
+                   grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                   ticks: { font: { size: 10 } },
+                   grid: { display: false }
+                }
+             },
+             plugins: {
+                legend: { display: false },
+                tooltip: {
+                   callbacks: {
+                      label: function(ctx) { return ` ${ctx.raw} murid`; }
+                   }
+                }
+             }
+          }
+       });
+
+       // 3. CHART 3: DOUGHNUT ERROR PROPORTIONS
+       const topChars = sortedChars.filter(c => c.totalMistakes > 0);
+       let charLabels = [];
+       let charData = [];
+       const colorsPalette = ['#DC2626', '#EA580C', '#D97706', '#CA8A04', '#65A30D', '#0D9488', '#64748B'];
+
+       if (topChars.length === 0) {
+          charLabels = ['Tidak ada kesalahan 🎉'];
+          charData = [1];
+          window.analyticsChartInstances.charErrors = new Chart(canvasChar, {
+             type: 'doughnut',
+             data: {
+                labels: charLabels,
+                datasets: [{
+                   data: charData,
+                   backgroundColor: ['#10B981'],
+                   borderWidth: 2,
+                   borderColor: '#FFFFFF'
+                }]
+             },
+             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                   legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                   tooltip: { enabled: false }
+                }
+             }
+          });
+       } else {
+          const topN = 5;
+          const primary = topChars.slice(0, topN);
+          const remaining = topChars.slice(topN);
+
+          primary.forEach(c => {
+             const info = getCharInfo(c.char);
+             charLabels.push(`${c.char} (${info.pinyin || ''})`);
+             charData.push(c.totalMistakes);
+          });
+
+          if (remaining.length > 0) {
+             const remainingTotal = remaining.reduce((sum, c) => sum + c.totalMistakes, 0);
+             charLabels.push(`Lainnya (${remaining.length} huruf)`);
+             charData.push(remainingTotal);
+          }
+
+          const totalErrors = charData.reduce((a, b) => a + b, 0);
+
+          window.analyticsChartInstances.charErrors = new Chart(canvasChar, {
+             type: 'doughnut',
+             data: {
+                labels: charLabels,
+                datasets: [{
+                   data: charData,
+                   backgroundColor: colorsPalette.slice(0, charData.length),
+                   borderWidth: 2,
+                   borderColor: '#FFFFFF'
+                }]
+             },
+             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                   legend: {
+                      position: 'bottom',
+                      labels: { boxWidth: 12, font: { size: 11 } }
+                   },
+                   tooltip: {
+                      callbacks: {
+                         label: function(ctx) {
+                            const val = ctx.raw || 0;
+                            const pct = totalErrors > 0 ? Math.round((val / totalErrors) * 100) : 0;
+                            return ` ${ctx.label}: ${val}x salah (${pct}%)`;
+                         }
+                      }
+                   }
+                }
+             }
+          });
+       }
+    }
+
     function renderMistakesClassPills() {
        const pillsEl = document.getElementById('mistakes-class-pills');
        if (!pillsEl) return;
@@ -4334,26 +4692,45 @@
           if (r.mistakes_detail && typeof r.mistakes_detail === 'string') {
              const parts = r.mistakes_detail.split('|');
              parts.forEach(p => {
-                const segs = p.split(':');
-                if (segs.length >= 2) {
-                   const ch = segs[0].trim();
-                   const mCount = parseInt(segs[1].trim(), 10) || 0;
+                const seg = p.trim();
+                if (!seg) return;
+                const match = seg.match(/^([^:]+):\s*([0-9]+)(?:\s*[\(\[]([^\)\]]+)[\)\]])?/);
+                if (match) {
+                   const ch = match[1].trim();
+                   const mCount = parseInt(match[2], 10) || 0;
+                   const strokeDetails = {};
+                   if (match[3]) {
+                      match[3].split(',').forEach(st => {
+                         const pair = st.trim().split(':');
+                         if (pair.length === 2) {
+                            const sNum = pair[0].replace(/[^0-9]/g, '');
+                            const sCnt = parseInt(pair[1], 10) || 0;
+                            if (sNum && sCnt > 0) strokeDetails[sNum] = sCnt;
+                         }
+                      });
+                   }
+
                    if (ch) {
                       if (!charMap[ch]) {
                          charMap[ch] = {
                             char: ch,
                             totalMistakes: 0,
+                            strokeMistakes: {},
                             students: []
                          };
                       }
                       charMap[ch].totalMistakes += mCount;
+                      for (const sn in strokeDetails) {
+                         charMap[ch].strokeMistakes[sn] = (charMap[ch].strokeMistakes[sn] || 0) + strokeDetails[sn];
+                      }
                       if (mCount > 0) {
                          charMap[ch].students.push({
                             name: r.student_name,
                             cls: r.student_class || '',
-                            count: mCount
+                            count: mCount,
+                            strokes: strokeDetails
                          });
-                         sCharMistakes.push({ char: ch, count: mCount });
+                         sCharMistakes.push({ char: ch, count: mCount, strokes: strokeDetails });
                       }
                       sTotalMistakes += mCount;
                    }
@@ -4457,6 +4834,13 @@
 
                 const avgPerFailedStudent = studentFailCount > 0 ? (item.totalMistakes / studentFailCount).toFixed(1) : '0';
 
+                let strokeTagsHtml = '';
+                if (item.strokeMistakes && Object.keys(item.strokeMistakes).length > 0) {
+                   const sortedStrokes = Object.entries(item.strokeMistakes).sort((a,b) => b[1] - a[1]);
+                   const strokeTags = sortedStrokes.map(([sNum, sCnt]) => `<span class="stroke-tag" title="Guratan #${sNum} salah ${sCnt}x">Guratan #${sNum}: <b>${sCnt}x</b></span>`).join(' ');
+                   strokeTagsHtml = `<div class="stroke-breakdown-tags">${strokeTags}</div>`;
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                    <td style="text-align:center; font-weight:700; color:var(--text-muted);">${idx + 1}</td>
@@ -4464,6 +4848,7 @@
                    <td>
                       <div style="font-weight:700; color:var(--primary); font-size:1rem;">${escapeHtml(info.pinyin)}</div>
                       <div style="font-size:0.85rem; color:var(--text-muted);">${escapeHtml(info.meaning)}</div>
+                      ${strokeTagsHtml}
                    </td>
                    <td>
                       <span style="font-size:1.15rem; font-weight:900; color:${item.totalMistakes > 0 ? '#DC2626' : '#059669'};">${item.totalMistakes}x</span>
@@ -4484,7 +4869,10 @@
           }
        }
 
-       // --- 3. RENDER STUDENTS TABLE ---
+       // --- 3. RENDER 3 VISUAL CHARTS ---
+       renderAnalyticsCharts(analyzedStudents, sortedChars, totalCompleted);
+
+       // --- 4. RENDER STUDENTS TABLE ---
        filterMistakesStudentTable();
     }
 
@@ -4539,7 +4927,12 @@
              charDetailHtml = '<span style="color:#059669; font-size:0.85rem; font-weight:600;">✓ Bersih tanpa salah</span>';
           } else {
              charDetailHtml = s.charMistakes.map(item => {
-                return `<span class="affected-student-chip" style="background:#FEE2E2; color:#991B1B; border-color:#FECDD3;">${escapeHtml(item.char)}: <b>${item.count}x</b></span>`;
+                let strokeSub = '';
+                if (item.strokes && Object.keys(item.strokes).length > 0) {
+                   const sList = Object.entries(item.strokes).map(([sn, sc]) => `G#${sn}:${sc}x`).join(', ');
+                   strokeSub = ` <small style="font-size:0.72rem; opacity:0.85;">(${sList})</small>`;
+                }
+                return `<span class="affected-student-chip" style="background:#FEE2E2; color:#991B1B; border-color:#FECDD3;">${escapeHtml(item.char)}: <b>${item.count}x</b>${strokeSub}</span>`;
              }).join(' ');
           }
 
@@ -4637,7 +5030,7 @@
 
        // Sheet 1: Analisis Huruf Tersulit
        const charData = [
-          ['No', 'Aksara', 'Pinyin', 'Arti', 'Total Kesalahan', 'Jumlah Murid Salah', 'Persentase Murid (%)', 'Tingkat Kesulitan', 'Daftar Murid yang Sering Salah']
+          ['No', 'Aksara', 'Pinyin', 'Arti', 'Total Kesalahan', 'Jumlah Murid Salah', 'Persentase Murid (%)', 'Tingkat Kesulitan', 'Rincian Nomor Guratan', 'Daftar Murid yang Sering Salah']
        ];
 
        const totalCompleted = students.length;
@@ -4650,6 +5043,7 @@
           if (pct >= 50 || item.totalMistakes >= 30) level = 'Tinggi';
           else if (pct >= 20 || item.totalMistakes >= 10) level = 'Sedang';
 
+          const strokeStr = Object.entries(item.strokeMistakes || {}).map(([sn, sc]) => `Guratan #${sn}: ${sc}x`).join(', ') || '-';
           const studentListStr = item.students.map(s => `${s.name}${s.cls ? ` (${s.cls})` : ''}: ${s.count}x`).join(', ');
 
           charData.push([
@@ -4661,6 +5055,7 @@
              studentFailCount,
              pct,
              level,
+             strokeStr,
              studentListStr
           ]);
        });
@@ -4680,7 +5075,13 @@
           else if (s.totalMistakes <= 10) predicate = 'Perlu Latihan';
 
           const charMistakesStr = s.charMistakes.length > 0
-             ? s.charMistakes.map(cm => `${cm.char}: ${cm.count}x`).join(', ')
+             ? s.charMistakes.map(cm => {
+                let st = '';
+                if (cm.strokes && Object.keys(cm.strokes).length > 0) {
+                   st = ' (' + Object.entries(cm.strokes).map(([sn, sc]) => `G#${sn}:${sc}x`).join(',') + ')';
+                }
+                return `${cm.char}: ${cm.count}x${st}`;
+             }).join(', ')
              : 'Tidak ada kesalahan';
 
           let dateStr = '-';
