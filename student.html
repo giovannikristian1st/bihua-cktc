@@ -231,6 +231,27 @@
       font-weight: bold;
       margin-left: 6px;
     }
+
+    /* ── Student Portal Dashboard ── */
+    #screen-portal {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: var(--bg-body);
+      color: var(--text-main);
+      box-sizing: border-box;
+      width: 100%;
+      padding-bottom: 50px;
+    }
+    .portal-task-card {
+      transition: all 0.2s ease;
+    }
+    .portal-task-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
   </style>
 
 </head>
@@ -239,9 +260,100 @@
   <!-- CONFETTI CANVAS -->
   <canvas id="confetti-canvas"></canvas>
 
+  <!-- STUDENT PORTAL DASHBOARD SCREEN -->
+  <div id="screen-portal" class="screen hidden" style="width: 100%; max-width: 860px; margin: 0 auto; padding: 20px 16px;">
+    <!-- PORTAL HEADER -->
+    <div class="portal-header-card" style="width: 100%; background: var(--bg-card, #FFFFFF); border-radius: 16px; padding: 22px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1.5px solid var(--border-color, #E2E8F0); margin-bottom: 20px; box-sizing: border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, var(--primary, #8B3DFF), #6D28D9); color:white; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:bold; box-shadow:0 4px 12px rgba(139,61,255,0.3);">
+            ✍️
+          </div>
+          <div>
+            <h2 id="portal-student-greeting" style="margin:0; font-size:1.35rem; color:var(--text-main, #0E1318); font-family:sans-serif; display:flex; align-items:center; gap:8px;">
+              <span>Halo!</span>
+            </h2>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+              <span id="portal-class-badge" style="background:rgba(139,61,255,0.1); color:var(--primary, #8B3DFF); font-weight:bold; padding:2px 10px; border-radius:20px; font-size:0.82rem;">Kelas -</span>
+              <span style="color:var(--text-muted, #64748B); font-size:0.85rem;">Portal Latihan Menulis Hanzi</span>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="btn" id="btn-portal-switch-user" style="width:auto; padding:8px 16px; font-size:0.85rem; background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; font-weight:600; cursor:pointer;" onclick="promptSwitchStudent()">
+            👤 Ganti Siswa / Kelas
+          </button>
+          <button type="button" class="btn" id="btn-portal-refresh" style="width:auto; padding:8px 14px; font-size:0.85rem; background:rgba(139,61,255,0.1); color:var(--primary, #8B3DFF); border:1px solid rgba(139,61,255,0.2); font-weight:600; cursor:pointer;" onclick="refreshPortalTasks()">
+            🔄 Segarkan
+          </button>
+        </div>
+      </div>
+
+      <!-- PORTAL STATS ROW -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:20px; padding-top:16px; border-top:1px dashed var(--border-color, #E2E8F0);">
+        <div style="background:rgba(245,158,11,0.08); border:1px solid #FCD34D; border-radius:12px; padding:12px 16px;">
+          <div style="font-size:0.8rem; color:#B45309; font-weight:600;">⏳ Tugas Belum Selesai</div>
+          <div id="portal-pending-count" style="font-size:1.6rem; font-weight:800; color:#D97706; margin-top:2px;">0</div>
+        </div>
+        <div style="background:rgba(16,185,129,0.08); border:1px solid #6EE7B7; border-radius:12px; padding:12px 16px;">
+          <div style="font-size:0.8rem; color:#047857; font-weight:600;">✅ Tugas Selesai</div>
+          <div id="portal-completed-count" style="font-size:1.6rem; font-weight:800; color:#059669; margin-top:2px;">0</div>
+        </div>
+        <div style="background:rgba(139,61,255,0.08); border:1px solid rgba(139,61,255,0.2); border-radius:12px; padding:12px 16px;">
+          <div style="font-size:0.8rem; color:var(--primary, #8B3DFF); font-weight:600;">📚 Total Tugas</div>
+          <div id="portal-total-count" style="font-size:1.6rem; font-weight:800; color:var(--primary, #8B3DFF); margin-top:2px;">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENT SELECTION MODAL / CARD (IF NOT LOGGED IN) -->
+    <div id="portal-student-modal" class="login-card" style="display:none; max-width:460px; margin: 40px auto; text-align:left;">
+      <h2 style="text-align:center; margin-bottom:8px;">Portal Siswa</h2>
+      <p style="text-align:center; margin-bottom:20px; color:var(--text-muted, #64748B); font-size:0.9rem;">Pilih kelas dan nama Anda untuk melihat tugas-tugas Anda</p>
+      
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:0.85rem; font-weight:bold; color:var(--text-main, #0E1318); margin-bottom:6px;">1. Pilih Kelas</label>
+        <select id="portal-select-class" class="student-select" style="margin-bottom:0;" onchange="onPortalClassChanged()">
+          <option value="">-- Pilih Kelas --</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-size:0.85rem; font-weight:bold; color:var(--text-main, #0E1318); margin-bottom:6px;">2. Pilih Nama Anda</label>
+        <select id="portal-select-student" class="student-select" style="margin-bottom:0;" disabled>
+          <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
+        </select>
+      </div>
+
+      <button id="btn-portal-login" class="btn" disabled onclick="savePortalStudentAndLoad()">Buka Daftar Tugas Saya 🚀</button>
+    </div>
+
+    <!-- TASK LIST CONTAINER -->
+    <div id="portal-task-container" style="width: 100%; box-sizing: border-box;">
+      <div id="portal-task-loading" style="text-align:center; padding:50px 20px; color:var(--text-muted, #64748B);">
+        <div class="loader" style="margin: 0 auto 14px auto;"></div>
+        <p style="font-size:1rem; font-weight:600;">Memuat tugas-tugas kamu...</p>
+      </div>
+      
+      <div id="portal-task-empty" style="display:none; text-align:center; padding:50px 20px; background:var(--bg-card, white); border-radius:16px; border:1px solid var(--border-color, #E2E8F0); box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+        <div style="font-size:3rem; margin-bottom:12px;">🎉</div>
+        <h3 style="margin:0 0 8px 0; color:var(--text-main, #0E1318);">Belum Ada Tugas Aktif</h3>
+        <p style="color:var(--text-muted, #64748B); max-width:400px; margin:0 auto; font-size:0.92rem;">Semua tugas untuk kelas Anda telah selesai atau guru belum memberikan tugas baru. Tetap semangat berlatih!</p>
+      </div>
+
+      <div id="portal-task-list" style="display:flex; flex-direction:column; gap:14px; width: 100%;"></div>
+    </div>
+  </div>
+
   <!-- LOGIN SCREEN -->
   <div id="screen-login" class="screen">
     <div class="login-card">
+      <div id="portal-nav-back-link" style="text-align:left; margin-bottom:14px;">
+        <button type="button" style="background:none; border:none; color:var(--primary, #8B3DFF); font-size:0.86rem; font-weight:bold; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:4px; text-decoration:none;" onclick="returnToStudentPortal()">
+          <span>←</span> <span>Ke Beranda Siswa</span>
+        </button>
+      </div>
       <h2>Mulai Tugas</h2>
       <p style="margin-bottom: 15px; color: #5E6A75;" id="login-info">Memuat data tugas...</p>
       
@@ -375,6 +487,7 @@
         <div id="finish-options" style="display:none; margin-top: 20px; flex-direction: column; gap: 12px;">
           <button class="btn" id="btn-show-leaderboard" style="background:#00C4CC;">🏆 Papan Peringkat</button>
           <button class="btn" id="btn-restart" style="background:#FFA500;">🔄 Kerjakan Lagi</button>
+          <button class="btn" id="btn-portal" style="background:var(--primary, #8B3DFF); color:white;" onclick="returnToStudentPortal()">🏠 Beranda Siswa</button>
           <button class="btn" id="btn-close" style="background:#ef4444;">🚪 Selesai</button>
         </div>
         
@@ -401,6 +514,7 @@
       <div id="thank-you-msg" style="display:none; margin-top: 10px; padding: 20px 0;">
         <h1 style="font-size: 5rem; color: var(--primary); margin: 0; line-height: 1;">感恩</h1>
         <p style="font-size: 1.8rem; color: var(--text-muted); margin-top: 10px; font-weight: bold;">gǎn ēn</p>
+        <button class="btn" style="background:var(--primary, #8B3DFF); color:white; margin-top:24px; font-weight:bold;" onclick="returnToStudentPortal()">🏠 Kembali ke Beranda Siswa</button>
       </div>
     </div>
   </div>
@@ -841,7 +955,15 @@
             }
          });
       } else {
-         loginInfo.textContent = "Error: Link tugas tidak valid (Data kosong).";
+         const screenLoginEl = document.getElementById('screen-login');
+         if (screenLoginEl) screenLoginEl.classList.add('hidden');
+         fetchStudentsPromise.then(supaStudents => {
+            if (supaStudents && Object.keys(supaStudents).length > 0) {
+               currentStudentsDB = supaStudents;
+               try { localStorage.setItem('stroke_app_cached_students', JSON.stringify(supaStudents)); } catch(e){}
+            }
+            initStudentPortal();
+         });
       }
     };
     
@@ -1949,6 +2071,12 @@
            <div style="color: #10B981; font-size: 2.5rem; margin-bottom: 5px;">✓</div>
            <p style="color: #10B981; font-weight: bold;">Tugas berhasil dikirim!</p>
          `;
+         if (studentName && submitCls && submitCls !== "Tidak diketahui") {
+            try {
+               localStorage.setItem('stroke_app_portal_class', submitCls);
+               localStorage.setItem('stroke_app_portal_student', studentName);
+            } catch(e) {}
+         }
          document.getElementById('finish-options').style.display = 'flex';
          updateStudentLeaderboardButtons();
          fetchLeaderboard();
@@ -2194,6 +2322,325 @@
           if (restartContainer) restartContainer.style.display = 'none';
        }
     }
+
+    // ==========================================
+    // --- STUDENT PORTAL DASHBOARD FUNCTIONS ---
+    // ==========================================
+    window.portalCachedTasks = [];
+
+    function formatPortalDate(dateStr) {
+       if (!dateStr) return '';
+       try {
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return '';
+          const dd = String(d.getDate()).padStart(2, '0');
+          const mmm = d.toLocaleString('id-ID', { month: 'short' });
+          const yyyy = d.getFullYear();
+          return `${dd} ${mmm} ${yyyy}`;
+       } catch(e) {
+          return '';
+       }
+    }
+
+    window.initStudentPortal = async function() {
+       const portalScreen = document.getElementById('screen-portal');
+       if (!portalScreen) return;
+       portalScreen.classList.remove('hidden');
+
+       const savedClass = localStorage.getItem('stroke_app_portal_class');
+       const savedStudent = localStorage.getItem('stroke_app_portal_student');
+
+       const modal = document.getElementById('portal-student-modal');
+       const headerCard = document.querySelector('.portal-header-card');
+       const taskContainer = document.getElementById('portal-task-container');
+
+       // Populate classes in portal modal dropdown
+       const classSelect = document.getElementById('portal-select-class');
+       if (classSelect) {
+          classSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+          const sourceDB = (currentStudentsDB && Object.keys(currentStudentsDB).length > 0)
+             ? currentStudentsDB
+             : ((typeof _studentsDB !== 'undefined') ? _studentsDB : {});
+          
+          Object.keys(sourceDB).sort().forEach(cls => {
+             const opt = document.createElement('option');
+             opt.value = cls;
+             opt.textContent = `Kelas ${cls}`;
+             classSelect.appendChild(opt);
+          });
+       }
+
+       if (savedClass && savedStudent) {
+          if (modal) modal.style.display = 'none';
+          if (headerCard) headerCard.style.display = 'block';
+          if (taskContainer) taskContainer.style.display = 'block';
+
+          const greetingEl = document.getElementById('portal-student-greeting');
+          if (greetingEl) greetingEl.innerHTML = `<span>Halo, <b>${escapeHtml(savedStudent)}</b>! 👋</span>`;
+
+          const classBadge = document.getElementById('portal-class-badge');
+          if (classBadge) classBadge.textContent = `Kelas ${savedClass}`;
+
+          await refreshPortalTasks();
+       } else {
+          if (headerCard) headerCard.style.display = 'none';
+          if (taskContainer) taskContainer.style.display = 'none';
+          if (modal) modal.style.display = 'block';
+       }
+    };
+
+    window.onPortalClassChanged = function() {
+       const classSelect = document.getElementById('portal-select-class');
+       const studentSelect = document.getElementById('portal-select-student');
+       const loginBtn = document.getElementById('btn-portal-login');
+       if (!classSelect || !studentSelect) return;
+
+       const cls = classSelect.value;
+       studentSelect.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+       if (!cls) {
+          studentSelect.disabled = true;
+          if (loginBtn) loginBtn.disabled = true;
+          return;
+       }
+
+       const sourceDB = (currentStudentsDB && Object.keys(currentStudentsDB).length > 0)
+          ? currentStudentsDB
+          : ((typeof _studentsDB !== 'undefined') ? _studentsDB : {});
+
+       const list = sourceDB[cls] || [];
+       list.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          studentSelect.appendChild(opt);
+       });
+       studentSelect.disabled = false;
+       studentSelect.onchange = () => {
+          if (loginBtn) loginBtn.disabled = !studentSelect.value;
+       };
+    };
+
+    window.savePortalStudentAndLoad = function() {
+       const classSelect = document.getElementById('portal-select-class');
+       const studentSelect = document.getElementById('portal-select-student');
+       if (!classSelect || !studentSelect || !classSelect.value || !studentSelect.value) return;
+
+       const cls = classSelect.value;
+       const name = studentSelect.value;
+
+       try {
+          localStorage.setItem('stroke_app_portal_class', cls);
+          localStorage.setItem('stroke_app_portal_student', name);
+       } catch(e) {}
+
+       initStudentPortal();
+    };
+
+    window.promptSwitchStudent = function() {
+       const modal = document.getElementById('portal-student-modal');
+       const headerCard = document.querySelector('.portal-header-card');
+       const taskContainer = document.getElementById('portal-task-container');
+
+       if (headerCard) headerCard.style.display = 'none';
+       if (taskContainer) taskContainer.style.display = 'none';
+       if (modal) {
+          modal.style.display = 'block';
+          const classSelect = document.getElementById('portal-select-class');
+          const savedCls = localStorage.getItem('stroke_app_portal_class');
+          if (classSelect && savedCls) {
+             classSelect.value = savedCls;
+             onPortalClassChanged();
+             const studentSelect = document.getElementById('portal-select-student');
+             const savedStudent = localStorage.getItem('stroke_app_portal_student');
+             if (studentSelect && savedStudent) {
+                studentSelect.value = savedStudent;
+                const loginBtn = document.getElementById('btn-portal-login');
+                if (loginBtn) loginBtn.disabled = false;
+             }
+          }
+       }
+    };
+
+    window.refreshPortalTasks = async function() {
+       const savedClass = localStorage.getItem('stroke_app_portal_class');
+       const savedStudent = localStorage.getItem('stroke_app_portal_student');
+       if (!savedClass || !savedStudent) return;
+
+       const loadingEl = document.getElementById('portal-task-loading');
+       const emptyEl = document.getElementById('portal-task-empty');
+       const listEl = document.getElementById('portal-task-list');
+
+       if (loadingEl) loadingEl.style.display = 'block';
+       if (emptyEl) emptyEl.style.display = 'none';
+       if (listEl) listEl.innerHTML = '';
+
+       try {
+          const tasksList = await DB.getStudentTasksWithStatus(savedClass, savedStudent);
+          window.portalCachedTasks = tasksList || [];
+
+          if (loadingEl) loadingEl.style.display = 'none';
+
+          const pendingCount = (tasksList || []).filter(t => !t.is_completed).length;
+          const completedCount = (tasksList || []).filter(t => t.is_completed).length;
+          const totalCount = (tasksList || []).length;
+
+          const pCountEl = document.getElementById('portal-pending-count');
+          const cCountEl = document.getElementById('portal-completed-count');
+          const tCountEl = document.getElementById('portal-total-count');
+          if (pCountEl) pCountEl.textContent = pendingCount;
+          if (cCountEl) cCountEl.textContent = completedCount;
+          if (tCountEl) tCountEl.textContent = totalCount;
+
+          if (!tasksList || tasksList.length === 0) {
+             if (emptyEl) emptyEl.style.display = 'block';
+             return;
+          }
+
+          tasksList.forEach(t => {
+             const p = t.payload || {};
+             let babTitle = '';
+             let previewChars = [];
+
+             if (p.v && typeof p.v === 'object') {
+                for (const bk in p.v) {
+                   for (const ut in p.v[bk]) {
+                      babTitle = babTitle ? `${babTitle}, ${bk} ${ut}` : `${bk} ${ut}`;
+                      if (typeof _meihuaDB !== 'undefined' && _meihuaDB[bk] && _meihuaDB[bk][ut]) {
+                         const uVocabs = _meihuaDB[bk][ut].vocab || [];
+                         const val = p.v[bk][ut];
+                         if (typeof val === 'string') {
+                            val.split('|').forEach(vp => {
+                               const [vIdx] = vp.split(':');
+                               const vObj = uVocabs[parseInt(vIdx)];
+                               if (vObj && vObj.char) previewChars.push(vObj.char);
+                            });
+                         }
+                      }
+                   }
+                }
+             }
+             if (p.cv && Array.isArray(p.cv) && p.cv.length > 0) {
+                const mTitle = `Manual: ${p.cv.map(c => c.char).join(', ')}`;
+                babTitle = babTitle ? `${babTitle} (${mTitle})` : mTitle;
+                p.cv.forEach(c => { if (c.char) previewChars.push(c.char); });
+             }
+             if (!babTitle) babTitle = 'Latihan Menulis Hanzi';
+
+             previewChars = [...new Set(previewChars)].slice(0, 8);
+             let previewHtml = '';
+             if (previewChars.length > 0) {
+                previewHtml = `
+                   <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                      ${previewChars.map(ch => `<span style="font-family:'KaiTi','STKaiti',serif; font-size:1.15rem; background:#F8FAFC; border:1px solid #E2E8F0; padding:2px 8px; border-radius:6px; color:#1E293B;">${escapeHtml(ch)}</span>`).join('')}
+                      ${previewChars.length >= 8 ? '<span style="font-size:0.8rem; color:#94A3B8; align-self:center;">...dan lainnya</span>' : ''}
+                   </div>
+                `;
+             }
+
+             const dateStr = formatPortalDate(t.created_at);
+
+             const card = document.createElement('div');
+             card.className = 'portal-task-card';
+             card.style.cssText = `background:var(--bg-card, #FFFFFF); border-radius:14px; padding:18px 20px; border:1.5px solid ${t.is_completed ? '#E2E8F0' : 'var(--primary, #8B3DFF)'}; box-shadow:0 2px 10px rgba(0,0,0,0.04); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:12px;`;
+             card.innerHTML = `
+                <div style="flex:1; min-width:260px;">
+                   <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                      ${t.is_remedial ? `<span style="background:#FEF3C7; color:#D97706; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px;">🔁 Remedial</span>` : `<span style="background:#EDE9FE; color:var(--primary, #8B3DFF); font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px;">📝 Tugas Reguler</span>`}
+                      ${t.is_completed ? `<span style="background:#ECFDF5; color:#059669; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px; border:1px solid #A7F3D0;">✅ Selesai (${t.completions_count}x dikerjakan)</span>` : `<span style="background:#FFFBEB; color:#B45309; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px; border:1px solid #FDE68A;">⏳ Belum Selesai</span>`}
+                      <span style="font-size:0.75rem; color:#94A3B8;">ID: ${t.id}</span>
+                   </div>
+                   <h3 style="margin:0 0 6px 0; font-size:1.15rem; color:var(--text-main, #0E1318); font-family:sans-serif;">
+                      ${escapeHtml(babTitle)}
+                   </h3>
+                   <div style="font-size:0.84rem; color:var(--text-muted, #64748B); display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                      <span>👩‍🏫 Guru: <b>${escapeHtml(t.teacher_name || '-')}</b></span>
+                      <span>🔁 <b>${p.r || 1}x</b> pengulangan</span>
+                      ${p.tm == 1 ? `<span>✍️ Wajib arti pinyin</span>` : ''}
+                      ${dateStr ? `<span>📅 ${dateStr}</span>` : ''}
+                   </div>
+                   ${previewHtml}
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                   ${t.is_completed ? `
+                      <button type="button" class="btn" style="width:auto; padding:10px 20px; font-size:0.9rem; font-weight:bold; background:#F8FAFC; color:var(--primary, #8B3DFF); border:1.5px solid var(--primary, #8B3DFF); border-radius:10px; cursor:pointer;" onclick="launchTaskFromPortal('${t.id}')">
+                         🔄 Latihan Ulang
+                      </button>
+                   ` : `
+                      <button type="button" class="btn" style="width:auto; padding:10px 22px; font-size:0.92rem; font-weight:bold; background:linear-gradient(135deg, var(--primary, #8B3DFF), #6D28D9); color:white; border:none; border-radius:10px; box-shadow:0 4px 14px rgba(139,61,255,0.3); cursor:pointer;" onclick="launchTaskFromPortal('${t.id}')">
+                         🚀 Mulai Kerjakan
+                      </button>
+                   `}
+                </div>
+             `;
+             listEl.appendChild(card);
+          });
+       } catch(e) {
+          console.error(e);
+          if (loadingEl) loadingEl.style.display = 'none';
+          if (listEl) listEl.innerHTML = `<p style="color:#EF4444; text-align:center; padding:20px;">Gagal memuat tugas: ${escapeHtml(e.message)}</p>`;
+       }
+    };
+
+    window.launchTaskFromPortal = async function(taskId) {
+       const portalClass = localStorage.getItem('stroke_app_portal_class');
+       const portalStudent = localStorage.getItem('stroke_app_portal_student');
+
+       const portalScreen = document.getElementById('screen-portal');
+       if (portalScreen) portalScreen.classList.add('hidden');
+
+       let taskObj = (window.portalCachedTasks || []).find(x => x.id === taskId);
+       if (!taskObj || !taskObj.payload) {
+          try {
+             const fetched = await DB.getTask(taskId);
+             if (fetched) {
+                taskObj = {
+                   id: taskId,
+                   payload: typeof fetched.payload === 'string' ? JSON.parse(fetched.payload) : fetched.payload
+                };
+             }
+          } catch(e) {
+             alert("Gagal memuat tugas: " + e.message);
+             if (portalScreen) portalScreen.classList.remove('hidden');
+             return;
+          }
+       }
+
+       const payloadStr = typeof taskObj.payload === 'string' ? taskObj.payload : JSON.stringify(taskObj.payload);
+       processAssignmentData(payloadStr, true, taskId);
+
+       selectedStudentClass = portalClass || '';
+       studentName = portalStudent || '';
+
+       try {
+          const newUrl = window.location.pathname + '?id=' + encodeURIComponent(taskId);
+          window.history.replaceState({ taskId }, '', newUrl);
+       } catch(e) {}
+
+       const loginScreen = document.getElementById('screen-login');
+       if (loginScreen) loginScreen.classList.remove('hidden');
+
+       populateStudentSelect();
+       if (classSelectStudent && selectedStudentClass) {
+          classSelectStudent.value = selectedStudentClass;
+          classSelectStudent.dispatchEvent(new Event('change'));
+       }
+       if (studentSelect && studentName) {
+          studentSelect.value = studentName;
+          studentSelect.dispatchEvent(new Event('change'));
+       }
+       checkStartBtn();
+    };
+
+    window.returnToStudentPortal = function() {
+       ['screen-login', 'screen-game', 'screen-typing', 'screen-finish'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add('hidden');
+       });
+       try {
+          window.history.replaceState({}, '', window.location.pathname);
+       } catch(e) {}
+       initStudentPortal();
+    };
   </script>
 </body>
 </html>

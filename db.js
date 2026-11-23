@@ -51,6 +51,108 @@ var DB = {
       return await res.json();
    },
 
+   updateTask: async function(id, payloadString, teacherName, className) {
+      const bodyData = {
+         payload: payloadString
+      };
+      if (teacherName !== undefined) bodyData.teacher_name = teacherName || "";
+      if (className !== undefined) bodyData.class = className || "";
+
+      const res = await fetch(`${this.url}/rest/v1/tasks?id=eq.${encodeURIComponent(id)}`, {
+         method: 'PATCH',
+         headers: Object.assign(this.getHeaders(), {
+            'Prefer': 'return=representation'
+         }),
+         body: JSON.stringify(bodyData)
+      });
+      if (!res.ok) {
+         const err = await res.text();
+         throw new Error("Gagal memperbarui tugas: " + err);
+      }
+      return await res.json();
+   },
+
+   getStudentTasksWithStatus: async function(className, studentName) {
+      if (!className || !studentName) return [];
+      const normCls = className.trim().toUpperCase();
+      const normName = studentName.trim().toUpperCase();
+
+      // 1. Fetch all tasks
+      const allTasks = await this.getTasks();
+
+      // 2. Fetch student's submissions for this class
+      let subs = [];
+      try {
+         const resSubs = await fetch(`${this.url}/rest/v1/submissions?class=eq.${encodeURIComponent(className)}&select=*`, {
+            headers: this.getHeaders()
+         });
+         if (resSubs.ok) {
+            const rawSubs = await resSubs.json();
+            subs = (rawSubs || []).filter(s => (s.student_name || '').trim().toUpperCase() === normName && s.status === 'Selesai');
+         }
+      } catch(e) {
+         console.warn("Gagal memuat riwayat submission murid:", e);
+      }
+
+      const subsMap = {};
+      subs.forEach(s => {
+         if (!subsMap[s.task_id]) subsMap[s.task_id] = [];
+         subsMap[s.task_id].push(s);
+      });
+
+      // 3. Filter relevant tasks for this student
+      const result = [];
+      allTasks.forEach(t => {
+         let p = {};
+         try { p = typeof t.payload === 'string' ? JSON.parse(t.payload) : (t.payload || {}); } catch(e) {}
+
+         const tClasses = (Array.isArray(p.classes) && p.classes.length > 0)
+            ? p.classes.map(c => String(c).trim().toUpperCase())
+            : (t.class || '').split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
+
+         const isClassMatch = tClasses.includes(normCls);
+         const isRemedial = !!(p.type === 'remedial' || (p.rs && typeof p.rs === 'object' && Object.keys(p.rs).length > 0));
+
+         let isAssigned = false;
+         if (isRemedial) {
+            if (p.rs && typeof p.rs === 'object') {
+               const remList = p.rs[className] || p.rs[normCls] || [];
+               isAssigned = remList.some(n => String(n).trim().toUpperCase() === normName);
+            }
+         } else {
+            isAssigned = isClassMatch;
+         }
+
+         if (isAssigned) {
+            const tSubs = subsMap[t.id] || [];
+            const isCompleted = tSubs.length > 0;
+            result.push({
+               id: t.id,
+               payload: p,
+               teacher_name: t.teacher_name || p.guru || '',
+               class_summary: t.class || p.cls || className,
+               is_remedial: isRemedial,
+               is_completed: isCompleted,
+               completions_count: tSubs.length,
+               last_submitted_at: isCompleted ? tSubs[tSubs.length - 1].submitted_at : null,
+               created_at: t.created_at
+            });
+         }
+      });
+
+      // Sort: uncompleted (tasks to do) first, then by created_at desc
+      result.sort((a, b) => {
+         if (a.is_completed !== b.is_completed) {
+            return a.is_completed ? 1 : -1;
+         }
+         const tA = a.created_at ? new Date(a.created_at).getTime() : 0;
+         const tB = b.created_at ? new Date(b.created_at).getTime() : 0;
+         return tB - tA;
+      });
+
+      return result;
+   },
+
    deleteTask: async function(id) {
       const res = await fetch(`${this.url}/rest/v1/tasks?id=eq.${encodeURIComponent(id)}`, {
          method: 'DELETE',

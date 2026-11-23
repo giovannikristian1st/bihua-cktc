@@ -1360,6 +1360,24 @@
       <p style="color:var(--text-muted)">Buat tugas menulis Hanzi dengan kurikulum Meihua</p>
     </header>
 
+    <!-- BANNER MODE EDIT TUGAS -->
+    <div id="edit-task-banner" style="display:none; background:linear-gradient(135deg, #FEF3C7, #FDE68A); border:2px solid #F59E0B; border-radius:12px; padding:16px 20px; margin-bottom:20px; box-shadow:0 4px 12px rgba(245,158,11,0.15);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+         <div>
+            <div style="font-size:1.1rem; font-weight:800; color:#92400E; display:flex; align-items:center; gap:8px;">
+               <span>✏️ Mode Edit Tugas:</span>
+               <span id="edit-task-id-badge" style="background:#B45309; color:white; padding:3px 10px; border-radius:6px; font-family:monospace; font-size:0.95rem;">-</span>
+            </div>
+            <div style="font-size:0.88rem; color:#78350F; margin-top:4px;">
+               Anda sedang mengubah materi/pengaturan tugas ini. <b>Link pengerjaan siswa tidak berubah</b> sehingga siswa tetap menggunakan link yang sama.
+            </div>
+         </div>
+         <button type="button" class="btn" style="width:auto; padding:8px 18px; font-size:0.88rem; background:white; color:#B45309; border:1.5px solid #D97706; font-weight:bold; cursor:pointer;" onclick="cancelEditTask()">
+            ✕ Batal Edit
+         </button>
+      </div>
+    </div>
+
     <div class="card">
       <div class="grid-2">
         <div class="form-group">
@@ -1528,7 +1546,7 @@
                   <th>Kelas</th>
                   <th>Bab / Kosakata</th>
                   <th>Progres Pengumpulan</th>
-                  <th style="border-radius:0 8px 0 0; width:320px; text-align:center;">Aksi</th>
+                  <th style="border-radius:0 8px 0 0; width:380px; text-align:center;">Aksi</th>
                </tr>
             </thead>
             <tbody id="task-list-body">
@@ -3474,8 +3492,14 @@
        const isRemedialValid = (selectedTaskType !== 'remedial') || (remedialCount > 0);
        generateBtn.disabled = !(currentTeacher && activeClasses.length > 0 && isRemedialValid && hasVocab);
 
-       if (generateBtn.textContent !== 'Menyimpan Link...') {
-          if (selectedTaskType === 'remedial' && remedialCount > 0) {
+       if (generateBtn.textContent !== 'Menyimpan Link...' && generateBtn.textContent !== 'Menyimpan Perubahan...') {
+          if (window.currentEditingTaskId) {
+             if (selectedTaskType === 'remedial' && remedialCount > 0) {
+                generateBtn.textContent = `💾 Simpan Perubahan Remedial (${remedialCount} Siswa)`;
+             } else {
+                generateBtn.textContent = `💾 Simpan Perubahan Tugas (ID: ${window.currentEditingTaskId})`;
+             }
+          } else if (selectedTaskType === 'remedial' && remedialCount > 0) {
              generateBtn.textContent = `Buat Link Remedial (${remedialCount} Siswa)`;
           } else if (activeClasses.length > 1) {
              generateBtn.textContent = `Buat Link Tugas (${activeClasses.length} Kelas)`;
@@ -3547,10 +3571,11 @@
           }
       }
       
-      const shortId = Math.random().toString(36).substring(2, 8);
+      const isEditing = !!window.currentEditingTaskId;
+      const targetTaskId = isEditing ? window.currentEditingTaskId : Math.random().toString(36).substring(2, 8);
       const payloadCustomVocabs = customVocabs.map(c => ({ char: c.char, pinyin: c.pinyin, meaning: c.meaning }));
       const payload = {
-         id: shortId,
+         id: targetTaskId,
          cls: clsSummary,
          classes: payloadClasses,
          r: rep,
@@ -3570,18 +3595,24 @@
       baseUrl = baseUrl.substring(0, lastSlash) + '/student.html';
       
       generateBtn.disabled = true;
-      generateBtn.textContent = 'Menyimpan Link...';
+      generateBtn.textContent = isEditing ? 'Menyimpan Perubahan...' : 'Menyimpan Link...';
       
       try {
-         await DB.saveTask(shortId, payloadString, guru, clsSummary);
-         const finalUrl = `${baseUrl}?id=${shortId}`;
+         if (isEditing) {
+            await DB.updateTask(targetTaskId, payloadString, guru, clsSummary);
+         } else {
+            await DB.saveTask(targetTaskId, payloadString, guru, clsSummary);
+         }
+         const finalUrl = `${baseUrl}?id=${targetTaskId}`;
          
          linkOutput.value = finalUrl;
          resultBox.style.display = 'block';
 
          const bannerEl = document.getElementById('result-summary-banner');
          if (bannerEl) {
-            if (taskType === 'remedial' && remedialMap) {
+            if (isEditing) {
+               bannerEl.innerHTML = `✅ Tugas <b>${targetTaskId}</b> berhasil diperbarui! Link pengerjaan siswa tetap sama:<br><a href="${finalUrl}" target="_blank" style="color:var(--primary); font-weight:bold;">${finalUrl}</a>`;
+            } else if (taskType === 'remedial' && remedialMap) {
                const listPreview = Object.keys(remedialMap).map(c => `${c}: ${remedialMap[c].join(', ')}`).join(' | ');
                bannerEl.innerHTML = `✅ Link <b>Remedial Khusus (${totalRemedialSelected} Siswa)</b> berhasil dibuat!<br><span style="font-weight:normal; font-size:0.84rem;">Siswa terpilih: ${escapeHtml(listPreview)}</span>`;
             } else if (payloadClasses.length > 1) {
@@ -3592,11 +3623,19 @@
             bannerEl.style.display = 'block';
          }
          
+         if (isEditing) {
+            alert(`✅ Berhasil! Perubahan pada Tugas ID "${targetTaskId}" telah disimpan ke database.\n\nLink siswa tidak berubah sehingga murid tetap bisa menggunakan link yang sama.`);
+            window.currentEditingTaskId = null;
+            const editBanner = document.getElementById('edit-task-banner');
+            if (editBanner) editBanner.style.display = 'none';
+            if (window.allHistoryTasks) fetchTasks();
+         }
+
          selectedVocabs = {};
          updateCombinedView();
          document.getElementById('vocab-selection-container').style.display = 'none';
       } catch (err) {
-         alert("Gagal menyimpan link: " + err.message);
+         alert("Gagal menyimpan tugas: " + err.message);
       } finally {
          generateBtn.textContent = 'Buat Link Tugas';
          updateGenerateBtn();
@@ -3868,10 +3907,14 @@
                 </div>
              </td>
              <td>
-                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-width: 290px;">
+                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; min-width: 380px;">
                     <button class="btn btn-view-results" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;"
                        onclick="viewTaskResultsById('${t.id}')">
                        📊 Lihat Hasil
+                    </button>
+                    <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:#D97706; border-color:#FCD34D; white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;"
+                       onclick="startEditTask('${t.id}')" title="Edit Kosakata, Pengulangan, atau Siswa Remedial">
+                       ✏️ Edit
                     </button>
                     <button class="btn copy-btn" style="padding:8px 6px; font-size:0.85rem; font-weight:bold; color:var(--primary); border-color:var(--primary); white-space:nowrap; margin:0; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;"
                        onclick="copyHistoryTaskLink('${t.id}', this)" title="Salin Link Tugas">
@@ -3945,6 +3988,141 @@
        document.body.removeChild(ta);
        showCopyHistorySuccess(btnEl);
     }
+    
+    window.currentEditingTaskId = null;
+
+    window.startEditTask = function(taskId) {
+       const t = (window.allHistoryTasksMap && window.allHistoryTasksMap[taskId]) || (window.allHistoryTasks || []).find(item => item.id === taskId);
+       if (!t) {
+          alert("Data tugas tidak ditemukan!");
+          return;
+       }
+       let p = {};
+       try {
+          p = typeof t.payload === 'string' ? JSON.parse(t.payload) : (t.payload || {});
+       } catch(e) {
+          alert("Format payload tugas tidak valid: " + e.message);
+          return;
+       }
+
+       window.currentEditingTaskId = taskId;
+
+       // 1. Switch view to Buat Tugas (view-dashboard)
+       showView('view-dashboard');
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+       // 2. Show Edit Banner
+       const banner = document.getElementById('edit-task-banner');
+       const badge = document.getElementById('edit-task-id-badge');
+       if (banner) banner.style.display = 'block';
+       if (badge) badge.textContent = taskId;
+
+       // 3. Set Teacher if exists
+       const guru = p.guru || t.teacher_name || t.guru || '';
+       if (guru && DB_TEACHERS[guru]) {
+          const ts = document.getElementById('teacher-name');
+          if (ts) ts.value = guru;
+          currentTeacher = guru;
+          updateClassSelect(guru);
+       }
+
+       // 4. Set Classes
+       const taskClasses = parseTaskClasses(p, t.class || t.cls || p.cls);
+       selectedClasses = [...taskClasses];
+
+       // 5. Set Repetition & Require Meaning
+       if (p.r) {
+          const repEl = document.getElementById('repetition');
+          if (repEl) repEl.value = p.r;
+       }
+       const reqMeanEl = document.getElementById('require-meaning');
+       if (reqMeanEl) {
+          reqMeanEl.checked = !!(p.tm == 1 || p.requireMeaning);
+       }
+
+       // 6. Set Task Type (Reguler vs Remedial)
+       const taskType = p.type || 'tugas';
+       selectedTaskType = taskType;
+       const radioReg = document.getElementById('task-type-tugas');
+       const radioRem = document.getElementById('task-type-remedial');
+       if (taskType === 'remedial') {
+          if (radioRem) radioRem.checked = true;
+          if (radioReg) radioReg.checked = false;
+       } else {
+          if (radioReg) radioReg.checked = true;
+          if (radioRem) radioRem.checked = false;
+       }
+       updateTaskTypeUI(true);
+
+       // If Remedial, restore remedial students
+       selectedRemedialStudents = {};
+       if (p.rs && typeof p.rs === 'object') {
+          for (const c in p.rs) {
+             if (Array.isArray(p.rs[c])) {
+                selectedRemedialStudents[c] = [...p.rs[c]];
+             }
+          }
+       }
+
+       // 7. Restore Meihua selected vocabs
+       selectedVocabs = {};
+       if (p.v && typeof p.v === 'object') {
+          for (const bk in p.v) {
+             if (typeof p.v[bk] === 'object') {
+                selectedVocabs[bk] = {};
+                for (const ut in p.v[bk]) {
+                   selectedVocabs[bk][ut] = {};
+                   const vVal = p.v[bk][ut];
+                   if (typeof vVal === 'string') {
+                      const vParts = vVal.split('|');
+                      vParts.forEach(vp => {
+                         if (!vp) return;
+                         const [vIdx, charIndices] = vp.split(':');
+                         if (vIdx !== undefined && charIndices !== undefined) {
+                            selectedVocabs[bk][ut][vIdx] = charIndices.split(',').map(Number);
+                         }
+                      });
+                   } else if (typeof vVal === 'object') {
+                      selectedVocabs[bk][ut] = vVal;
+                   }
+                }
+             }
+          }
+       }
+
+       // 8. Restore Custom Vocabs
+       customVocabs = [];
+       if (Array.isArray(p.cv)) {
+          customVocabs = p.cv.map(c => ({
+             id: 'cv_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+             char: c.char,
+             pinyin: c.pinyin || '',
+             meaning: c.meaning || ''
+          }));
+       }
+
+       // 9. Update UI components
+       renderClassPicker();
+       renderRemedialStudentPicker();
+       updateRemedialSummaryUI();
+       updateCombinedView();
+       renderBookMatrix();
+       if (currentBook && currentUnit) {
+          renderVocabSelection(currentBook, currentUnit);
+       }
+       updateGenerateBtn();
+    };
+
+    window.cancelEditTask = function() {
+       window.currentEditingTaskId = null;
+       const banner = document.getElementById('edit-task-banner');
+       if (banner) banner.style.display = 'none';
+       selectedVocabs = {};
+       customVocabs = [];
+       updateCombinedView();
+       updateGenerateBtn();
+       showView('view-history');
+    };
     
     let currentTeacherLbData = [];
     let currentTeacherLbMode = 'time';
