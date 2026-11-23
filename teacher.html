@@ -986,33 +986,40 @@
     /* ⚡ 1. IVANNA / IVANA - HARRY POTTER & GRYFFINDOR SCARLET MAGIC STYLE */
     body.theme-teacher-harrypotter {
       --primary: #740001;          /* Gryffindor Deep Crimson / Scarlet */
-      --primary-dark: #370000;     /* Hogwarts Midnight Maroon */
+      --primary-dark: #450000;     /* Hogwarts Midnight Maroon */
       --primary-light: #9B111E;    /* Scarlet Magic */
-      --accent-gold: #EEBA30;      /* Gryffindor Golden Lion (#EEBA30 / #D3A625) */
+      --accent-gold: #EEBA30;      /* Gryffindor Golden Lion */
       --bg: #FAF5ED;               /* Hogwarts Ancient Library Parchment */
       --card: #FFFFFF;
-      --text: #2B1810;             /* Spellbook Deep Brown Ink */
-      --text-muted: #6B5B52;
+      --text: #1E293B;             /* Crisp Slate for Easy Reading */
+      --text-muted: #64748B;
       --border: #E5D9C8;
-      font-family: 'Cinzel Decorative', 'MedievalSharp', 'Lora', Georgia, serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body.theme-teacher-harrypotter h1 {
       font-family: 'HarryP', 'Cinzel Decorative', serif;
       font-weight: normal;
       font-size: 3.4rem;
-      letter-spacing: 3px;
+      letter-spacing: 2.5px;
       line-height: 1.1;
-      background: linear-gradient(135deg, #740001 0%, #9B111E 45%, #EEBA30 100%);
+      color: #740001;
+      background: linear-gradient(135deg, #740001 0%, #9B111E 50%, #B91C1C 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      text-shadow: none;
     }
     body.theme-teacher-harrypotter h2,
     body.theme-teacher-harrypotter h3,
-    body.theme-teacher-harrypotter h4,
+    body.theme-teacher-harrypotter h4 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+      color: #740001;
+      letter-spacing: normal;
+    }
     body.theme-teacher-harrypotter .nav-title {
       font-family: 'HarryP', 'Cinzel Decorative', serif;
       font-weight: normal;
-      letter-spacing: 2.5px;
+      letter-spacing: 2px;
       font-size: 1.85rem;
     }
     body.theme-teacher-harrypotter .nav-bar {
@@ -1021,10 +1028,13 @@
       border-bottom: 3.5px solid #EEBA30;
     }
     body.theme-teacher-harrypotter .btn {
-      font-family: 'HarryP', 'Cinzel Decorative', serif;
-      font-size: 1.45rem;
-      letter-spacing: 2px;
-      background: linear-gradient(135deg, #370000 0%, #740001 50%, #9B111E 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: normal;
+      text-transform: none;
+      background: linear-gradient(135deg, #450000 0%, #740001 50%, #9B111E 100%);
+      color: #FFFFFF !important;
       border: 1.5px solid #EEBA30;
       border-radius: 10px;
       box-shadow: 0 4px 18px rgba(116, 0, 1, 0.35);
@@ -1042,6 +1052,18 @@
     body.theme-teacher-harrypotter .nav-btn.active {
       color: #740001;
       border: 2px solid #EEBA30;
+      background: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+    }
+    body.theme-teacher-harrypotter table.data-table thead th {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: normal;
+    }
+    body.theme-teacher-harrypotter .mistake-char-box,
+    body.theme-teacher-harrypotter .tianzige-print-box,
+    body.theme-teacher-harrypotter .vocab-char {
+      font-family: 'Kaiti', 'KaiTi', STKaiti, '楷体', serif !important;
     }
 
     /* 💍 2. GIOVANNI / GIO - ELEGANT WARM THEME / CLEAN SANS & KAITI */
@@ -1132,95 +1154,120 @@
 
     /* 🐉 3. IMELDA / IMEL - GAME OF THRONES MAJESTIC STYLE */
     body.theme-teacher-insideout {
-      --primary: #D97706;          /* Joy Golden Amber (#D97706) */
-      --primary-dark: #92400E;     /* Deep Core Memory Amber */
-      --primary-light: #F59E0B;    /* Joy Sparkle Amber */
+      --primary: #B45309;          /* Deep Amber Gold */
+      --primary-dark: #78350F;     /* Deep Dragon Bronze */
+      --primary-light: #D97706;    /* Vibrant Amber */
       --accent-gold: #FCD34D;
-      --bg: #FEFDF5;               /* Radiant Joy Memory Glow */
+      --bg: #FDFBF7;               /* Eye-friendly Warm Parchment */
       --card: #FFFFFF;
-      --text: #381B09;             /* Core Memory Deep Espresso */
-      --text-muted: #6B3008;
+      --text: #1E293B;             /* Crisp Slate Ink */
+      --text-muted: #64748B;
       --border: #FDE68A;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body.theme-teacher-insideout h1 {
       font-family: 'GameOfThrones', serif;
-      letter-spacing: 2.5px;
-      font-size: 2.9rem;
+      letter-spacing: 2px;
+      font-size: 2.8rem;
       text-transform: uppercase;
-      background: linear-gradient(135deg, #92400E 0%, #D97706 40%, #10B981 75%, #3B82F6 100%);
+      color: #78350F;
+      background: linear-gradient(135deg, #78350F 0%, #B45309 60%, #D97706 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 12px rgba(217, 119, 6, 0.2);
+      text-shadow: none;
     }
     body.theme-teacher-insideout h2,
     body.theme-teacher-insideout h3,
-    body.theme-teacher-insideout h4,
+    body.theme-teacher-insideout h4 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+      color: #78350F;
+      letter-spacing: normal;
+      text-transform: none;
+    }
     body.theme-teacher-insideout .nav-title {
       font-family: 'GameOfThrones', serif;
-      letter-spacing: 1.8px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       font-size: 1.6rem;
     }
     body.theme-teacher-insideout .nav-bar {
-      background: linear-gradient(135deg, #92400E 0%, #D97706 35%, #10B981 70%, #3B82F6 100%);
-      box-shadow: 0 4px 20px rgba(217, 119, 6, 0.3);
+      background: linear-gradient(135deg, #78350F 0%, #92400E 50%, #B45309 100%);
+      box-shadow: 0 4px 20px rgba(120, 53, 15, 0.3);
       border-bottom: 3.5px solid #FCD34D;
     }
     body.theme-teacher-insideout .btn {
-      font-family: 'GameOfThrones', serif;
-      letter-spacing: 1.2px;
-      font-size: 1.25rem;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #92400E 0%, #D97706 35%, #10B981 70%, #3B82F6 100%);
-      border: 1.5px solid #FEF08A;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: normal;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: none;
+      background: linear-gradient(135deg, #78350F 0%, #B45309 50%, #D97706 100%);
+      color: #FFFFFF !important;
+      border: 1.5px solid #FCD34D;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(120, 53, 15, 0.3);
     }
     body.theme-teacher-insideout .btn:hover {
-      box-shadow: 0 6px 20px rgba(217, 119, 6, 0.48);
+      box-shadow: 0 6px 20px rgba(180, 83, 9, 0.45);
       transform: translateY(-2px);
     }
     body.theme-teacher-insideout .card {
       border: 1.5px solid #FDE68A;
-      border-top: 4px solid #D97706;
-      box-shadow: 0 4px 20px rgba(146, 64, 14, 0.07);
-      border-radius: 16px;
+      border-top: 4px solid #B45309;
+      box-shadow: 0 4px 20px rgba(120, 53, 15, 0.07);
+      border-radius: 14px;
     }
     body.theme-teacher-insideout .nav-btn.active {
-      color: #92400E;
-      border: 2px solid #D97706;
-      font-family: 'GameOfThrones', serif;
-      letter-spacing: 1px;
+      color: #78350F;
+      border: 2px solid #FCD34D;
+      background: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+    }
+    body.theme-teacher-insideout table.data-table thead th {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: normal;
+    }
+    body.theme-teacher-insideout .mistake-char-box,
+    body.theme-teacher-insideout .tianzige-print-box,
+    body.theme-teacher-insideout .vocab-char {
+      font-family: 'Kaiti', 'KaiTi', STKaiti, '楷体', serif !important;
     }
 
     /* 🛡️ 4. ADI / MUL - DISNEY MARVEL / AVENGERS RED & WHITE HEROIC STYLE */
     body.theme-teacher-marvel {
-      --primary: #ED1D24;          /* Iconic Marvel Heroic Red */
-      --primary-dark: #A3080E;     /* Deep Marvel Comic Maroon */
-      --primary-light: #FF3B3F;    /* Arc Reactor Bright Red */
+      --primary: #DC2626;          /* Strong Heroic Crimson Red (#DC2626) */
+      --primary-dark: #8B0000;     /* Deep Marvel Dark Crimson */
+      --primary-light: #EF4444;    /* Vibrant Hero Red */
       --accent-gold: #FFFFFF;      /* Pure Crisp White */
-      --bg: #F8F9FA;               /* Clean Stark Tech Silver-White */
+      --bg: #F8FAFC;               /* Clean Tech Slate Background */
       --card: #FFFFFF;
-      --text: #111827;             /* High-Tech Stealth Charcoal */
-      --text-muted: #4B5563;
-      --border: #E5E7EB;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      --text: #111827;             /* High-Tech Charcoal */
+      --text-muted: #4B5563;       /* Clear Slate Muted */
+      --border: #E2E8F0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body.theme-teacher-marvel h1 {
       font-family: 'Avengers', sans-serif;
-      letter-spacing: 2.5px;
+      letter-spacing: 2px;
       font-size: 3.2rem;
       text-transform: uppercase;
-      background: linear-gradient(135deg, #111111 0%, #A3080E 30%, #ED1D24 65%, #FF3B3F 100%);
+      color: #8B0000;
+      background: linear-gradient(135deg, #111111 0%, #8B0000 40%, #DC2626 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 14px rgba(237, 29, 36, 0.25);
+      text-shadow: none;
     }
     body.theme-teacher-marvel h2,
     body.theme-teacher-marvel h3,
-    body.theme-teacher-marvel h4,
+    body.theme-teacher-marvel h4 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+      color: #991B1B;
+      letter-spacing: normal;
+      text-transform: none;
+    }
     body.theme-teacher-marvel .nav-title {
       font-family: 'Avengers', sans-serif;
       letter-spacing: 2px;
@@ -1228,95 +1275,245 @@
       text-transform: uppercase;
     }
     body.theme-teacher-marvel .nav-bar {
-      background: linear-gradient(135deg, #111111 0%, #7F0000 30%, #ED1D24 75%, #FF3B3F 100%);
-      box-shadow: 0 4px 24px rgba(237, 29, 36, 0.4);
+      background: linear-gradient(135deg, #111111 0%, #7F0000 35%, #DC2626 80%, #EF4444 100%);
+      box-shadow: 0 4px 24px rgba(220, 38, 38, 0.35);
       border-bottom: 3.5px solid #FFFFFF;
     }
     body.theme-teacher-marvel .btn {
-      font-family: 'Avengers', sans-serif;
-      letter-spacing: 1.5px;
-      font-size: 1.35rem;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #A3080E 0%, #ED1D24 55%, #FF3B3F 100%);
-      border: 2px solid #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: normal;
+      text-transform: none;
+      background: linear-gradient(135deg, #8B0000 0%, #DC2626 55%, #EF4444 100%);
+      color: #FFFFFF !important;
+      border: 1.5px solid #FFFFFF;
       border-radius: 10px;
-      box-shadow: 0 4px 18px rgba(237, 29, 36, 0.4);
+      box-shadow: 0 4px 18px rgba(220, 38, 38, 0.35);
     }
     body.theme-teacher-marvel .btn:hover {
-      box-shadow: 0 6px 24px rgba(237, 29, 36, 0.6);
+      box-shadow: 0 6px 24px rgba(220, 38, 38, 0.55);
       transform: translateY(-2px);
     }
     body.theme-teacher-marvel .card {
-      border: 1.5px solid #E5E7EB;
-      border-top: 4px solid #ED1D24;
-      box-shadow: 0 4px 20px rgba(237, 29, 36, 0.08);
+      border: 1.5px solid #E2E8F0;
+      border-top: 4px solid #DC2626;
+      box-shadow: 0 4px 20px rgba(220, 38, 38, 0.07);
       border-radius: 14px;
     }
     body.theme-teacher-marvel .nav-btn.active {
-      color: #ED1D24;
+      color: #DC2626;
       border: 2px solid #FFFFFF;
-      font-family: 'Avengers', sans-serif;
-      letter-spacing: 1px;
+      background: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+    }
+    body.theme-teacher-marvel table.data-table thead th {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: normal;
+    }
+    body.theme-teacher-marvel .mistake-char-box,
+    body.theme-teacher-marvel .tianzige-print-box,
+    body.theme-teacher-marvel .vocab-char {
+      font-family: 'Kaiti', 'KaiTi', STKaiti, '楷体', serif !important;
     }
 
     /* 💖 5. JUMINAH - BARBIE DREAMHOUSE GLAMOUR & SPARKLE PINK STYLE */
     body.theme-teacher-barbie {
-      --primary: #E0218A;          /* Barbie Signature Hot Pink */
-      --primary-dark: #9D0053;     /* Deep Magenta Rose */
-      --primary-light: #FF66B2;    /* Bubblegum Sparkle Pink */
+      --primary: #BE185D;          /* Deep Elegant Pink (high contrast with white text) */
+      --primary-dark: #831843;     /* Deep Magenta Rose */
+      --primary-light: #DB2777;    /* Vibrant Hot Pink */
       --accent-gold: #FFFFFF;      /* Pure Dreamhouse White */
       --bg: #FFF5F9;               /* Delicate Dreamhouse Rose Porcelain */
       --card: #FFFFFF;
-      --text: #3B0724;             /* Deep Plum Berry Ink */
-      --text-muted: #831843;
+      --text: #1E293B;             /* Crisp Slate Ink for Easy Reading */
+      --text-muted: #64748B;
       --border: #FBCFE8;
-      font-family: 'Fredoka', 'Quicksand', system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body.theme-teacher-barbie h1 {
       font-family: 'Barbie', 'Fredoka', cursive, sans-serif;
       letter-spacing: 2px;
       font-size: 3.5rem;
-      background: linear-gradient(135deg, #9D0053 0%, #E0218A 50%, #FF66B2 100%);
+      color: #831843;
+      background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 14px rgba(224, 33, 138, 0.25);
+      text-shadow: none;
     }
     body.theme-teacher-barbie h2,
     body.theme-teacher-barbie h3,
-    body.theme-teacher-barbie h4,
+    body.theme-teacher-barbie h4 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+      color: #831843;
+      letter-spacing: normal;
+    }
     body.theme-teacher-barbie .nav-title {
       font-family: 'Barbie', 'Fredoka', cursive, sans-serif;
       letter-spacing: 1.5px;
       font-size: 2rem;
     }
     body.theme-teacher-barbie .nav-bar {
-      background: linear-gradient(135deg, #9D0053 0%, #E0218A 45%, #FF66B2 100%);
-      box-shadow: 0 4px 24px rgba(224, 33, 138, 0.35);
+      background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%);
+      box-shadow: 0 4px 24px rgba(190, 24, 93, 0.35);
       border-bottom: 3.5px solid #FFFFFF;
     }
     body.theme-teacher-barbie .btn {
-      font-family: 'Barbie', 'Fredoka', cursive, sans-serif;
-      letter-spacing: 1.5px;
-      font-size: 1.4rem;
-      background: linear-gradient(135deg, #9D0053 0%, #E0218A 50%, #FF66B2 100%);
-      border: 2px solid #FFFFFF;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px rgba(224, 33, 138, 0.38);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: normal;
+      text-transform: none;
+      background: linear-gradient(135deg, #831843 0%, #BE185D 50%, #DB2777 100%);
+      color: #FFFFFF !important;
+      border: 1.5px solid #FFFFFF;
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(190, 24, 93, 0.35);
     }
     body.theme-teacher-barbie .btn:hover {
-      box-shadow: 0 6px 24px rgba(224, 33, 138, 0.58);
+      box-shadow: 0 6px 24px rgba(190, 24, 93, 0.55);
       transform: translateY(-2px);
     }
     body.theme-teacher-barbie .card {
       border: 1.5px solid #FBCFE8;
-      border-top: 4px solid #E0218A;
-      box-shadow: 0 4px 20px rgba(224, 33, 138, 0.08);
+      border-top: 4px solid #BE185D;
+      box-shadow: 0 4px 20px rgba(190, 24, 93, 0.08);
       border-radius: 16px;
     }
     body.theme-teacher-barbie .nav-btn.active {
-      color: #E0218A;
+      color: #BE185D;
       border: 2px solid #FFFFFF;
-      font-family: 'Barbie', 'Fredoka', sans-serif;
+      background: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 700;
+    }
+    body.theme-teacher-barbie table.data-table thead th {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: normal;
+    }
+    body.theme-teacher-barbie .mistake-char-box,
+    body.theme-teacher-barbie .tianzige-print-box,
+    body.theme-teacher-barbie .vocab-char {
+      font-family: 'Kaiti', 'KaiTi', STKaiti, '楷体', serif !important;
+    }
+
+    /* ── UNIVERSAL CONTRAST & READABILITY ENHANCEMENTS ACROSS ALL THEMES ── */
+    
+    /* 1. Secondary Buttons (Copy, Edit, Delete, Options) MUST remain white background with crisp colored text */
+    .copy-btn,
+    .btn.copy-btn,
+    body[class*="theme-teacher-"] .btn.copy-btn,
+    body[class*="theme-teacher-"] .copy-btn {
+      background: #FFFFFF !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+      text-shadow: none !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      font-weight: 700 !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+    }
+    .copy-btn:hover,
+    .btn.copy-btn:hover,
+    body[class*="theme-teacher-"] .btn.copy-btn:hover,
+    body[class*="theme-teacher-"] .copy-btn:hover {
+      background: #F8FAFC !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* 2. Primary Results Button in Table */
+    .btn-view-results,
+    .btn.btn-view-results,
+    body[class*="theme-teacher-"] .btn.btn-view-results,
+    body[class*="theme-teacher-"] .btn-view-results {
+      background: var(--primary) !important;
+      color: #FFFFFF !important;
+      border: 1px solid var(--primary-dark, var(--primary)) !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      font-weight: 700 !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+    }
+    .btn-view-results:hover,
+    .btn.btn-view-results:hover,
+    body[class*="theme-teacher-"] .btn.btn-view-results:hover,
+    body[class*="theme-teacher-"] .btn-view-results:hover {
+      opacity: 0.92 !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* 3. Table Header Contrast */
+    table.data-table thead tr,
+    body[class*="theme-teacher-"] table.data-table thead tr {
+      background: linear-gradient(135deg, var(--primary-dark, #1E293B), var(--primary, #334155)) !important;
+      color: #FFFFFF !important;
+    }
+    table.data-table thead th,
+    body[class*="theme-teacher-"] table.data-table thead th {
+      color: #FFFFFF !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      font-weight: 700 !important;
+      letter-spacing: normal !important;
+    }
+
+    /* 4. Chinese Character Typography across all tables & cards */
+    .mistake-char-box,
+    .tianzige-print-box,
+    .vocab-char,
+    .difficult-char-badge,
+    table.data-table td small,
+    body[class*="theme-teacher-"] .mistake-char-box,
+    body[class*="theme-teacher-"] .tianzige-print-box,
+    body[class*="theme-teacher-"] .vocab-char,
+    body[class*="theme-teacher-"] .difficult-char-badge,
+    body[class*="theme-teacher-"] table.data-table td small {
+      font-family: 'Kaiti', 'KaiTi', STKaiti, '楷体', serif !important;
+    }
+
+    /* 5. Harmonize Task Type Radio Buttons (No Green clash in Marvel/Barbie/HarryPotter) */
+    #label-type-tugas,
+    #label-type-remedial {
+      transition: all 0.2s ease !important;
+    }
+    input[name="task-type"]:checked + span {
+      color: var(--primary) !important;
+    }
+
+    /* 6. Vocab item selection (Neutral soft background with themed border) */
+    .vocab-item.selected,
+    body[class*="theme-teacher-"] .vocab-item.selected {
+      background-color: rgba(0, 0, 0, 0.03) !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 1px var(--primary) !important;
+    }
+
+    /* 7. Class mini badges and status badges (No green clash) */
+    .class-mini-badge,
+    body[class*="theme-teacher-"] .class-mini-badge {
+      background: #F1F5F9 !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border) !important;
+      font-weight: 700 !important;
+    }
+
+    /* 8. Audio Theme Toggle Buttons in Nav Bar (Crisp white text on any background) */
+    #btn-harry-music,
+    #btn-gio-music,
+    #btn-avengers-music,
+    #btn-imel-music,
+    #btn-barbie-music {
+      color: #FFFFFF !important;
+      border-color: rgba(255, 255, 255, 0.6) !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* 9. Header Teacher Selector Dropdown in Nav Bar */
+    .header-teacher-select {
+      background-color: #FFFFFF !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      font-weight: 700 !important;
     }
   </style>
 </head>
@@ -1404,7 +1601,7 @@
       <div class="form-group" style="margin-top: 10px; margin-bottom: 10px;">
         <label>Jenis Penugasan</label>
         <div style="display:flex; gap:12px; margin-top:6px; flex-wrap:wrap;">
-           <label id="label-type-tugas" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:var(--primary); text-transform:none; font-size:0.95rem; padding:10px 18px; border:2px solid var(--primary); border-radius:10px; background:rgba(27,94,32,0.08); transition:all 0.2s;">
+           <label id="label-type-tugas" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:var(--primary); text-transform:none; font-size:0.95rem; padding:10px 18px; border:2px solid var(--primary); border-radius:10px; background:rgba(0,0,0,0.03); transition:all 0.2s;">
               <input type="radio" name="task-type" id="task-type-tugas" value="tugas" checked style="width:18px; height:18px; cursor:pointer;">
               <span>📝 Tugas Reguler (Seluruh Kelas)</span>
            </label>
@@ -2759,7 +2956,7 @@
              lblRemedial.style.color = '#B45309';
           } else {
              lblTugas.style.borderColor = 'var(--primary)';
-             lblTugas.style.background = 'rgba(27,94,32,0.08)';
+             lblTugas.style.background = 'rgba(0,0,0,0.03)';
              lblTugas.style.color = 'var(--primary)';
              lblRemedial.style.borderColor = 'var(--border)';
              lblRemedial.style.background = 'white';
@@ -3870,7 +4067,7 @@
           
           const typeBadge = taskType === 'remedial'
              ? `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#FEF3C7; color:#D97706; font-size:0.75rem; font-weight:bold; margin-right:4px;">🔁 Remedial</span>`
-             : `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#EDE9FE; color:var(--primary); font-size:0.75rem; font-weight:bold; margin-right:4px;">📝 Tugas</span>`;
+             : `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#F1F5F9; color:var(--primary); border:1px solid var(--border); font-size:0.75rem; font-weight:bold; margin-right:4px;">📝 Tugas</span>`;
 
           let classSubInfo = '';
           if (taskType === 'remedial' && rs && remedialNamesList.length > 0) {
@@ -4416,7 +4613,7 @@
     function renderDetailClassFilterBar() {
         const bar = document.getElementById('detail-class-filter-bar');
         if (!bar) return;
-        if (window.currentActiveDetailTab === 'leaderboard' || window.currentActiveDetailTab === 'mistakes') {
+        if (window.currentActiveDetailTab && window.currentActiveDetailTab !== 'results') {
             bar.style.display = 'none';
             return;
         }
@@ -4482,7 +4679,7 @@
     function renderDetailStatusFilterBar() {
         const bar = document.getElementById('detail-status-filter-bar');
         if (!bar) return;
-        if (window.currentActiveDetailTab === 'leaderboard' || window.currentActiveDetailTab === 'mistakes') {
+        if (window.currentActiveDetailTab && window.currentActiveDetailTab !== 'results') {
             bar.style.display = 'none';
             return;
         }
@@ -5939,6 +6136,8 @@
 
         const filterBar = document.getElementById('detail-class-filter-bar');
         if (filterBar) filterBar.style.display = 'none';
+        const filterStatusBar = document.getElementById('detail-status-filter-bar');
+        if (filterStatusBar) filterStatusBar.style.display = 'none';
         const lbPills = document.getElementById('lb-teacher-class-pills');
         if (lbPills) lbPills.style.display = 'none';
 
@@ -6045,10 +6244,11 @@
 
            window.currentDetailRows = displayRows;
            window.currentMistakesFilterClass = 'ALL';
-           renderDetailClassFilterBar();
-           renderDetailStatusFilterBar();
-           renderDetailRowsTable();
-           if (window.currentActiveDetailTab === 'mistakes') {
+           if (window.currentActiveDetailTab === 'results') {
+              renderDetailClassFilterBar();
+              renderDetailStatusFilterBar();
+              renderDetailRowsTable();
+           } else if (window.currentActiveDetailTab === 'mistakes') {
               renderMistakesAnalysis();
            }
            updateDetailStickyOffset();
