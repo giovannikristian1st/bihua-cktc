@@ -441,6 +441,10 @@
       background: #E0F2FE;
       color: #0369A1;
     }
+    .grade-pass {
+      background: #EEF2FF;
+      color: #3730A3;
+    }
     .grade-need-practice {
       background: #FEF3C7;
       color: #B45309;
@@ -1793,6 +1797,13 @@
 
      <!-- TAB 1: DAFTAR PENGERJAAN SISWA -->
      <div id="tab-content-results" class="card" style="padding-top:16px;">
+        <div id="results-score-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding:10px 14px; border-radius:10px; background:#F8FAFC; border:1px solid var(--border);">
+           <div id="results-score-summary" style="font-size:0.88rem; color:var(--text);">
+              📊 <b>Penilaian Otomatis:</b> KKM <b>70</b> • Maks <b>95</b> <i>(Diambil dari Best Score tiap murid)</i>
+           </div>
+           <button type="button" class="btn copy-btn" style="width:auto; padding:6px 14px; font-size:0.84rem; margin:0;" onclick="exportResultsScoresToExcel()">📥 Download Nilai (Excel)</button>
+        </div>
+
         <!-- ANALISIS HURUF TERSULIT (SCROLLS NATURALLY) -->
         <div id="difficult-chars-section" class="difficult-char-card" style="display:none; margin-bottom:20px;">
            <h4 style="color:#BE123C; margin-bottom:6px;">⚠️ Analisis Huruf Tersulit:</h4>
@@ -1806,6 +1817,7 @@
                    <th>Nama Murid</th>
                    <th>Waktu Selesai</th>
                    <th>Status</th>
+                   <th style="width:125px; text-align:center;">Nilai (Best)</th>
                    <th>Selesai (Kali)</th>
                    <th>Kesalahan per Huruf</th>
                 </tr>
@@ -2045,11 +2057,12 @@
                     <tr>
                        <th style="width:60px; text-align:center;">No</th>
                        <th>Nama Murid</th>
-                       <th style="width:120px;">Total Salah</th>
-                       <th style="width:160px;">Predikat</th>
+                       <th style="width:110px; text-align:center;">Nilai (Best)</th>
+                       <th style="width:110px;">Total Salah</th>
+                       <th style="width:155px;">Predikat</th>
                        <th>Rincian Huruf yang Salah</th>
-                       <th style="width:160px;">Waktu Selesai</th>
-                       <th style="width:90px; text-align:center;">Selesai</th>
+                       <th style="width:155px;">Waktu Selesai</th>
+                       <th style="width:85px; text-align:center;">Selesai</th>
                     </tr>
                  </thead>
                  <tbody id="mistakes-student-tbody">
@@ -4723,6 +4736,101 @@
         makePill(`⏳ Belum Mengerjakan (${pendingCount})`, 'BELUM', 'pill-pending');
     }
 
+    function getActiveTaskGradingOptions() {
+        const meta = (window.allHistoryTasksMap && currentActiveTaskId) ? window.allHistoryTasksMap[currentActiveTaskId] : null;
+        let payload = meta ? meta.payload : null;
+        if (typeof payload === 'string') {
+            try { payload = JSON.parse(payload); } catch(e) { payload = null; }
+        }
+        const taskChars = (typeof DB !== 'undefined' && DB.extractTaskCharsFromPayload && payload)
+            ? DB.extractTaskCharsFromPayload(payload)
+            : [];
+        const repsPerChar = (payload && parseInt(payload.r, 10)) ? parseInt(payload.r, 10) : 1;
+        return { taskChars: taskChars, repsPerChar: repsPerChar };
+    }
+
+    function getRowScoreValue(row) {
+        if (!row || row.status !== 'Selesai') return null;
+        if (typeof row.best_score === 'number') return row.best_score;
+        const opts = getActiveTaskGradingOptions();
+        const res = (typeof DB !== 'undefined' && DB.calculateSubmissionScore)
+            ? DB.calculateSubmissionScore(row, opts)
+            : { score: 70 };
+        return res.score;
+    }
+
+    function exportResultsScoresToExcel() {
+        if (typeof XLSX === 'undefined') {
+            alert("Library SheetJS (XLSX) belum dimuat. Mohon periksa koneksi internet.");
+            return;
+        }
+        let rowsToExport = window.currentDetailRows || [];
+        if (window.currentDetailFilterClass && window.currentDetailFilterClass !== 'ALL') {
+            rowsToExport = rowsToExport.filter(r => (r.student_class || '').toUpperCase() === window.currentDetailFilterClass.toUpperCase());
+        }
+        if (window.currentDetailFilterStatus === 'SELESAI') {
+            rowsToExport = rowsToExport.filter(r => r.status === 'Selesai');
+        } else if (window.currentDetailFilterStatus === 'BELUM') {
+            rowsToExport = rowsToExport.filter(r => r.status !== 'Selesai');
+        }
+        if (rowsToExport.length === 0) {
+            alert("Belum ada data murid untuk diexport.");
+            return;
+        }
+
+        const sortedRows = [...rowsToExport].sort((a, b) => {
+            const cA = (a.student_class || '').toUpperCase();
+            const cB = (b.student_class || '').toUpperCase();
+            if (cA !== cB) return cA.localeCompare(cB);
+            return (a.student_name || '').localeCompare(b.student_name || '');
+        });
+
+        const sheetData = [
+            ['No', 'Kelas', 'Nama Murid', 'Status', 'Nilai (Best Score)', 'Nilai Terakhir', 'Predikat', 'Selesai (Kali)', 'Total Salah (Best)', 'Waktu Selesai']
+        ];
+
+        sortedRows.forEach((r, idx) => {
+            const isComplete = r.status === 'Selesai';
+            const bestScore = isComplete ? getRowScoreValue(r) : '';
+            const latestScore = isComplete ? (typeof r.latest_score === 'number' ? r.latest_score : bestScore) : '';
+            const tier = (isComplete && typeof DB !== 'undefined' && DB.getScoreTier)
+                ? DB.getScoreTier(bestScore).shortLabel
+                : (isComplete ? 'Tuntas KKM' : 'Belum Selesai');
+            const attempts = isComplete ? (parseInt(String(r.repetitions || 1).replace(/x+/gi, ''), 10) || 1) : 0;
+            const totalMistakes = isComplete ? (r.mistakes_count || 0) : '';
+
+            let dateStr = '-';
+            if (isComplete && r.submitted_at) {
+                const dObj = new Date(r.submitted_at);
+                const dd = String(dObj.getDate()).padStart(2, '0');
+                const mmm = dObj.toLocaleString('id-ID', { month: 'short' });
+                const yyyy = dObj.getFullYear();
+                const hh = String(dObj.getHours()).padStart(2, '0');
+                const min = String(dObj.getMinutes()).padStart(2, '0');
+                dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
+            }
+
+            sheetData.push([
+                idx + 1,
+                r.student_class || '',
+                r.student_name || '',
+                r.status || 'Belum',
+                bestScore,
+                latestScore,
+                tier,
+                attempts,
+                totalMistakes,
+                dateStr
+            ]);
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        XLSX.utils.book_append_sheet(wb, ws, "Daftar Nilai");
+        const clsTag = (window.currentDetailFilterClass && window.currentDetailFilterClass !== 'ALL') ? `_${window.currentDetailFilterClass}` : '';
+        XLSX.writeFile(wb, `Daftar_Nilai_${currentActiveTaskId || 'Tugas'}${clsTag}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
     function renderDetailRowsTable() {
         const tbody = document.getElementById('task-results-body');
         if (!tbody) return;
@@ -4733,6 +4841,20 @@
         // 1. Filter by Class
         if (window.currentDetailFilterClass && window.currentDetailFilterClass !== 'ALL') {
             rowsToRender = rowsToRender.filter(r => (r.student_class || '').toUpperCase() === window.currentDetailFilterClass.toUpperCase());
+        }
+
+        // Update class score summary (across completed students in active class filter)
+        const summaryEl = document.getElementById('results-score-summary');
+        if (summaryEl) {
+            const completedScoped = rowsToRender.filter(r => r.status === 'Selesai');
+            if (completedScoped.length > 0) {
+                const scores = completedScoped.map(r => getRowScoreValue(r));
+                const avgVal = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                const maxVal = Math.max(...scores);
+                summaryEl.innerHTML = `📊 <b>Rata-rata Nilai: ${avgVal}</b> &nbsp;•&nbsp; Tertinggi: <b>${maxVal}</b> &nbsp;•&nbsp; <span style="color:var(--text-muted);">KKM 70 • Maks 95 (Best Score dari ${completedScoped.length} murid selesai)</span>`;
+            } else {
+                summaryEl.innerHTML = `📊 <b>Penilaian Otomatis:</b> KKM <b>70</b> • Maks <b>95</b> <span style="color:var(--text-muted);">(Diambil dari Best Score tiap murid)</span>`;
+            }
         }
 
         // 2. Filter by Status (Sudah / Belum)
@@ -4752,7 +4874,7 @@
             } else if (window.currentDetailFilterStatus === 'BELUM') {
                 emptyMessage = '🎉 Hebat! Semua murid untuk filter ini sudah selesai mengerjakan tugas.';
             }
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:35px 20px; color:var(--text-muted); font-size:1rem;">${emptyMessage}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:35px 20px; color:var(--text-muted); font-size:1rem;">${emptyMessage}</td></tr>`;
         } else {
             rowsToRender.forEach(r => {
                 const isComplete = r.status === 'Selesai';
@@ -4779,10 +4901,24 @@
 
                 // Clean repetition format: strictly 1x, 2x, 3x - never 3xx
                 let repText = '-';
+                let countNum = 1;
                 if (isComplete) {
                     let rawRep = String(r.repetitions || 1).replace(/x+/gi, '').trim();
-                    const countNum = parseInt(rawRep, 10) || 1;
+                    countNum = parseInt(rawRep, 10) || 1;
                     repText = `${countNum}x`;
+                }
+
+                // Best Score cell
+                let scoreHtml = '<span style="color:#94A3B8; font-weight:600;">-</span>';
+                if (isComplete) {
+                    const bestVal = getRowScoreValue(r);
+                    const tier = (typeof DB !== 'undefined' && DB.getScoreTier)
+                        ? DB.getScoreTier(bestVal)
+                        : { bg: '#E0F2FE', color: '#0369A1', border: '#7DD3FC' };
+                    const latestSubNote = (countNum > 1 && typeof r.latest_score === 'number' && r.latest_score !== bestVal)
+                        ? `<div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Terakhir: ${r.latest_score}</div>`
+                        : '';
+                    scoreHtml = `<span style="display:inline-block; padding:3px 11px; border-radius:8px; background:${tier.bg}; color:${tier.color}; border:1px solid ${tier.border}; font-weight:800; font-size:0.95rem;">${bestVal}</span>${latestSubNote}`;
                 }
 
                 let cleanDetail = (r.mistakes_detail || '').split(';; META:')[0].trim();
@@ -4790,6 +4926,7 @@
                     <td><b>${escapeHtml(r.student_name)}</b>${clsBadge}</td>
                     <td>${dateStr}</td>
                     <td>${statusBadge}</td>
+                    <td style="text-align:center;">${scoreHtml}</td>
                     <td>${repText}</td>
                     <td><small>${isComplete ? escapeHtml(cleanDetail || '-') : '-'}</small></td>
                 `;
@@ -5601,12 +5738,16 @@
           }
           grandTotalMistakes += sTotalMistakes;
 
+          const sBestScore = getRowScoreValue(r);
+          const sLatestScore = (typeof r.latest_score === 'number') ? r.latest_score : sBestScore;
           analyzedStudents.push({
              name: r.student_name,
              cls: r.student_class || '',
              submitted_at: r.submitted_at,
              duration: r.duration,
              repetitions: r.repetitions || 1,
+             bestScore: sBestScore,
+             latestScore: sLatestScore,
              totalMistakes: sTotalMistakes,
              charMistakes: sCharMistakes,
              meta: meta
@@ -5831,7 +5972,7 @@
 
        tbody.innerHTML = '';
        if (filtered.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.95rem;">${students.length === 0 ? '📭 Belum ada data pengerjaan murid yang selesai.' : '🔍 Tidak ada murid yang sesuai dengan pencarian.'}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.95rem;">${students.length === 0 ? '📭 Belum ada data pengerjaan murid yang selesai.' : '🔍 Tidak ada murid yang sesuai dengan pencarian.'}</td></tr>`;
           return;
        }
 
@@ -5847,18 +5988,12 @@
              dateStr = `${dd}/${mmm}/${yyyy} ${hh}:${min}`;
           }
 
-          let gradeBadge = '<span class="student-grade-badge grade-struggling">🔴 Perlu Bimbingan</span>';
-          let mistakeColor = '#DC2626';
-          if (s.totalMistakes === 0) {
-             gradeBadge = '<span class="student-grade-badge grade-perfect">🌟 Sempurna</span>';
-             mistakeColor = '#059669';
-          } else if (s.totalMistakes <= 3) {
-             gradeBadge = '<span class="student-grade-badge grade-good">👍 Sangat Baik</span>';
-             mistakeColor = '#10B981';
-          } else if (s.totalMistakes <= 10) {
-             gradeBadge = '<span class="student-grade-badge grade-need-practice">⚠️ Perlu Latihan</span>';
-             mistakeColor = '#D97706';
-          }
+          const scoreVal = (typeof s.bestScore === 'number') ? s.bestScore : 70;
+          const tier = (typeof DB !== 'undefined' && DB.getScoreTier)
+             ? DB.getScoreTier(scoreVal)
+             : { label: '💪 Tuntas KKM', badgeClass: 'grade-need-practice', bg: '#FEF3C7', color: '#B45309', border: '#FCD34D' };
+          const gradeBadge = `<span class="student-grade-badge ${tier.badgeClass}">${tier.label}</span>`;
+          let mistakeColor = s.totalMistakes === 0 ? '#059669' : (scoreVal >= 85 ? '#0369A1' : (scoreVal >= 78 ? '#D97706' : '#DC2626'));
 
           let charDetailHtml = '';
           if (s.charMistakes.length === 0) {
@@ -5887,10 +6022,16 @@
           const countNum = parseInt(rawRep, 10) || 1;
           repText = `${countNum}x`;
 
+          const latestNote = (countNum > 1 && typeof s.latestScore === 'number' && s.latestScore !== scoreVal)
+             ? `<div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Terakhir: ${s.latestScore}</div>`
+             : '';
+          const scoreBadgeHtml = `<span style="display:inline-block; padding:3px 10px; border-radius:8px; background:${tier.bg}; color:${tier.color}; border:1px solid ${tier.border}; font-weight:800; font-size:0.95rem;">${scoreVal}</span>${latestNote}`;
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
              <td style="text-align:center; font-weight:700; color:var(--text-muted);">${idx + 1}</td>
              <td><b>${escapeHtml(s.name)}</b>${clsBadge}${devBadge}${hintBadge}</td>
+             <td style="text-align:center;">${scoreBadgeHtml}</td>
              <td><span style="font-weight:900; font-size:1.1rem; color:${mistakeColor};">${s.totalMistakes}x</span></td>
              <td>${gradeBadge}</td>
              <td>${charDetailHtml}</td>
@@ -6013,14 +6154,15 @@
 
        // Sheet 2: Rincian Siswa
        const studentData = [
-          ['No', 'Nama Murid', 'Kelas', 'Total Kesalahan', 'Predikat', 'Perangkat', 'Bantuan (Hints)', 'Rincian Huruf yang Salah', 'Waktu Pengumpulan', 'Selesai (Kali)']
+          ['No', 'Nama Murid', 'Kelas', 'Nilai (Best Score)', 'Nilai Terakhir', 'Total Kesalahan', 'Predikat', 'Perangkat', 'Bantuan (Hints)', 'Rincian Huruf yang Salah', 'Waktu Pengumpulan', 'Selesai (Kali)']
        ];
 
        students.forEach((s, idx) => {
-          let predicate = 'Perlu Bimbingan';
-          if (s.totalMistakes === 0) predicate = 'Sempurna';
-          else if (s.totalMistakes <= 3) predicate = 'Sangat Baik';
-          else if (s.totalMistakes <= 10) predicate = 'Perlu Latihan';
+          const scoreVal = (typeof s.bestScore === 'number') ? s.bestScore : 70;
+          const latestVal = (typeof s.latestScore === 'number') ? s.latestScore : scoreVal;
+          const predicate = (typeof DB !== 'undefined' && DB.getScoreTier)
+             ? DB.getScoreTier(scoreVal).shortLabel
+             : 'Tuntas KKM';
 
           const charMistakesStr = s.charMistakes.length > 0
              ? s.charMistakes.map(cm => {
@@ -6051,6 +6193,8 @@
              idx + 1,
              s.name,
              s.cls || '',
+             scoreVal,
+             latestVal,
              s.totalMistakes,
              predicate,
              devText,
@@ -6142,7 +6286,7 @@
         if (lbPills) lbPills.style.display = 'none';
 
         const tbody = document.getElementById('task-results-body');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:25px; color:var(--text-muted); font-size:1rem;">⏳ Memuat data pengerjaan murid...</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:25px; color:var(--text-muted); font-size:1rem;">⏳ Memuat data pengerjaan murid...</td></tr>';
 
         // 3. Fetch submissions & build expected roster (supports remedial subset & multi-class)
         try {
@@ -6184,8 +6328,28 @@
               return sorted[0];
            }
 
+           const taskGradingOpts = getActiveTaskGradingOptions();
            const displayRows = [];
            const matchedKeys = new Set();
+
+           function buildCompletedRow(group, studentNameOverride, studentClsOverride) {
+              const latestSub = pickLatestSub(group);
+              const completionsCount = group.length;
+              const bestInfo = (typeof DB !== 'undefined' && DB.getBestScoreForSubmissions)
+                 ? DB.getBestScoreForSubmissions(group, taskGradingOpts)
+                 : { bestScore: 70, bestSub: latestSub, bestResult: null, latestScore: 70 };
+              const chosenSub = bestInfo.bestSub || latestSub;
+              return Object.assign({}, chosenSub, {
+                 student_name: studentNameOverride || chosenSub.student_name,
+                 student_class: studentClsOverride || chosenSub.class || (currentActiveTaskClasses.length === 1 ? currentActiveTaskClasses[0] : ''),
+                 status: 'Selesai',
+                 repetitions: completionsCount,
+                 submitted_at: latestSub ? latestSub.submitted_at : chosenSub.submitted_at,
+                 best_score: bestInfo.bestScore,
+                 latest_score: bestInfo.latestScore,
+                 best_result: bestInfo.bestResult
+              });
+           }
 
            expectedRoster.forEach(entry => {
               const normName = entry.name.trim().toUpperCase();
@@ -6206,14 +6370,7 @@
 
               if (group && group.length > 0) {
                  matchedKeys.add(exactKey);
-                 const latestSub = pickLatestSub(group);
-                 const completionsCount = group.length;
-                 displayRows.push(Object.assign({}, latestSub, {
-                    student_name: entry.name,
-                    student_class: entry.cls,
-                    status: 'Selesai',
-                    repetitions: completionsCount
-                 }));
+                 displayRows.push(buildCompletedRow(group, entry.name, entry.cls));
               } else {
                  displayRows.push({
                     student_name: entry.name,
@@ -6222,7 +6379,9 @@
                     submitted_at: '',
                     mistakes_detail: '',
                     repetitions: '-',
-                    duration: 0
+                    duration: 0,
+                    best_score: null,
+                    latest_score: null
                  });
               }
            });
@@ -6230,15 +6389,7 @@
            // Extra submissions from students outside expected roster (added at most once)
            for (const k in studentSubsGroup) {
               if (!matchedKeys.has(k)) {
-                 const group = studentSubsGroup[k];
-                 const latestSub = pickLatestSub(group);
-                 const completionsCount = group.length;
-                 displayRows.push(Object.assign({}, latestSub, {
-                    student_name: latestSub.student_name,
-                    student_class: latestSub.class || (currentActiveTaskClasses.length === 1 ? currentActiveTaskClasses[0] : ''),
-                    status: 'Selesai',
-                    repetitions: completionsCount
-                 }));
+                 displayRows.push(buildCompletedRow(studentSubsGroup[k], null, null));
               }
            }
 
@@ -6254,7 +6405,7 @@
            updateDetailStickyOffset();
         } catch (err) {
            console.error('viewTaskResults error:', err);
-           if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:25px; color:#EF4444;">Gagal memuat data: ${escapeHtml(err.message)}</td></tr>`;
+           if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:25px; color:#EF4444;">Gagal memuat data: ${escapeHtml(err.message)}</td></tr>`;
         }
 
         // 4. Fetch Leaderboard for this Task ID

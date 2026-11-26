@@ -355,7 +355,8 @@
         </button>
       </div>
       <h2>Mulai Tugas</h2>
-      <p style="margin-bottom: 15px; color: #5E6A75;" id="login-info">Memuat data tugas...</p>
+      <p style="margin-bottom: 12px; color: #5E6A75;" id="login-info">Memuat data tugas...</p>
+      <div id="login-best-score-info" style="display:none; margin-bottom:14px; padding:10px 14px; border-radius:10px; background:linear-gradient(135deg, rgba(16,185,129,0.08), rgba(245,158,11,0.08)); border:1.5px solid #FCD34D; font-size:0.88rem; color:#0E1318;"></div>
       
       <select id="class-select-student" class="student-select" style="display:none; margin-bottom:12px;">
         <option value="">-- 1. Pilih Kelas --</option>
@@ -477,7 +478,24 @@
         <h2>Selesai!</h2>
         <div class="star-rating-container" id="star-rating-container"></div>
         <div class="star-badge-text" id="star-badge-text"></div>
-        <p style="color:var(--text-muted);">Kamu telah menyelesaikan semua tugas.</p>
+        <p style="color:var(--text-muted); margin-bottom:12px;">Kamu telah menyelesaikan semua tugas.</p>
+
+        <div id="finish-score-card" style="display:none; margin:12px 0 14px 0; padding:14px 16px; border-radius:14px; background:linear-gradient(135deg, rgba(139,61,255,0.06), rgba(16,185,129,0.06)); border:1.5px solid var(--border-color, #E2E8F0); text-align:center;">
+          <div style="display:flex; justify-content:space-around; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div>
+              <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.4px;">Nilai Kali Ini</div>
+              <div id="finish-current-score" style="font-size:2.1rem; font-weight:900; color:var(--primary); line-height:1.1; margin-top:2px;">-</div>
+              <div id="finish-current-meta" style="font-size:0.76rem; color:var(--text-muted); margin-top:3px;">KKM: 70 • Maks: 95</div>
+            </div>
+            <div style="width:1px; height:48px; background:var(--border-color, #E2E8F0);"></div>
+            <div>
+              <div style="font-size:0.75rem; font-weight:700; color:#B45309; text-transform:uppercase; letter-spacing:0.4px;">🏆 Best Score Tersimpan</div>
+              <div id="finish-best-score" style="font-size:2.1rem; font-weight:900; color:#059669; line-height:1.1; margin-top:2px;">-</div>
+              <div id="finish-best-meta" style="font-size:0.76rem; color:var(--text-muted); margin-top:3px;">Menyimpan ke sistem...</div>
+            </div>
+          </div>
+          <div id="finish-best-banner" style="display:none; margin-top:10px; padding:6px 10px; border-radius:8px; font-size:0.8rem; font-weight:700;"></div>
+        </div>
         
         <div class="status-text" id="submit-status">
           <div class="loader"></div>
@@ -1125,6 +1143,7 @@
             }
          } catch(e) {}
       }
+      updateLoginBestScorePreview(activeCls, sName);
       if (sName && activeCls) {
          try {
             const savedT = await DB.getStudentTheme(activeCls, sName);
@@ -1212,6 +1231,146 @@
         }
     }
 
+    let currentAttemptScoreObj = null;
+    let currentSavedBestInfo = null;
+
+    function getStudentBestCacheKey(id, cls, name) {
+        if (!id || !name) return null;
+        return 'stroke_app_best_score_' + id + '_' + encodeURIComponent(cls || '') + '_' + encodeURIComponent(name);
+    }
+
+    function getCachedBestScoreInfo(id, cls, name) {
+        try {
+            const key = getStudentBestCacheKey(id, cls, name);
+            if (!key) return null;
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+    }
+
+    function saveCachedBestScoreInfo(id, cls, name, info) {
+        try {
+            const key = getStudentBestCacheKey(id, cls, name);
+            if (!key || !info) return;
+            localStorage.setItem(key, JSON.stringify(info));
+        } catch(e) {}
+    }
+
+    function buildLiveScoreObject() {
+        const totalMistakes = Object.values(mistakesMap || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+        const taskChars = (tasks || []).map(t => t.char).filter(Boolean);
+        const liveMeta = {
+            repMistakes: repMistakes || {},
+            hintUsageCount: hintUsageCount || 0,
+            autoHintCount: autoHintCount || 0
+        };
+        if (typeof DB !== 'undefined' && DB.calculateSubmissionScore) {
+            return DB.calculateSubmissionScore({
+                mistakes_count: totalMistakes,
+                total_words: taskChars.length || 1,
+                repetitions: repetitions || 1,
+                meta: liveMeta
+            }, {
+                taskChars: taskChars,
+                repsPerChar: repetitions || 1
+            });
+        }
+        return { score: 70, accuracyPct: 100, totalMistakes: totalMistakes, tier: { label: '💪 Tuntas KKM' } };
+    }
+
+    function renderFinishScoreCard(scoreObj, bestInfo, isSavingPending = false) {
+        const card = document.getElementById('finish-score-card');
+        if (!card || !scoreObj) return;
+        card.style.display = 'block';
+
+        const curEl = document.getElementById('finish-current-score');
+        const curMetaEl = document.getElementById('finish-current-meta');
+        const bestEl = document.getElementById('finish-best-score');
+        const bestMetaEl = document.getElementById('finish-best-meta');
+        const bannerEl = document.getElementById('finish-best-banner');
+
+        const curScore = scoreObj.score;
+        const priorBest = (bestInfo && typeof bestInfo.bestScore === 'number') ? bestInfo.bestScore : null;
+        const effectiveBest = (priorBest !== null) ? Math.max(curScore, priorBest) : curScore;
+        const attemptsCount = (bestInfo && bestInfo.attemptsCount) ? bestInfo.attemptsCount : 1;
+
+        if (curEl) {
+            curEl.innerHTML = `${curScore}<span style="font-size:1rem; font-weight:700; color:var(--text-muted);"> / 95</span>`;
+        }
+        if (curMetaEl) {
+            const tierTxt = (scoreObj.tier && scoreObj.tier.label) ? scoreObj.tier.label : '';
+            curMetaEl.textContent = `${tierTxt} • Akurasi ${scoreObj.accuracyPct || 0}%`;
+        }
+        if (bestEl) {
+            bestEl.innerHTML = `${effectiveBest}<span style="font-size:1rem; font-weight:700; color:var(--text-muted);"> / 95</span>`;
+        }
+        if (bestMetaEl) {
+            if (isSavingPending) {
+                bestMetaEl.textContent = 'Memeriksa riwayat tersimpan...';
+            } else {
+                bestMetaEl.textContent = `Tersimpan dari ${attemptsCount}x selesai • KKM 70`;
+            }
+        }
+        if (bannerEl) {
+            if (isSavingPending) {
+                bannerEl.style.display = 'none';
+            } else if (bestInfo && bestInfo.isNewBest && attemptsCount > 1) {
+                bannerEl.style.display = 'block';
+                bannerEl.style.background = '#ECFDF5';
+                bannerEl.style.color = '#065F46';
+                bannerEl.style.border = '1px solid #A7F3D0';
+                bannerEl.textContent = `🎉 Rekor Baru! Best Score kamu naik menjadi ${effectiveBest} / 95 dan sudah tersimpan!`;
+            } else if (priorBest !== null && curScore < priorBest) {
+                bannerEl.style.display = 'block';
+                bannerEl.style.background = '#FFFBEB';
+                bannerEl.style.color = '#B45309';
+                bannerEl.style.border = '1px solid #FDE68A';
+                bannerEl.textContent = `🏆 Tenang! Best Score tertinggimu (${effectiveBest} / 95) tetap aman tersimpan di sistem.`;
+            } else {
+                bannerEl.style.display = 'block';
+                bannerEl.style.background = '#ECFDF5';
+                bannerEl.style.color = '#065F46';
+                bannerEl.style.border = '1px solid #A7F3D0';
+                bannerEl.textContent = `✅ Nilai ${effectiveBest} / 95 tersimpan sebagai Best Score kamu (KKM: 70).`;
+            }
+        }
+    }
+
+    async function updateLoginBestScorePreview(activeCls, sName) {
+        const box = document.getElementById('login-best-score-info');
+        if (!box) return;
+        if (!sName || !assignmentData || !assignmentData.id) {
+            box.style.display = 'none';
+            return;
+        }
+        const taskChars = (tasks || []).map(t => t.char).filter(Boolean);
+        const cached = getCachedBestScoreInfo(assignmentData.id, activeCls, sName);
+        if (cached && typeof cached.bestScore === 'number') {
+            box.style.display = 'block';
+            box.innerHTML = `🏆 <b>Best Score Tersimpan: ${cached.bestScore} / 95</b> <span style="color:#64748B;">(${cached.attemptsCount || 1}x selesai • KKM 70)</span>`;
+        } else {
+            box.style.display = 'none';
+        }
+        if (typeof DB !== 'undefined' && DB.getStudentTaskBestScore) {
+            try {
+                const liveBest = await DB.getStudentTaskBestScore(assignmentData.id, activeCls, sName, {
+                    taskChars: taskChars,
+                    repsPerChar: repetitions || 1
+                });
+                if (studentSelect.value !== sName) return;
+                if (liveBest && typeof liveBest.bestScore === 'number' && liveBest.attemptsCount > 0) {
+                    saveCachedBestScoreInfo(assignmentData.id, activeCls, sName, {
+                        bestScore: liveBest.bestScore,
+                        latestScore: liveBest.latestScore,
+                        attemptsCount: liveBest.attemptsCount
+                    });
+                    box.style.display = 'block';
+                    box.innerHTML = `🏆 <b>Best Score Tersimpan: ${liveBest.bestScore} / 95</b> <span style="color:#64748B;">(${liveBest.attemptsCount}x selesai • KKM 70)</span>`;
+                }
+            } catch(e) {}
+        }
+    }
+
     function getProgressKey(id, name, cls) {
         if (!id) return null;
         const clsPart = cls ? ('_' + encodeURIComponent(cls)) : '';
@@ -1238,6 +1397,8 @@
             studentName: studentName,
             studentClass: activeCls,
             currentWordMistakes: currentWordMistakes,
+            lastScoreObj: currentAttemptScoreObj,
+            bestScoreInfo: currentSavedBestInfo,
             timestamp: Date.now()
         };
         try {
@@ -1336,9 +1497,35 @@
                 if (progress.currentScreen === 'finish') {
                     screenLogin.classList.add('hidden');
                     screenFinish.classList.remove('hidden');
+                    const scoreObj = progress.lastScoreObj || buildLiveScoreObject();
+                    currentAttemptScoreObj = scoreObj;
+                    calculateStars(scoreObj.score);
+                    const cachedBest = progress.bestScoreInfo || getCachedBestScoreInfo(assignmentData.id, selectedStudentClass, studentName);
+                    renderFinishScoreCard(scoreObj, cachedBest, false);
+                    const stEl = document.getElementById('submit-status');
+                    if (stEl) {
+                        stEl.innerHTML = '<div style="color:#10B981; font-size:1.6rem; margin-bottom:2px;">✓</div><p style="color:#10B981; font-weight:bold; font-size:0.95rem;">Hasil pengerjaan tersimpan</p>';
+                    }
                     document.getElementById('finish-options').style.display = 'flex';
                     updateStudentLeaderboardButtons();
                     fetchLeaderboard();
+                    if (typeof DB !== 'undefined' && DB.getStudentTaskBestScore) {
+                        DB.getStudentTaskBestScore(assignmentData.id, selectedStudentClass, studentName, {
+                            taskChars: (tasks || []).map(t => t.char).filter(Boolean),
+                            repsPerChar: repetitions || 1
+                        }).then(dbBest => {
+                            if (dbBest && typeof dbBest.bestScore === 'number') {
+                                const merged = {
+                                    bestScore: Math.max(dbBest.bestScore, scoreObj.score),
+                                    latestScore: dbBest.latestScore || scoreObj.score,
+                                    attemptsCount: dbBest.attemptsCount || 1
+                                };
+                                currentSavedBestInfo = merged;
+                                saveCachedBestScoreInfo(assignmentData.id, selectedStudentClass, studentName, merged);
+                                renderFinishScoreCard(scoreObj, merged, false);
+                            }
+                        }).catch(() => {});
+                    }
                     return true;
                 } else if (progress.currentScreen === 'typing') {
                     screenLogin.classList.add('hidden');
@@ -1375,6 +1562,7 @@
       tasks.forEach(t => mistakesMap[t.char] = 0);
       drawnChars.clear();
       currentWordMistakes = 0;
+      currentAttemptScoreObj = null;
       const displayClsSuffix = (taskClasses.length > 1 && selectedStudentClass) ? ` (${selectedStudentClass})` : '';
       document.getElementById('display-name').textContent = studentName + displayClsSuffix;
       
@@ -1765,27 +1953,25 @@
       }
     }
 
-    function calculateStars() {
-      const totalMistakes = Object.values(mistakesMap).reduce((a, b) => a + b, 0);
+    function calculateStars(scoreOverride) {
       const starContainer = document.getElementById('star-rating-container');
       const badgeText = document.getElementById('star-badge-text');
+      const scoreObj = (typeof scoreOverride === 'number') ? { score: scoreOverride } : buildLiveScoreObject();
+      const score = scoreObj.score || 70;
       
-      let stars = '⭐⭐⭐';
-      let title = 'Sempurna! Luar Biasa! 🎉';
+      let stars = '⭐';
+      let title = 'Tugas Selesai! Yuk Coba Lagi Agar Nilai Makin Tinggi! 💪';
       
-      if (totalMistakes === 0) {
+      if (score >= 90) {
          stars = '⭐⭐⭐';
-         title = 'Sempurna! Tanpa Kesalahan! 🌟';
-      } else if (totalMistakes <= 3) {
+         title = 'Luar Biasa! Goresan Sangat Rapi! 🌟';
+      } else if (score >= 80) {
          stars = '⭐⭐';
-         title = 'Bagus Sekali! Terus Semangat! 👍';
-      } else {
-         stars = '⭐';
-         title = 'Kerja Bagus! Terus Berlatih ya! 💪';
+         title = 'Bagus Sekali! Bisa Latihan Ulang untuk Nilai 95! 👍';
       }
       
-      starContainer.textContent = stars;
-      badgeText.textContent = title;
+      if (starContainer) starContainer.textContent = stars;
+      if (badgeText) badgeText.textContent = title;
     }
 
     // --- CONFETTI ANIMATION ENGINE ---
@@ -1843,9 +2029,14 @@
     function finishGame() {
       screenGame.classList.add('hidden');
       screenFinish.classList.remove('hidden');
+
+      currentAttemptScoreObj = buildLiveScoreObject();
+      const activeCls = selectedStudentClass || (taskClasses.length === 1 ? taskClasses[0] : '') || (assignmentData && assignmentData.cls) || '';
+      const cachedBest = getCachedBestScoreInfo(assignmentData && assignmentData.id, activeCls, studentName);
       saveStudentProgress();
-      
-      calculateStars();
+
+      calculateStars(currentAttemptScoreObj.score);
+      renderFinishScoreCard(currentAttemptScoreObj, cachedBest, true);
       playSound('victory');
       launchConfetti();
       
@@ -1856,9 +2047,9 @@
       
       document.getElementById('submit-status').innerHTML = `
         <div class="loader"></div>
-        <p style="margin-top:10px;">Mengirim data ke guru...</p>
+        <p style="margin-top:10px;">Mengirim data & menyimpan nilai terbaik...</p>
       `;
-      submitData();
+      submitData(currentAttemptScoreObj, cachedBest);
     }
 
     let currentTaskPinyinData = [];
@@ -2032,8 +2223,10 @@
       }
     }
 
-    async function submitData() {
+    async function submitData(precomputedScoreObj, priorCachedBest) {
       const statusEl = document.getElementById('submit-status');
+      const scoreObj = precomputedScoreObj || buildLiveScoreObject();
+      currentAttemptScoreObj = scoreObj;
       const totalMistakes = Object.values(mistakesMap).reduce((a, b) => a + b, 0);
       let durationSec = (Date.now() - taskStartTime) / 1000;
       const totalCharDuration = Object.values(charDurations || {}).reduce((a, b) => a + b, 0);
@@ -2067,9 +2260,35 @@
             strokeMistakesMap,
             metaStats
          );
+         const taskCharsList = (tasks || []).map(t => t.char).filter(Boolean);
+         let dbBest = null;
+         if (typeof DB !== 'undefined' && DB.getStudentTaskBestScore) {
+            dbBest = await DB.getStudentTaskBestScore(assignmentData.id, submitCls, studentName, {
+               taskChars: taskCharsList,
+               repsPerChar: repetitions || 1
+            });
+         }
+
+         const priorScoreBeforeThis = (priorCachedBest && typeof priorCachedBest.bestScore === 'number') ? priorCachedBest.bestScore : null;
+         const dbBestScore = (dbBest && typeof dbBest.bestScore === 'number') ? dbBest.bestScore : scoreObj.score;
+         const finalBestScore = Math.max(scoreObj.score, dbBestScore, priorScoreBeforeThis || 0);
+         const attemptsCount = (dbBest && dbBest.attemptsCount) ? dbBest.attemptsCount : ((priorCachedBest && priorCachedBest.attemptsCount ? priorCachedBest.attemptsCount : 0) + 1);
+         const isNewBest = (priorScoreBeforeThis !== null && scoreObj.score > priorScoreBeforeThis) || (attemptsCount > 1 && scoreObj.score >= dbBestScore && dbBest && dbBest.latestScore === scoreObj.score);
+
+         const bestInfo = {
+            bestScore: finalBestScore,
+            latestScore: scoreObj.score,
+            attemptsCount: attemptsCount,
+            isNewBest: isNewBest
+         };
+         currentSavedBestInfo = bestInfo;
+         saveCachedBestScoreInfo(assignmentData.id, submitCls, studentName, bestInfo);
+         saveStudentProgress();
+         renderFinishScoreCard(scoreObj, bestInfo, false);
+
          statusEl.innerHTML = `
            <div style="color: #10B981; font-size: 2.5rem; margin-bottom: 5px;">✓</div>
-           <p style="color: #10B981; font-weight: bold;">Tugas berhasil dikirim!</p>
+           <p style="color: #10B981; font-weight: bold;">Tugas & Best Score (${finalBestScore}/95) berhasil disimpan!</p>
          `;
          if (studentName && submitCls && submitCls !== "Tidak diketahui") {
             try {
@@ -2081,6 +2300,8 @@
          updateStudentLeaderboardButtons();
          fetchLeaderboard();
       } catch (err) {
+         const fallbackBest = Math.max(scoreObj.score, (priorCachedBest && priorCachedBest.bestScore) ? priorCachedBest.bestScore : 0);
+         renderFinishScoreCard(scoreObj, { bestScore: fallbackBest, attemptsCount: (priorCachedBest && priorCachedBest.attemptsCount) || 1 }, false);
          statusEl.innerHTML = `
            <div style="color: #ef4444; font-size: 2.5rem; margin-bottom: 5px;">✗</div>
            <p style="color: #ef4444; font-weight: bold;">Gagal mengirim data: ${err.message}</p>
@@ -2270,6 +2491,9 @@
        autoHintCount = 0;
        charHints = {};
        tasks.forEach(t => mistakesMap[t.char] = 0);
+       currentAttemptScoreObj = null;
+       const scCard = document.getElementById('finish-score-card');
+       if (scCard) scCard.style.display = 'none';
        
        saveStudentProgress();
        loadWord();
@@ -2546,7 +2770,7 @@
                 <div style="flex:1; min-width:260px;">
                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
                       ${t.is_remedial ? `<span style="background:#FEF3C7; color:#D97706; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px;">🔁 Remedial</span>` : `<span style="background:#EDE9FE; color:var(--primary, #8B3DFF); font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px;">📝 Tugas Reguler</span>`}
-                      ${t.is_completed ? `<span style="background:#ECFDF5; color:#059669; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px; border:1px solid #A7F3D0;">✅ Selesai (${t.completions_count}x dikerjakan)</span>` : `<span style="background:#FFFBEB; color:#B45309; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px; border:1px solid #FDE68A;">⏳ Belum Selesai</span>`}
+                      ${t.is_completed ? `<span style="background:#ECFDF5; color:#059669; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px; border:1px solid #A7F3D0;">✅ Selesai (${t.completions_count}x dikerjakan)</span>${(t.best_score !== null && t.best_score !== undefined) ? `<span style="background:#FEF3C7; color:#B45309; font-size:0.76rem; font-weight:800; padding:2px 9px; border-radius:6px; border:1px solid #FCD34D;">🏆 Best Score: ${t.best_score} / 95</span>` : ''}` : `<span style="background:#FFFBEB; color:#B45309; font-size:0.75rem; font-weight:bold; padding:2px 8px; border-radius:6px; border:1px solid #FDE68A;">⏳ Belum Selesai</span>`}
                       <span style="font-size:0.75rem; color:#94A3B8;">ID: ${t.id}</span>
                    </div>
                    <h3 style="margin:0 0 6px 0; font-size:1.15rem; color:var(--text-main, #0E1318); font-family:sans-serif;">
@@ -2626,6 +2850,13 @@
        }
        if (studentSelect && studentName) {
           studentSelect.value = studentName;
+          if (taskObj && typeof taskObj.best_score === 'number') {
+             saveCachedBestScoreInfo(taskId, selectedStudentClass, studentName, {
+                bestScore: taskObj.best_score,
+                latestScore: taskObj.latest_score || taskObj.best_score,
+                attemptsCount: taskObj.completions_count || 1
+             });
+          }
           studentSelect.dispatchEvent(new Event('change'));
        }
        checkStartBtn();

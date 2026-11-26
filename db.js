@@ -126,6 +126,20 @@ var DB = {
          if (isAssigned) {
             const tSubs = subsMap[t.id] || [];
             const isCompleted = tSubs.length > 0;
+            let bestScore = null;
+            let latestScore = null;
+            let lastSubmittedAt = null;
+            if (isCompleted) {
+               const taskChars = this.extractTaskCharsFromPayload(p);
+               const repsPerChar = parseInt(p.r, 10) || 1;
+               const bestInfo = this.getBestScoreForSubmissions(tSubs, {
+                  taskChars: taskChars,
+                  repsPerChar: repsPerChar
+               });
+               bestScore = bestInfo.bestScore;
+               latestScore = bestInfo.latestScore;
+               lastSubmittedAt = bestInfo.latestSub ? bestInfo.latestSub.submitted_at : tSubs[tSubs.length - 1].submitted_at;
+            }
             result.push({
                id: t.id,
                payload: p,
@@ -134,7 +148,9 @@ var DB = {
                is_remedial: isRemedial,
                is_completed: isCompleted,
                completions_count: tSubs.length,
-               last_submitted_at: isCompleted ? tSubs[tSubs.length - 1].submitted_at : null,
+               best_score: bestScore,
+               latest_score: latestScore,
+               last_submitted_at: lastSubmittedAt,
                created_at: t.created_at
             });
          }
@@ -527,5 +543,308 @@ var DB = {
          })
       });
       return res.ok;
+   },
+
+   // --- GRADING ENGINE (KKM 70, MAX 95, BEST SCORE) ---
+   SCORE_MIN: 70,
+   SCORE_MAX: 95,
+
+   extractTaskCharsFromPayload: function(payload) {
+      if (typeof payload === 'string') {
+         try { payload = JSON.parse(payload); } catch(e) { return []; }
+      }
+      if (!payload || typeof payload !== 'object') return [];
+      const chars = [];
+
+      if (Array.isArray(payload.w)) {
+         payload.w.forEach(c => {
+            if (c) String(c).split('').forEach(ch => chars.push(ch));
+         });
+      } else if (payload.v && payload.b && payload.u && typeof _meihuaDB !== 'undefined') {
+         const uData = (_meihuaDB[payload.b] && _meihuaDB[payload.b][payload.u]) ? (_meihuaDB[payload.b][payload.u].vocab || []) : [];
+         String(payload.v).split('|').forEach(vp => {
+            const [vIdx, cIdxStr] = vp.split(':');
+            const vObj = uData[parseInt(vIdx, 10)];
+            if (vObj && vObj.char && cIdxStr) {
+               cIdxStr.split(',').forEach(ci => {
+                  const ch = vObj.char[Number(ci)];
+                  if (ch) chars.push(ch);
+               });
+            }
+         });
+      } else if (payload.v && typeof payload.v === 'object' && typeof _meihuaDB !== 'undefined') {
+         for (const bk in payload.v) {
+            for (const ut in payload.v[bk]) {
+               const uData = (_meihuaDB[bk] && _meihuaDB[bk][ut]) ? (_meihuaDB[bk][ut].vocab || []) : [];
+               String(payload.v[bk][ut]).split('|').forEach(vp => {
+                  const [vIdx, cIdxStr] = vp.split(':');
+                  const vObj = uData[parseInt(vIdx, 10)];
+                  if (vObj && vObj.char && cIdxStr) {
+                     cIdxStr.split(',').forEach(ci => {
+                        const ch = vObj.char[Number(ci)];
+                        if (ch) chars.push(ch);
+                     });
+                  }
+               });
+            }
+         }
+      }
+
+      if (Array.isArray(payload.cv)) {
+         payload.cv.forEach(item => {
+            if (item && item.char) {
+               String(item.char).split('').forEach(ch => {
+                  if (ch.trim()) chars.push(ch);
+               });
+            }
+         });
+      }
+
+      return chars;
+   },
+
+   extractMetaFromDetail: function(mistakesDetail) {
+      let cleanDetail = '';
+      let meta = null;
+      const charMistakesMap = {};
+      const charList = [];
+
+      if (mistakesDetail && typeof mistakesDetail === 'string') {
+         if (mistakesDetail.includes(';; META:')) {
+            const spl = mistakesDetail.split(';; META:');
+            cleanDetail = spl[0].trim();
+            try { meta = JSON.parse(spl[1].trim()); } catch(e) {}
+         } else {
+            cleanDetail = mistakesDetail.trim();
+         }
+
+         if (cleanDetail) {
+            cleanDetail.split('|').forEach(seg => {
+               const s = seg.trim();
+               if (!s) return;
+               const m = s.match(/^([^:]+):\s*([0-9]+)/);
+               if (m) {
+                  const ch = m[1].trim();
+                  const cnt = parseInt(m[2], 10) || 0;
+                  if (ch) {
+                     charList.push(ch);
+                     charMistakesMap[ch] = cnt;
+                  }
+               }
+            });
+         }
+      }
+
+      return { cleanDetail, meta, charMistakesMap, charList };
+   },
+
+   getExpectedStrokes: function(charList, repsPerChar, fallbackWordsCount) {
+      const reps = Math.max(1, parseInt(repsPerChar, 10) || 1);
+      let singlePassStrokes = 0;
+
+      if (Array.isArray(charList) && charList.length > 0) {
+         charList.forEach(ch => {
+            let strokeCount = 8;
+            if (typeof BM_STROKE_DATA !== 'undefined' && BM_STROKE_DATA[ch]) {
+               if (Array.isArray(BM_STROKE_DATA[ch].medians) && BM_STROKE_DATA[ch].medians.length > 0) {
+                  strokeCount = BM_STROKE_DATA[ch].medians.length;
+               } else if (Array.isArray(BM_STROKE_DATA[ch].strokes) && BM_STROKE_DATA[ch].strokes.length > 0) {
+                  strokeCount = BM_STROKE_DATA[ch].strokes.length;
+               }
+            }
+            singlePassStrokes += strokeCount;
+         });
+      } else {
+         const words = Math.max(1, parseInt(fallbackWordsCount, 10) || 1);
+         singlePassStrokes = words * 8;
+      }
+
+      return Math.max(1, singlePassStrokes * reps);
+   },
+
+   getScoreTier: function(score) {
+      const s = Number(score) || this.SCORE_MIN;
+      if (s >= 92) {
+         return {
+            label: '🌟 Istimewa',
+            shortLabel: 'Istimewa',
+            color: '#065F46',
+            bg: '#D1FAE5',
+            border: '#6EE7B7',
+            badgeClass: 'grade-perfect'
+         };
+      } else if (s >= 85) {
+         return {
+            label: '👍 Sangat Baik',
+            shortLabel: 'Sangat Baik',
+            color: '#0369A1',
+            bg: '#E0F2FE',
+            border: '#7DD3FC',
+            badgeClass: 'grade-good'
+         };
+      } else if (s >= 78) {
+         return {
+            label: '✨ Baik',
+            shortLabel: 'Baik',
+            color: '#3730A3',
+            bg: '#EEF2FF',
+            border: '#C7D2FE',
+            badgeClass: 'grade-pass'
+         };
+      }
+      return {
+         label: '💪 Tuntas KKM',
+         shortLabel: 'Tuntas KKM',
+         color: '#B45309',
+         bg: '#FEF3C7',
+         border: '#FCD34D',
+         badgeClass: 'grade-need-practice'
+      };
+   },
+
+   calculateSubmissionScore: function(sub, options = {}) {
+      if (!sub || typeof sub !== 'object') {
+         return {
+            score: this.SCORE_MIN,
+            accuracyPct: 0,
+            totalMistakes: 0,
+            weightedMistakes: 0,
+            totalExpectedStrokes: 8,
+            tier: this.getScoreTier(this.SCORE_MIN)
+         };
+      }
+
+      const parsed = this.extractMetaFromDetail(sub.mistakes_detail || '');
+      const meta = sub.meta || parsed.meta || null;
+
+      let totalMistakes = 0;
+      if (typeof sub.mistakes_count === 'number' && !isNaN(sub.mistakes_count)) {
+         totalMistakes = Math.max(0, sub.mistakes_count);
+      } else if (sub.mistakes_count !== undefined && sub.mistakes_count !== null && !isNaN(parseInt(sub.mistakes_count, 10))) {
+         totalMistakes = Math.max(0, parseInt(sub.mistakes_count, 10));
+      } else {
+         totalMistakes = Object.values(parsed.charMistakesMap).reduce((a, b) => a + (Number(b) || 0), 0);
+      }
+
+      const charList = (Array.isArray(options.taskChars) && options.taskChars.length > 0)
+         ? options.taskChars
+         : parsed.charList;
+      const repsPerChar = Math.max(1, parseInt(options.repsPerChar || sub.repetitions, 10) || 1);
+      const wordCount = Math.max(1, (charList && charList.length > 0) ? charList.length : (parseInt(sub.total_words, 10) || 1));
+
+      const totalExpectedStrokes = this.getExpectedStrokes(charList, repsPerChar, wordCount);
+
+      // Weight Putaran 1 lightly (0.5x) when repMistakes telemetry exists and repetitions > 1
+      let weightedMistakes = totalMistakes;
+      if (meta && meta.repMistakes && typeof meta.repMistakes === 'object' && repsPerChar > 1) {
+         const rep1 = Math.min(totalMistakes, Math.max(0, Number(meta.repMistakes[1] || meta.repMistakes['1'] || 0)));
+         const rest = Math.max(0, totalMistakes - rep1);
+         weightedMistakes = (rep1 * 0.5) + rest;
+      }
+
+      // Small slip grace tolerance for kids (only for tasks >= 40 strokes)
+      const grace = (totalExpectedStrokes >= 40)
+         ? Math.max(1, Math.floor(totalExpectedStrokes * 0.02))
+         : 0;
+      const excessMistakes = Math.max(0, weightedMistakes - grace);
+      const errorRatio = excessMistakes / Math.max(1, totalExpectedStrokes);
+
+      // Score curve strictly in [70, 95]
+      const accuracyFactor = 1 / (1 + 6 * errorRatio);
+      const rawScore = this.SCORE_MIN + (this.SCORE_MAX - this.SCORE_MIN) * accuracyFactor;
+
+      // Very gentle penalty if manual "Contoh Guratan" hints are heavily used (never drops below KKM 70)
+      const manualHints = meta ? (Number(meta.hintUsageCount) || 0) : 0;
+      const freeHints = Math.max(2, Math.floor(wordCount * 0.3));
+      const hintPenalty = Math.min(3, Math.max(0, manualHints - freeHints) * 0.5);
+
+      const finalScore = Math.max(this.SCORE_MIN, Math.min(this.SCORE_MAX, Math.round(rawScore - hintPenalty)));
+      const accuracyPct = Math.round((totalExpectedStrokes / Math.max(1, totalExpectedStrokes + totalMistakes)) * 100);
+
+      return {
+         score: finalScore,
+         accuracyPct: Math.max(0, Math.min(100, accuracyPct)),
+         totalMistakes: totalMistakes,
+         weightedMistakes: Number(weightedMistakes.toFixed(1)),
+         totalExpectedStrokes: totalExpectedStrokes,
+         tier: this.getScoreTier(finalScore)
+      };
+   },
+
+   getBestScoreForSubmissions: function(subsList, options = {}) {
+      if (!Array.isArray(subsList) || subsList.length === 0) {
+         return {
+            bestScore: null,
+            bestSub: null,
+            bestResult: null,
+            latestScore: null,
+            latestSub: null,
+            latestResult: null,
+            attemptsCount: 0
+         };
+      }
+
+      const sortedLatest = [...subsList].sort((a, b) => {
+         const tA = a && a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+         const tB = b && b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+         return tB - tA;
+      });
+
+      const scored = sortedLatest.map(sub => {
+         const res = this.calculateSubmissionScore(sub, options);
+         return {
+            sub: sub,
+            res: res,
+            score: res.score,
+            mistakes: res.totalMistakes,
+            ts: sub && sub.submitted_at ? new Date(sub.submitted_at).getTime() : 0
+         };
+      });
+
+      const latestEntry = scored[0];
+      const sortedBest = [...scored].sort((a, b) => {
+         if (b.score !== a.score) return b.score - a.score;
+         if (a.mistakes !== b.mistakes) return a.mistakes - b.mistakes;
+         return b.ts - a.ts;
+      });
+      const bestEntry = sortedBest[0];
+
+      return {
+         bestScore: bestEntry.score,
+         bestSub: bestEntry.sub,
+         bestResult: bestEntry.res,
+         latestScore: latestEntry.score,
+         latestSub: latestEntry.sub,
+         latestResult: latestEntry.res,
+         attemptsCount: scored.length
+      };
+   },
+
+   getStudentTaskBestScore: async function(taskId, className, studentName, options = {}) {
+      if (!taskId || !studentName) {
+         return { bestScore: null, latestScore: null, attemptsCount: 0 };
+      }
+      try {
+         const subs = await this.getTaskSubmissions(taskId);
+         const normName = studentName.trim().toUpperCase();
+         const normCls = (className || '').trim().toUpperCase();
+         const hasSpecificCls = normCls && normCls !== '-' && normCls !== 'TIDAK DIKETAHUI';
+
+         const studentSubs = (subs || []).filter(s => {
+            if (!s || !s.student_name) return false;
+            if (s.student_name.trim().toUpperCase() !== normName) return false;
+            if (s.status && s.status !== 'Selesai') return false;
+            const rCls = (s.class || '').trim().toUpperCase();
+            if (hasSpecificCls && rCls && rCls !== '-' && rCls !== 'TIDAK DIKETAHUI') {
+               return rCls === normCls;
+            }
+            return true;
+         });
+
+         return this.getBestScoreForSubmissions(studentSubs, options);
+      } catch (e) {
+         console.warn("Gagal mengambil best score tersimpan:", e);
+         return { bestScore: null, latestScore: null, attemptsCount: 0 };
+      }
    }
 };
